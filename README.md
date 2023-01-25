@@ -34,6 +34,7 @@
           - Syntax highlighting for code snippets that are shared within the messaging app.
           - A built-in code editor for writing/sharing code within the app.
           - An ability to create and share diagrams and flowcharts.
+          - An ability to organize group chats with specific users
 
       - Other general additional features include:
 
