@@ -2,9 +2,9 @@
 
 - Project Name: GatorChat
 
-- Project Members: Rafel Sevilla, Kevin Cen, John Struckman, Ria Chacko
+- Project Members: Rafael Sevilla, Kevin Cen, John Struckman, Ria Chacko
 
-- Front-end Memebers: Ria Chacko, Rafel Sevilla
+- Front-end Members: Ria Chacko, Rafael Sevilla
 
 - Back-end Members: Kevin Cen, John Struckman
 
