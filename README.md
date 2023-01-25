@@ -23,6 +23,7 @@
       - List of contacts with easy contact import and editing functionality. (Contact Syncing) - Ria
       - Notifications, unread message counts, and/or message states (read/unread). -Ria
       - User presence indication (available, away, offline, time last active). - Ria
+      - User Profile - Ria
 
     - Below are additional features that we would implement if time permits:
 
@@ -45,6 +46,7 @@
         - Dark/Light Mode - Ria
         - Read Receipts - Ria
         - Profile Customization - Ria
+        - Location tracking and sharing - Ria
 
 
 
