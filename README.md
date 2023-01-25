@@ -20,9 +20,9 @@
       - Can send images.
       - Able to edit/delete messages.
       - Ability to search past messages.
-      - List of contacts with easy contact import and editing functionality.
-      - Notifications, unread message counts, and/or message states (read/unread).
-      - User presence indication (available, away, offline, time last active).
+      - List of contacts with easy contact import and editing functionality. (Contact Syncing) - Ria
+      - Notifications, unread message counts, and/or message states (read/unread). -Ria
+      - User presence indication (available, away, offline, time last active). - Ria
 
     - Below are additional features that we would implement if time permits:
 
@@ -40,6 +40,11 @@
 
         - Ability to send voice notes.
         - Ability to reply to a message with emojis.
+        - Message Disappearing - Ria
+        - Chatbots - Ria
+        - Dark/Light Mode - Ria
+        - Read Receipts - Ria
+        - Profile Customization - Ria
 
 
 
