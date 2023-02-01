@@ -1,3 +1,6 @@
 User Stories:
-  1. As a user of the app, I should be able to run the app and connect to a database, put in an input, and see it displayed on the screen
-  2. 
+  1. As a user of the app, I should be able to run the app and connect to a database, put in an input, and see it displayed on the screen (John)
+  2. As an end user, I want to sync my list of contacts so that I can build and strengthen my social connections. (Ria)
+  3. As an end user, I want to send my contacts images so that I can have a multimedia rich communication with my contacts. (Ria)
+  4. As an end user, I want to be able to set up my profile so that people can recognize me and my personality. (Ria)
+  5. As an end user, I want to know the statuses of my contacts so that I can start chatting with them when they are available. (Ria)
