@@ -21,6 +21,16 @@ type Message struct {
 	Text string
 }
 
+func printMessages(db *gorm.DB) {
+	//PRINT ALL MESSAGES IN DATABASE
+	var messages []Message
+	db.Find(&messages)
+	fmt.Println("All messages:")
+	for _, message := range messages {
+		fmt.Println("Message:", message.Text, "SenderID:", message.SenderID, "Time Stamp:", message.CreatedAt)
+	}
+}
+
 func main() {
 
 	//CONNECTS TO THE SQLITE DATABASE KNOWN AS "test.db"
@@ -31,7 +41,7 @@ func main() {
 	}
 
 	//TABLE NAME IS THE PLURALIZED VERSION OF THE STRUCT NAME IN SNAKE CASE
-	//CLEARS THE ENTIRE DATABASE
+	//CLEARS THE ENTIRE DATABASE - DO NOT ACTUALLY DO THIS; I AM CLEARING THIS SO THE TEST MESSAGES ARE NOT OVERWHELMING
 	err = db.Exec("DELETE FROM messages").Error
 	if err != nil {
 		panic(err)
@@ -43,7 +53,7 @@ func main() {
 	//GENERATE MESSAGE ENTRIES
 	db.Create(&Message{Text: "Hello", SenderID: 12345, ReceiverID: 1359})
 
-	//QUERY FOR THE FIRST ENTRY IN THE TABLE
+	//QUERY EXAMPLE: FIRST ENTRY IN THE TABLE
 	var textMessage Message
 	db.First(&textMessage, 1)
 
@@ -57,23 +67,18 @@ func main() {
 
 	//CLEAR THE VARIABLE - IMPORTANT BECAUSE OLD DATA WILL PERSIST IF NOT SPECIFICALLY UPDATED
 	textMessage = Message{}
-	//LOCATE THE FIRST MESSAGE IN THE DATABASE THAT HAS THE MATCHING TEXT
+	//QUERY EXAMPLE: LOCATE THE FIRST MESSAGE IN THE DATABASE THAT HAS THE MATCHING TEXT
 	db.Where("Text = ?", "Hi").First(&textMessage)
 	//%v IS A FORMAT VERB THAT WILL BE REPLACED WITH THE RESPECTIVE CONTENT AFTER THE COMMA
 	fmt.Println("The first instance of 'Hi' in the database.")
 	fmt.Printf("%v (%v)", textMessage.Text, textMessage.CreatedAt)
 	fmt.Println()
 
-	//PRINT ALL MESSAGES IN DATABASE
-	var messages []Message
-	db.Find(&messages)
-	fmt.Println("All messages:")
-	for _, message := range messages {
-		fmt.Println("Message:", message.Text, "SenderID:", message.SenderID, "Time Stamp:", message.CreatedAt)
-	}
+	printMessages(db)
 
 	//TEST DELETE (SOFT)
 	textMessage = Message{}
-	fmt.Println("Deleting:  ", textMessage.Text)
+	db.Where("Text = ?", "Hi").First(&textMessage)
+	fmt.Println("Soft deleting:  ", textMessage.Text)
 	db.Delete(&textMessage)
 }
