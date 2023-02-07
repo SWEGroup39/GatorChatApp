@@ -55,7 +55,7 @@ func main() {
 	fmt.Println("Message: ", textMessage.Text)
 	fmt.Println("Message: ", textMessage.CreatedAt)
 
-	//CLEAR THE VARIABLE
+	//CLEAR THE VARIABLE - IMPORTANT BECAUSE OLD DATA WILL PERSIST IF NOT SPECIFICALLY UPDATED
 	textMessage = Message{}
 	//LOCATE THE FIRST MESSAGE IN THE DATABASE THAT HAS THE MATCHING TEXT
 	db.Where("Text = ?", "Hi").First(&textMessage)
@@ -72,4 +72,8 @@ func main() {
 		fmt.Println("Message:", message.Text, "SenderID:", message.SenderID, "Time Stamp:", message.CreatedAt)
 	}
 
+	//TEST DELETE (SOFT)
+	textMessage = Message{}
+	fmt.Println("Deleting:  ", textMessage.Text)
+	db.Delete(&textMessage)
 }
