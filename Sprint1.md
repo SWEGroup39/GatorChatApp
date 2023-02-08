@@ -40,8 +40,9 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - Front-end Video: https://youtu.be/ZyRSMR8j1qI
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**BACK-END**
 
-**BACK-END - What issues your team planned to address:**
+**What issues your team planned to address:**
 
 **USER STORIES/ISSUES TACKLED:**
 - "As a user of the app, I should be able to run the app and connect to a database, put in an input, and see it displayed on the screen."
