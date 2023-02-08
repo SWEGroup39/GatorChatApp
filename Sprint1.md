@@ -30,17 +30,17 @@
 
 **PLANNED ISSUES TO FIX FOR SPRINT 1 (SEE ISSUES TAB)**
 - Create the chat interface between users.
-- Create the a panel where users can see all their conversations.
+- Create a panel where users can see all their conversations.
 - Being able to have a clutter free layout for the app and allow users to easily navigate the app and a basic login/authentication screen for the app.
-- Create an avatar (prorfile picture feature so users can be easly idenitified)
+- Create an avatar (profile picture feature so users can be easily idenitified)
 - Being able to scroll up and down in a conversation to search for a message 
 - Have a list of all conversations with other users 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - **Which ones were successfully completed:**
   - The issue that was completed would be setting up the basic layout of the app and having an organized setup. 
   - We were able to develop a basic chat interface on how a conversation panel would look like for our users.
-  - We were able to add profile picture to the conversation interface, so users can be eadily identified
-  - The conversations are scrollable so the user can scroll to see previus messages
+  - We were able to add profile picture to the conversation interface, so users can be easily identified
+  - The conversations are scrollable so the user can scroll to see previous messages
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
  - **Which ones didn't and why?**
   - We weren't able to implement the login screen because we are not yet well-versed with the process. As we progress, we will be able to implement this issue.
