@@ -49,9 +49,9 @@
 - "As a user of the app, I want my messages to be saved so that I can start a conversation back up later."
 - "As a user, I want to be able to search for past messages and conversations, so that I can easily find information that I need."
 
-**PLANNED TASKS FOR SPRINT 1**
+**PLANNED ISSUES TO FIX FOR SPRINT 1**
 - Develop a Database were we can store user and messages information.
-- Make the data in the database persist and have it able to retrieve/insert data.
+- Make the data in the database persist and have it able to retrieve/edit data.
 - Create a restAPI with basic GET, POST, PUT functionaliities.
 - Connect the database and API.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
