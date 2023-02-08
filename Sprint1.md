@@ -26,7 +26,7 @@
 **USER STORIES/ISSUES TACKLED:**
 - "As a user who is not familiar with how messaging apps work, I want the layout to be straightforward and not cluttered in terms of presentation."
 
-**PLANNED TASKS FOR SPRINT 1**
+**PLANNED ISSUES TO FIX FOR SPRINT 1 (SEE ISSUES TAB)**
 - Create the chat interface between users.
 - Create the a panel where users can see all their conversations.
 - Being able to have a clutter free layout for the app and allow users to easily navigate the app and a basic login/authentication screen for the app.
@@ -49,11 +49,11 @@
 - "As a user of the app, I want my messages to be saved so that I can start a conversation back up later."
 - "As a user, I want to be able to search for past messages and conversations, so that I can easily find information that I need."
 
-**PLANNED ISSUES TO FIX FOR SPRINT 1**
+**PLANNED ISSUES TO FIX FOR SPRINT 1 (SEE ISSUES TAB)**
 - Develop a Database were we can store user and messages information.
 - Make the data in the database persist and have it able to retrieve/edit data.
 - Create a restAPI with basic GET, POST, PUT functionaliities.
-- Connect the database and API.
+- Connect the database and API together and allow the API to access/edit the information in the database.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - **Which ones were successfully completed:**
   - We were able to get both a basic database and restAPI created.
