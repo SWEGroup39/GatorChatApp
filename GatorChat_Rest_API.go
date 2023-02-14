@@ -1,5 +1,7 @@
 package main
 
+//API IS INTERFACED USING POSTMAN
+
 import (
 	"encoding/json"
 	"log"
@@ -10,31 +12,38 @@ import (
 	"gorm.io/gorm"
 )
 
-// Connects to the MySQL database on a host and port, using the database name, username, and password
+// CONNECT TO MYSQL DATABASE USING MICROSOFT AZURE
 var dsn = "swegroup39:8wWrp52ey^2^@tcp(gator-chat.mysql.database.azure.com:3306)/user_messages?parseTime=true&tls=true&charset=utf8mb4"
 var db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
+// MESSAGE STRUCT USED FOR EACH TABLE ENTRY
 type UserMessage struct {
 	gorm.Model
-	Message    string `json:"message"`
-	SenderID   string `json:"sender_id"`
-	ReceiverID string `json:"receiver_id"`
+
+	//THE ACTUAL MESSAGE CONTENT
+	Message string `json:"message"`
+
+	//USER ID OF WHOEVER SENT THE MESSAGE
+	Sender_ID string `json:"sender_id"`
+
+	//USER ID OF WHOEVER RECEIVED THE MESSAGE
+	Receiver_ID string `json:"receiver_id"`
 }
 
-// Get a specific message by ID
+// GETS A MESSAGE BASED ON THE GORM ID
 func getMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var message UserMessage
 	result := db.First(&message, params["id"])
 	if result.Error != nil {
-		http.Error(w, "Message not found", http.StatusNotFound)
+		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
 	}
 	json.NewEncoder(w).Encode(message)
 }
 
-// Create a new message
+// CREATES A NEW ENTRY IN THE DATABASE
 func createMessage(w http.ResponseWriter, r *http.Request) {
 	var message UserMessage
 	err := json.NewDecoder(r.Body).Decode(&message)
@@ -50,7 +59,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(message)
 }
 
-// Edit a message
+// UPDATES AN ENTIRE MESSAGE ENTRY
 func editMessage(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var message UserMessage
@@ -65,13 +74,13 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if result.RowsAffected == 0 {
-		http.Error(w, "Message not found", http.StatusNotFound)
+		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
 	}
 	json.NewEncoder(w).Encode(message)
 }
 
-// Delete a Message
+// SOFT DELETES A MESSAGE
 func deleteMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -81,20 +90,21 @@ func deleteMessage(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	json.NewEncoder(w).Encode("Message deleted successfully")
+	json.NewEncoder(w).Encode("Message deleted successfully.")
 }
 
 func main() {
-	// Init Router
+	// INIT ROUTER
 	r := mux.NewRouter()
 
-	// // Connect to MySQL database
+	//AUTO MIGRATE CURRENTLY NOT WORKING
+
 	// err = db.AutoMigrate(&UserMessage{})
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
 
-	// Text Route Handlers / Endpoints
+	// TEXT ROUTE HANDLERS / ENDPOINTS
 	r.HandleFunc("/api/messages/{id}", getMessage).Methods("GET")
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
 	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")
