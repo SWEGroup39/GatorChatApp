@@ -6,12 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Gator Chat';
-  message= '';
-  messages: string[]=[
-    
-  ]
-  addMessage(newMessage: string){
-    this.messages.push(newMessage);
-  }
+  title = 'chatG-app';
 }
