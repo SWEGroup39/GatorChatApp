@@ -13,7 +13,7 @@ import (
 )
 
 // CONNECT TO MYSQL DATABASE USING MICROSOFT AZURE
-var dsn = "swegroup39:8wWrp52ey^2^@tcp(gator-chat.mysql.database.azure.com:3306)/user_messages?parseTime=true&tls=true&charset=utf8mb4"
+var dsn = "swegroup39:8wWrp52ey^2^@tcp(gator-chat.mysql.database.azure.com:3306)/user_messages?parseTime=true&loc=Local&tls=true&charset=utf8mb4"
 var db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 // MESSAGE STRUCT USED FOR EACH TABLE ENTRY
@@ -43,8 +43,21 @@ func getMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(message)
 }
 
+// GETS ALL MESSAGES IN DATABASE
+func getAllMessages(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var messages []UserMessage
+	result := db.Find(&messages)
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(messages)
+}
+
 // CREATES A NEW ENTRY IN THE DATABASE
 func createMessage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var message UserMessage
 	err := json.NewDecoder(r.Body).Decode(&message)
 	if err != nil {
@@ -59,8 +72,9 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(message)
 }
 
-// UPDATES AN ENTIRE MESSAGE ENTRY
+// UPDATES ONLY THE MESSAGE FIELD IN THE ENTRY
 func editMessage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var message UserMessage
 	err := json.NewDecoder(r.Body).Decode(&message)
@@ -68,7 +82,7 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	result := db.Model(&UserMessage{}).Where("id = ?", params["id"]).Updates(&message)
+	result := db.Model(&UserMessage{}).Where("id = ?", params["id"]).Update("Message", message.Message)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
@@ -97,7 +111,7 @@ func main() {
 	// INIT ROUTER
 	r := mux.NewRouter()
 
-	//AUTO MIGRATE CURRENTLY NOT WORKING
+	// AUTO MIGRATE CURRENTLY NOT WORKING...
 
 	// err = db.AutoMigrate(&UserMessage{})
 	// if err != nil {
@@ -106,6 +120,7 @@ func main() {
 
 	// TEXT ROUTE HANDLERS / ENDPOINTS
 	r.HandleFunc("/api/messages/{id}", getMessage).Methods("GET")
+	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
 	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")
 	r.HandleFunc("/api/messages/{id}", deleteMessage).Methods("DELETE")
