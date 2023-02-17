@@ -95,11 +95,24 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 // SOFT DELETES A MESSAGE
+//func deleteMessage(w http.ResponseWriter, r *http.Request) {
+//	w.Header().Set("Content-Type", "application/json")
+//	params := mux.Vars(r)
+//	var userMessage UserMessage
+//	result := db.Where("id = ?", params["id"]).Delete(&userMessage)
+//	if result.RowsAffected == 0 {
+//		http.NotFound(w, r)
+//		return
+//	}
+//	json.NewEncoder(w).Encode("Message deleted successfully.")
+//}
+
+// HARD DELETES A MESSAGE (the ID can be reused after this)
 func deleteMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var userMessage UserMessage
-	result := db.Where("id = ?", params["id"]).Delete(&userMessage)
+	result := db.Where("id = ?", params["id"]).Unscoped().Delete(&userMessage)
 	if result.RowsAffected == 0 {
 		http.NotFound(w, r)
 		return
