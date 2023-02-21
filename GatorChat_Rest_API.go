@@ -1,13 +1,12 @@
 package main
 
 //API IS INTERFACED/TESTED USING POSTMAN
-
 import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 	"net/url"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
@@ -21,30 +20,29 @@ var db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 // MESSAGE STRUCT USED FOR EACH TABLE ENTRY
 type UserMessage struct {
 	gorm.Model
-
 	//THE ACTUAL MESSAGE CONTENT
 	Message string `json:"message"`
-
 	//USER ID OF WHOEVER SENT THE MESSAGE
 	Sender_ID string `json:"sender_id"`
-
 	//USER ID OF WHOEVER RECEIVED THE MESSAGE
 	Receiver_ID string `json:"receiver_id"`
+	//MAYBE ADD A USERMESSAGE SLICE TO KEEP TRACK OF GROUP CHATS?
 }
 
 // // GETS A MESSAGE BASED ON THE GORM ID
-// func getMessage(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	params := mux.Vars(r)
-// 	var message UserMessage
-// 	result := db.First(&message, params["id"])
-// 	if result.Error != nil {
-// 		http.Error(w, "Message not found.", http.StatusNotFound)
-// 		return
-// 	}
-// 	json.NewEncoder(w).Encode(message)
-// }
-
+//
+//	func getMessage(w http.ResponseWriter, r *http.Request) {
+//		w.Header().Set("Content-Type", "application/json")
+//		params := mux.Vars(r)
+//		var message UserMessage
+//		result := db.First(&message, params["id"])
+//		if result.Error != nil {
+//			http.Error(w, "Message not found.", http.StatusNotFound)
+//			return
+//		}
+//		json.NewEncoder(w).Encode(message)
+//	}
+//
 // RETRIEVES ALL MESSAGES BETWEEN TWO PEOPLE
 // REQUEST NEEDS TO PASS IN SENDER ID AND RECEIVER ID
 func getConversation(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +115,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(message.Sender_ID) != 4 {
+	if len(message.Receiver_ID) != 4 {
 		http.Error(w, "Invalid Receiver ID (NOT FOUR DIGITS): "+message.Receiver_ID+" is not a valid ID.", http.StatusBadRequest)
 		return
 	}
@@ -134,6 +132,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
+	json.NewEncoder(w).Encode(message)
 	json.NewEncoder(w).Encode("Message created successfully.")
 }
 
@@ -157,21 +156,24 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
 	}
+	json.NewEncoder(w).Encode(message)
 	json.NewEncoder(w).Encode("Message edited successfully.")
 }
 
 // SOFT DELETES A MESSAGE
-//func deleteMessage(w http.ResponseWriter, r *http.Request) {
-//	w.Header().Set("Content-Type", "application/json")
-//	params := mux.Vars(r)
-//	var userMessage UserMessage
-//	result := db.Where("id = ?", params["id"]).Delete(&userMessage)
-//	if result.RowsAffected == 0 {
-//		http.NotFound(w, r)
-//		return
+//
+//	func deleteMessage(w http.ResponseWriter, r *http.Request) {
+//		w.Header().Set("Content-Type", "application/json")
+//		params := mux.Vars(r)
+//		var userMessage UserMessage
+//		result := db.Where("id = ?", params["id"]).Delete(&userMessage)
+//		if result.RowsAffected == 0 {
+//			http.NotFound(w, r)
+//			return
+//		}
+//		json.NewEncoder(w).Encode("Message deleted successfully.")
 //	}
-//	json.NewEncoder(w).Encode("Message deleted successfully.")
-//}
+//
 
 // HARD DELETES A MESSAGE (ID CAN BE REUSED AFTER THIS)
 func deleteMessage(w http.ResponseWriter, r *http.Request) {
@@ -186,12 +188,25 @@ func deleteMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("Message deleted successfully.")
 }
 
+// HARD DELETES A SPECIFIC MESSAGE BASED ON SENDER ID, USER ID, AND THE SPECIFIC MESSAGE
+func deleteSpecMessage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	var userMessage UserMessage
+	result := db.Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["mes"]).Unscoped().Delete(&userMessage)
+	if result.RowsAffected == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	json.NewEncoder(w).Encode("Message deleted successfully.")
+}
+
 func deleteTable(w http.ResponseWriter, r *http.Request) {
 	//CLEARS THE ENTIRE DATABASE - THIS WILL ONLY EVER BE USED FOR TESTING PURPOSES
 	//THIS RESETS THE GORM ID BACK TO 1
 	err = db.Exec("TRUNCATE TABLE user_messages").Error
 	if err != nil {
-    	panic(err)
+		panic(err)
 	}
 	json.NewEncoder(w).Encode("Table was deleted.")
 }
@@ -207,12 +222,10 @@ func main() {
 	r := mux.NewRouter()
 
 	// AUTO MIGRATE CURRENTLY NOT WORKING...
-
 	// err = db.AutoMigrate(&UserMessage{})
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
-
 	// TEXT ROUTE HANDLERS / ENDPOINTS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
@@ -220,6 +233,7 @@ func main() {
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", editMessage).Methods("PUT")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteMessage).Methods("DELETE")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/{mes}", deleteSpecMessage).Methods("DELETE")
 	r.HandleFunc("/api/messages/deleteTable", deleteTable).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8000", r))
