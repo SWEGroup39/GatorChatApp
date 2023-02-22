@@ -17,7 +17,7 @@
 
 - [Overview of **GET** Commands](#GET)
 
-- Overview of **DELETE** Commands
+- [Overview of **DELETE** Commands](#DELETE)
 
 ---
 <a id="settingUp"></a>
@@ -106,8 +106,19 @@
 
 ### ➜ Overview of  **GET** Command
 
-- The **GET** command prints displays messages that have been created with **POST**
+- The **GET** command prints displays messages that have been created with **POST**.
 - Three different versions: 
-    - one that uses the "getConversation" function to display all messages between two specified IDs
-    - one that uses the "getAllMessages" function to display all messages in the database
+    - one that uses the "getConversation" function to display all messages between the specified sender and receiver IDs
+    - one that uses the "getAllMessages" function to display all messages in the database (for testing purposes only)
     - one that uses the "searchMessage" function to display the infomation for the specified message, if it exists in the database  
+
+<a id="DELETE"></a>
+
+### ➜ Overview of  **DELETE** Command
+
+- The **DELETE** command deletes messages from the database.
+- Three different versions:
+    - one that uses the "deleteMessage" function to delete all messages between the specified sender and receiver IDs
+    - one that uses the "deleteSpecificMessage" function to delete a specified messaged between a sender and receiver, if it exists in the database
+    - one that uses the "deleteTable" function to delete all messages in the database (for testing purposes only).
+
