@@ -106,7 +106,7 @@
 
 ### ➜ Overview of  **GET** Command
 
-- The **GET** command prints displays messages that have been created wtih **POST**
+- The **GET** command prints displays messages that have been created with **POST**
 - Three different versions: 
     - one that uses the "getConversation" function to display all messages between two specified IDs
     - one that uses the "getAllMessages" function to display all messages in the database
