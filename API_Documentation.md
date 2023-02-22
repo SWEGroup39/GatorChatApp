@@ -85,3 +85,7 @@
 
 ### ➜ Overview of  **POST** Commands
 
+- The **POST** command takes in an input and creates a new message with the data.
+- Required inputs are a unique message ID number, a message string, a sender ID, and a receiver ID.
+- The message ID number can't be reused unless the previous message with that number was hard-deleted
+- Input "null" for the "CreatedAt", "UpdatedAt", and "DeletedAt" date inputs, these will be automatically filled in.
