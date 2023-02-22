@@ -1,9 +1,8 @@
+<a id="TOC"></a>
 # GatorChat API Documentation
 
 ### Written by: Kevin Cen and John Struckman
 ---
-
-<a id="TOC"></a>
 
 ## Table of Contents
 
