@@ -11,7 +11,7 @@
 
 - [Overview of **REST** Functions](#REST)
 
-- Overview of  **POST** Commands
+- [Overview of  **POST** Commands](#POST)
 
 - Overview of **PUT** Commands
 
@@ -80,3 +80,8 @@
 - This API serves to provide an **abstraction** to the process of manually accessing the database and running MySQL commands to perform the actions listed above.
 
 ---
+
+<a id="POST"></a>
+
+### ➜ Overview of  **POST** Commands
+
