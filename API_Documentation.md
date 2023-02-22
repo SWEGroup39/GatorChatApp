@@ -13,7 +13,7 @@
 
 - [Overview of  **POST** Commands](#POST)
 
-- Overview of **PUT** Commands
+- [Overview of **PUT** Commands](#PUT)
 
 - Overview of **GET** Commands
 
@@ -83,9 +83,19 @@
 
 <a id="POST"></a>
 
-### ➜ Overview of  **POST** Commands
+### ➜ Overview of  **POST** Command
 
-- The **POST** command takes in an input and creates a new message with the data.
+- The **POST** command takes in an input and creates a new message in the database.
 - Required inputs are a unique message ID number, a message string, a sender ID, and a receiver ID.
 - The message ID number can't be reused unless the previous message with that number was hard-deleted
 - Input "null" for the "CreatedAt", "UpdatedAt", and "DeletedAt" date inputs, these will be automatically filled in.
+
+---
+
+<a id="PUT"></a>
+
+### ➜ Overview of  **PUT** Command
+
+- The **PUT** command takes in an input to edit a message already in the database.
+- Required inputs are the unique message ID number, the new message string, the sender ID, and the receiver ID
+- The message with the input sender ID and receiver ID must already exist in the database to be edited.
