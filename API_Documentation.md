@@ -3,6 +3,8 @@
 ### Written by: Kevin Cen and John Struckman
 ---
 
+<a id="TOC"></a>
+
 ## Table of Contents
 
 - [Setting Up Golang](#settingUp)
@@ -38,6 +40,7 @@
   - **Gorilla Mux**
     - Gorilla Mux is needed for the "github.com/gorilla/mux" package.
 - **Quick Reference**: Use ``` go get -u <package> ``` in your command line to install a certain package.
+
 ---
 
 <a id="accessingAPI"></a>
@@ -112,6 +115,8 @@
     - one that uses the "getAllMessages" function to display all messages in the database (for testing purposes only)
     - one that uses the "searchMessage" function to display the infomation for the specified message, if it exists in the database  
 
+---
+
 <a id="DELETE"></a>
 
 ### ➜ Overview of  **DELETE** Command
@@ -122,3 +127,6 @@
     - one that uses the "deleteSpecificMessage" function to delete a specified messaged between a sender and receiver, if it exists in the database
     - one that uses the "deleteTable" function to delete all messages in the database (for testing purposes only).
 
+---
+
+[Back to top](#TOC)
