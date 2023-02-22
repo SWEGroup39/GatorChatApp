@@ -22,7 +22,7 @@
 ---
 <a id="settingUp"></a>
 
-### Setting Up Golang
+### ➜ Setting Up Golang
 
 ##### Please refer to the instructions linked below to properly install Go.
 
@@ -30,7 +30,6 @@
 - It is important to place your Go projects in a valid directory, for example:
     - ``` C:\Users\[USER]\go\src\github.com\kevinc3n\API ```
         - This ensures that Golang can find all of the packages and can properly run.
-<br>
 
 - **NOTE:** It is important to install the packages required to use the GatorChat API.
 - These include:
@@ -43,10 +42,9 @@
 
 <a id="accessingAPI"></a>
 
-### Accessing the GatorChat API
+### ➜ Accessing the GatorChat API
 
 - Once Golang is installed, the GatorChat API can now be opened and run.
-<br>
 
 - In the [Back-End-Branch](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch) of the [Github repository](https://github.com/SWEGroup39/GatorChatApp), there is a file named ```GatorChat_Rest_API.go```.
 - This file contains the API file that must be run in order to make requests to the API.
@@ -69,10 +67,10 @@
 
 <a id="REST"></a>
 
-### Overview of REST Functions
+### ➜ Overview of REST Functions
 
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
-<br>
+
 - The API supports **POST** to create a message and store it in a database for later retrieval.
 - The API supports **PUT** to update an existing message in the database with a new message.
 - The API supports **GET** to retrieve messages from the databse based on certain parameters.
