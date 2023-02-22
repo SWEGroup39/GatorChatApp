@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -42,7 +41,7 @@ type UserMessage struct {
 //		}
 //		json.NewEncoder(w).Encode(message)
 //	}
-//
+
 // RETRIEVES ALL MESSAGES BETWEEN TWO PEOPLE
 // REQUEST NEEDS TO PASS IN SENDER ID AND RECEIVER ID
 func getConversation(w http.ResponseWriter, r *http.Request) {
@@ -69,12 +68,12 @@ func getAllMessages(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(messages)
 }
 
+// MESSAGE PASSED IN MUST USE "%20" FOR SPACES
 func searchMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var messages []UserMessage
-	searchQuery, _ := url.QueryUnescape(params["search"])
-	result := db.Where("Message = ?", searchQuery).Find(&messages)
+	result := db.Where("Message = ?", params["search"]).Find(&messages)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
@@ -147,7 +146,7 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	result := db.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ?", params["id_1"], params["id_2"]).Update("Message", message.Message)
+	result := db.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Update("Message", message.Message)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
@@ -156,7 +155,6 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(message)
 	json.NewEncoder(w).Encode("Message edited successfully.")
 }
 
@@ -175,7 +173,7 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 //	}
 //
 
-// HARD DELETES A MESSAGE (ID CAN BE REUSED AFTER THIS)
+// HARD DELETES ALL MESSAGES WITH THE MATCHING SENDER AND RECEIVER ID (EFFECTIVELY CLEARS AN ENTIRE CONVERSATION)
 func deleteMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -185,15 +183,15 @@ func deleteMessage(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	json.NewEncoder(w).Encode("Message deleted successfully.")
+	json.NewEncoder(w).Encode("Messages deleted successfully.")
 }
 
 // HARD DELETES A SPECIFIC MESSAGE BASED ON SENDER ID, USER ID, AND THE SPECIFIC MESSAGE
-func deleteSpecMessage(w http.ResponseWriter, r *http.Request) {
+func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var userMessage UserMessage
-	result := db.Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["mes"]).Unscoped().Delete(&userMessage)
+	result := db.Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Unscoped().Delete(&userMessage)
 	if result.RowsAffected == 0 {
 		http.NotFound(w, r)
 		return
@@ -227,13 +225,21 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 	// TEXT ROUTE HANDLERS / ENDPOINTS
+
+	//POST FUNCTIONS
+	r.HandleFunc("/api/messages", createMessage).Methods("POST")
+
+	//GET FUNCTIONS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
 	r.HandleFunc("/api/messages/{search}", searchMessage).Methods("GET")
-	r.HandleFunc("/api/messages", createMessage).Methods("POST")
-	r.HandleFunc("/api/messages/{id_1}/{id_2}", editMessage).Methods("PUT")
+
+	//PUT FUNCTIONS
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", editMessage).Methods("PUT")
+
+	//DELETE FUNCTIONS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteMessage).Methods("DELETE")
-	r.HandleFunc("/api/messages/{id_1}/{id_2}/{mes}", deleteSpecMessage).Methods("DELETE")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", deleteSpecificMessage).Methods("DELETE")
 	r.HandleFunc("/api/messages/deleteTable", deleteTable).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8000", r))
