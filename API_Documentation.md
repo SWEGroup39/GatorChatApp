@@ -15,7 +15,7 @@
 
 - [Overview of **PUT** Commands](#PUT)
 
-- Overview of **GET** Commands
+- [Overview of **GET** Commands](#GET)
 
 - Overview of **DELETE** Commands
 
@@ -99,3 +99,15 @@
 - The **PUT** command takes in an input to edit a message already in the database.
 - Required inputs are the unique message ID number, the new message string, the sender ID, and the receiver ID
 - The message with the input sender ID and receiver ID must already exist in the database to be edited.
+
+---
+
+<a id="GET"></a>
+
+### ➜ Overview of  **GET** Command
+
+- The **GET** command prints displays messages that have been created wtih **POST**
+- Three different versions: 
+    - one that uses the "getConversation" function to display all messages between two specified IDs
+    - one that uses the "getAllMessages" function to display all messages in the database
+    - one that uses the "searchMessage" function to display the infomation for the specified message, if it exists in the database  
