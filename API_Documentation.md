@@ -169,6 +169,7 @@
         - This **GET** function returns the message object that matches the specified message, if it exists in the database.
          - **Example Syntax:**
         ```http://localhost:8000/api/messages/[MESSAGE] ```
+        - If the message contains spaces, use ```%20``` in place of the space.
         - **NOTE:** _The searching functionality is currently designed to only find messages that match exactly with the input message. In the future, this will be tweaked to find messages that contain the input message._
 
      - **Third Option: Get ALL Messages**: 
@@ -197,6 +198,7 @@
          - **Example Syntax:**
         ```http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE] ```
         - This function takes in a Sender ID, Receiver ID, and the message in the conversation that you want deleted.
+        - If the message contains spaces, use ```%20``` in place of the space.
 
      - **Second Option: Delete an Entire Conversation**:
         - This **DELETE** function deletes all messages between a sender and receiver, if they have a current conversation.
