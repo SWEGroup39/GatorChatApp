@@ -64,7 +64,6 @@
     - ```go build```
         - Once it has finished, run the command ```go run GatorChat_Rest_API.go```.
         - If running the code in VSCode you can run the command ```./(put the name of the .exe file that was made by go build here)``` instead
-        - If running the code in VSCode you can run the command ```./(put the name of the .exe file that was made by go build here)``` instead
 - The API should now be running. The localhost port should be active and able to receive requests.
 
 ---
