@@ -29,7 +29,7 @@
 
 - Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/emmett/go-setup.md).
 - It is important to place your Go projects in a valid directory, for example:
-    - ``` C:\Users\[USER]\go\src\github.com\kevinc3n\API ```
+    - ```C:\Users\[USER]\go\src\github.com\kevinc3n\API```
         - This ensures that Golang can find all of the packages and can properly run.
 
 - **NOTE:** It is important to install the dependencies/packages required to use the GatorChat API.
@@ -38,7 +38,7 @@
       - GORM is needed for the "gorm.io/driver/mysql" and "gorm.io/gorm" packages.
   - **Gorilla Mux**
     - Gorilla Mux is needed for the "github.com/gorilla/mux" package.
-- **Quick Reference**: Use ``` go get -u <package> ``` in your command line to install a certain package.
+- **Quick Reference**: Use ```go get -u <package>``` in your command line to install a certain package.
 
 ---
 
@@ -54,10 +54,10 @@
     - **To pull the branch into your folder through the command line, use the following commands:**
         - _**This assumes that the project has already been forked into a folder on your computer.**_
         - Open the command line/terminal and navigate to your repository folder using the ```cd``` command.
-            - For example: ``` cd C:\Users\[USER]\Desktop\SWE\GatorChatApp```
+            - For example: ```cd C:\Users\[USER]\Desktop\SWE\GatorChatApp```
         - Next, run the following command to have all of the branch's files be placed into your repository folder.
-            - ``` git pull origin [BRANCH_NAME] ```
-            - In this case, it is ``` git pull origin Back-End-Branch ```.
+            - ```git pull origin [BRANCH_NAME] ```
+            - In this case, it is ```git pull origin Back-End-Branch ```.
         - The folder should now contain the API file.
 
 - To run the file, open the terminal in your respective IDE and run the following commands:
@@ -92,10 +92,11 @@
 #### Syntax
 - There is currently only one POST command, and the syntax is as follows:
 
-- ``` http://localhost:8000/api/messages ```
+- ```http://localhost:8000/api/messages ```
 
     - For post, the information passed in must be through the request **body**.
     - The required inputs are a unique message ID number, a message string, a sender ID, and a receiver ID.
+    
         - **Example Syntax:**
             ```
                 {
@@ -108,8 +109,6 @@
                     "receiver_id": "4321"
                 }
             ```
-
-
 - Input **"null"** for the "CreatedAt", "UpdatedAt", and "DeletedAt" date inputs, these will be automatically filled in.
 - The message ID number cannot be reused unless the previous message with that number was hard-deleted.
 
@@ -136,7 +135,8 @@
 
 - The required inputs are the Sender ID, the Receiver ID, and the original message that you would like to have changed.
 
-- The message should be placed in the body of the PUT request. 
+- The **new** message should be placed in the body of the PUT request.
+
     - **Example Syntax:**
         ```
             {
@@ -162,19 +162,19 @@
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
          - **Example Syntax:**
-        ``` http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID] ```
+        ```http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID] ```
         - This returns all the messages, in a slice/array, where the first ID was either the sender/receiver and the second ID was either the sender/receiver.
     
     - **Second Option: Search for Message**: 
         - This **GET** function returns the message object that matches the specified message, if it exists in the database.
          - **Example Syntax:**
-        ``` http://localhost:8000/api/messages/[MESSAGE] ```
+        ```http://localhost:8000/api/messages/[MESSAGE] ```
         - **NOTE:** _The searching functionality is currently designed to only find messages that match exactly with the input message. In the future, this will be tweaked to find messages that contain the input message._
 
      - **Third Option: Get ALL Messages**: 
         - This **GET** function returns every message in the database.
          - **Example Syntax:**
-        ``` http://localhost:8000/api/messages ```
+        ```http://localhost:8000/api/messages ```
         - **NOTE:** _This is more of a testing function rather than a function that would be frequently/practically used._
 
 #### Requirements and Error Messages
@@ -195,19 +195,19 @@
      - **First Option: Delete a Specific Message**:
         - This **DELETE** function deletes a specified messaged between a sender and receiver, if it exists in the database.
          - **Example Syntax:**
-        ``` http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE] ```
+        ```http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE] ```
         - This function takes in a Sender ID, Receiver ID, and the message in the conversation that you want deleted.
 
      - **Second Option: Delete an Entire Conversation**:
         - This **DELETE** function deletes all messages between a sender and receiver, if they have a current conversation.
          - **Example Syntax:**
-        ``` http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID] ```
+        ```http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID] ```
         - This function takes in the two IDs of the people whose conversation you want deleted.
 
      - **Third Option: Delete All Conversations**:
         - This **DELETE** function deletes the entire database of messages.
          - **Example Syntax:**
-        ``` http://localhost:8000/api/messages/deleteTable```
+        ```http://localhost:8000/api/messages/deleteTable```
         - **NOTE:** _This function is used for testing purposes and is most likely not going to be an implemented function in the Frontend._
 
 #### Requirements and Error Messages
