@@ -12,11 +12,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// CONNECT TO MYSQL DATABASE USING MICROSOFT AZURE
-var dsn = "swegroup39:8wWrp52ey^2^@tcp(gator-chat.mysql.database.azure.com:3306)/user_messages?parseTime=true&loc=Local&tls=true&charset=utf8mb4"
-var db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+// CONNECT TO USER MESSAGES DATABASE
+var userMessagesDsn = "swegroup39:8wWrp52ey^2^@tcp(gator-chat.mysql.database.azure.com:3306)/user_messages?parseTime=true&loc=Local&tls=true&charset=utf8mb4"
+var userMessagesDb, messageErr = gorm.Open(mysql.Open(userMessagesDsn), &gorm.Config{})
 
-// MESSAGE STRUCT USED FOR EACH TABLE ENTRY
+// CONNECT TO USER ACCOUNTS DATABASE
+var userAccountsDsn = "swegroup39:8wWrp52ey^2^@tcp(gator-chat.mysql.database.azure.com:3306)/user_accounts?parseTime=true&loc=Local&tls=true&charset=utf8mb4"
+var userAccountsDb, accountErr = gorm.Open(mysql.Open(userAccountsDsn), &gorm.Config{})
+
+// MESSAGE STRUCT USED FOR EACH MESSAGE TABLE ENTRY
 type UserMessage struct {
 	gorm.Model
 	//THE ACTUAL MESSAGE CONTENT
@@ -25,7 +29,21 @@ type UserMessage struct {
 	Sender_ID string `json:"sender_id"`
 	//USER ID OF WHOEVER RECEIVED THE MESSAGE
 	Receiver_ID string `json:"receiver_id"`
-	//MESSAGE INSTANCE WILL PROBABLY GO HERE
+
+	//MAYBE ADD A USERMESSAGE SLICE TO KEEP TRACK OF GROUP CHATS?
+}
+
+// USER STRUCT FOR EACH USER TABLE ENTRY
+type UserAccount struct {
+	// THE USER'S USERNAME
+	Username string `json:"username"`
+	// THE USER'S PASSWORD
+	Password string `json:"password"`
+	// THE USER'S ID
+	User_ID string `json:"user_id"`
+	// A SLICE OF USER ID'S THAT REPRESENT THE PEOPLE THEY ARE IN A CURRENT CONVERSATION WITH
+	// JSON.RAWMESSAGE IS A TYPE THAT ALLOWS FOR ARRAYS OF STRINGS
+	Current_Conversations json.RawMessage `json:"current_conversations"`
 }
 
 // // GETS A MESSAGE BASED ON THE GORM ID
@@ -48,7 +66,7 @@ func getConversation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var messages []UserMessage
-	result := db.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
+	result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
 	if result.Error != nil {
 		http.Error(w, "Messages not found.", http.StatusNotFound)
 		return
@@ -60,7 +78,7 @@ func getConversation(w http.ResponseWriter, r *http.Request) {
 func getAllMessages(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var messages []UserMessage
-	result := db.Find(&messages)
+	result := userMessagesDb.Find(&messages)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
@@ -73,9 +91,11 @@ func searchMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var messages []UserMessage
-	result := db.Where("Message = ?", params["search"]).Find(&messages)
-	if result.Error != nil {
-		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+	// LIKE REQUIRES % TO BE SURROUNDED AROUND THE MESSAGE TO TELL IT TO FIND MESSAGES THAT CONTAIN IT, REGARDLESS OF WHERE IT IS
+	searchQuery := "%" + params["search"] + "%"
+	_ = userMessagesDb.Where("Message LIKE ?", searchQuery).Find(&messages)
+	if len(messages) == 0 {
+		http.Error(w, "No messages found.", http.StatusNotFound)
 		return
 	}
 	json.NewEncoder(w).Encode(messages)
@@ -125,7 +145,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//IF IT PASSES THE CHECKS, THEN IT CREATES
-	result := db.Create(&message)
+	result := userMessagesDb.Create(&message)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -146,7 +166,7 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	result := db.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Update("Message", message.Message)
+	result := userMessagesDb.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Update("Message", message.Message)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
@@ -155,6 +175,11 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
 	}
+
+	// GET THE ENTRY AGAIN (WITH THE UPDATED MESSAGE) TO RETURN BACK TO THE REQUESTER
+	userMessagesDb.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], message.Message).First(&message)
+
+	json.NewEncoder(w).Encode(message)
 	json.NewEncoder(w).Encode("Message edited successfully.")
 }
 
@@ -178,7 +203,7 @@ func deleteMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var userMessage UserMessage
-	result := db.Where("sender_id = ? AND receiver_id = ?", params["id_1"], params["id_2"]).Unscoped().Delete(&userMessage)
+	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ?", params["id_1"], params["id_2"]).Unscoped().Delete(&userMessage)
 	if result.RowsAffected == 0 {
 		http.NotFound(w, r)
 		return
@@ -191,7 +216,7 @@ func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var userMessage UserMessage
-	result := db.Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Unscoped().Delete(&userMessage)
+	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Unscoped().Delete(&userMessage)
 	if result.RowsAffected == 0 {
 		http.NotFound(w, r)
 		return
@@ -202,17 +227,51 @@ func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
 func deleteTable(w http.ResponseWriter, r *http.Request) {
 	//CLEARS THE ENTIRE DATABASE - THIS WILL ONLY EVER BE USED FOR TESTING PURPOSES
 	//THIS RESETS THE GORM ID BACK TO 1
-	err = db.Exec("TRUNCATE TABLE user_messages").Error
+	err := userMessagesDb.Exec("TRUNCATE TABLE user_messages").Error
 	if err != nil {
 		panic(err)
 	}
 	json.NewEncoder(w).Encode("Table was deleted.")
 }
 
+func createUserAccount(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var userAccount UserAccount
+	err := json.NewDecoder(r.Body).Decode(&userAccount)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	result := userAccountsDb.Create(&userAccount)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(userAccount)
+	json.NewEncoder(w).Encode("User account created successfully.")
+}
+
+// GETS ALL MESSAGES IN DATABASE
+func getAllUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var messages []UserAccount
+	result := userAccountsDb.Find(&messages)
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(messages)
+}
+
 func main() {
 
 	//CHECK IF THERE WERE ERRORS WITH CONNECTING
-	if err != nil {
+	if messageErr != nil {
+		panic("Error: Failed to connect to database.")
+	}
+
+	if accountErr != nil {
 		panic("Error: Failed to connect to database.")
 	}
 
@@ -241,6 +300,9 @@ func main() {
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteMessage).Methods("DELETE")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", deleteSpecificMessage).Methods("DELETE")
 	r.HandleFunc("/api/messages/deleteTable", deleteTable).Methods("DELETE")
+
+	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
+	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
