@@ -46,20 +46,6 @@ type UserAccount struct {
 	Current_Conversations json.RawMessage `json:"current_conversations"`
 }
 
-// // GETS A MESSAGE BASED ON THE GORM ID
-//
-//	func getMessage(w http.ResponseWriter, r *http.Request) {
-//		w.Header().Set("Content-Type", "application/json")
-//		params := mux.Vars(r)
-//		var message UserMessage
-//		result := db.First(&message, params["id"])
-//		if result.Error != nil {
-//			http.Error(w, "Message not found.", http.StatusNotFound)
-//			return
-//		}
-//		json.NewEncoder(w).Encode(message)
-//	}
-
 // RETRIEVES ALL MESSAGES BETWEEN TWO PEOPLE
 // REQUEST NEEDS TO PASS IN SENDER ID AND RECEIVER ID
 func getConversation(w http.ResponseWriter, r *http.Request) {
@@ -183,21 +169,6 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("Message edited successfully.")
 }
 
-// SOFT DELETES A MESSAGE
-//
-//	func deleteMessage(w http.ResponseWriter, r *http.Request) {
-//		w.Header().Set("Content-Type", "application/json")
-//		params := mux.Vars(r)
-//		var userMessage UserMessage
-//		result := db.Where("id = ?", params["id"]).Delete(&userMessage)
-//		if result.RowsAffected == 0 {
-//			http.NotFound(w, r)
-//			return
-//		}
-//		json.NewEncoder(w).Encode("Message deleted successfully.")
-//	}
-//
-
 // HARD DELETES ALL MESSAGES WITH THE MATCHING SENDER AND RECEIVER ID (EFFECTIVELY CLEARS AN ENTIRE CONVERSATION)
 func deleteMessage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -255,24 +226,75 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 // GETS ALL MESSAGES IN DATABASE
 func getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var messages []UserAccount
-	result := userAccountsDb.Find(&messages)
+	var users []UserAccount
+	result := userAccountsDb.Find(&users)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(messages)
+	json.NewEncoder(w).Encode(users)
+}
+
+func addConversation(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	var user UserAccount
+
+	//FIND THE MATCHING USER STRUCT WITH THE MATCHING USER_ID
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).First(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// CREATE A SLICE OF STRINGS
+	var conversationSlice []string
+	// CONVERT THE JSON INTO A STRING SLICE
+	err := json.Unmarshal([]byte(user.Current_Conversations), &conversationSlice)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// ADD THE NEW ID TO THE STRING SLICE
+	conversationSlice = append(conversationSlice, params["id_2"])
+
+	// CONVERT THE STRING SLICE BACK INTO A JSON AND UPDATE THE USER'S CONVERSATION JSON
+	conversationJSON, _ := json.Marshal(conversationSlice)
+
+	// REPLACE THE JSON WITH A NEW JSON THAT CONTAINS THE ADDED ID
+	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).Update("Current_Conversations", string(conversationJSON))
+
+	if result.Error != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//GET THE UPDATED USER STRUCT
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).First(&user)
+
+	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode("ID added successfully.")
+}
+
+func handleOptions(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func main() {
 
 	//CHECK IF THERE WERE ERRORS WITH CONNECTING
 	if messageErr != nil {
-		panic("Error: Failed to connect to database.")
+		panic("Error: Failed to connect to messages database.")
 	}
 
 	if accountErr != nil {
-		panic("Error: Failed to connect to database.")
+		panic("Error: Failed to connect to users database.")
 	}
 
 	// INIT ROUTER
@@ -283,26 +305,40 @@ func main() {
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+
 	// TEXT ROUTE HANDLERS / ENDPOINTS
 
-	//POST FUNCTIONS
+	// API FUNCTIONS FOR THE MESSAGES DATABASE
+
+	// POST FUNCTIONS
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
 
-	//GET FUNCTIONS
+	// GET FUNCTIONS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
 	r.HandleFunc("/api/messages/{search}", searchMessage).Methods("GET")
 
-	//PUT FUNCTIONS
+	// PUT FUNCTIONS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", editMessage).Methods("PUT")
 
-	//DELETE FUNCTIONS
+	// DELETE FUNCTIONS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteMessage).Methods("DELETE")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", deleteSpecificMessage).Methods("DELETE")
 	r.HandleFunc("/api/messages/deleteTable", deleteTable).Methods("DELETE")
 
+	// API FUNCTIONS FOR THE USERS DATABASE
+
+	// POST FUNCTIONS
 	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
+
+	// GET FUNCTIONS
 	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	// PUT FUNCTIONS
+	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
+
+	// FUNCTION FOR CORS SO IT ACCEPTS ALL REQUESTS
+	r.HandleFunc("/api/messages", handleOptions).Methods("OPTIONS")
+
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
