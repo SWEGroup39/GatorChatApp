@@ -9,16 +9,18 @@
 - [Setting Up Golang](#settingUp)
 
 - [Accessing the GatorChat API](#accessingAPI)
+<br>
+- [Overview of **REST** Functions for Messages](#REST_Messages)
 
-- [Overview of **REST** Functions](#REST)
+    - [Overview of  **POST** Commands for Messages](#POST_Messages)
 
-- [Overview of  **POST** Commands](#POST)
+    - [Overview of **PUT** Commands for Messages](#PUT_Messages)
 
-- [Overview of **PUT** Commands](#PUT)
+    - [Overview of **GET** Commands for Messages](#GET_Messages)
 
-- [Overview of **GET** Commands](#GET)
-
-- [Overview of **DELETE** Commands](#DELETE)
+    - [Overview of **DELETE** Commands for Messages](#DELETE_Messages)
+<br>
+- [Overview of **REST** Functions for Users](#REST_Users)
 
 ---
 <a id="settingUp"></a>
@@ -65,15 +67,18 @@
         - Once it has finished, run the command ```go run GatorChat_Rest_API.go```.
         - If running the code in VSCode you can run the command ```./(put the name of the .exe file that was made by go build here)``` instead
 - The API should now be running. The localhost port should be active and able to receive requests.
-
+    - In the scenario where the program cannot connect to the database, an error message will appear in the terminal:
+        - If the ```user_messages``` database cannot be opened, then "Error: Failed to connect to messages database." will be displayed.
+        - If the ```user_accounts``` database cannot be opened, then "Error: Failed to connect to users database." will be displayed.
 ---
 
-<a id="REST"></a>
+<a id="REST_Messages"></a>
 
-### ➜ Overview of REST Functions
+### ➜ Overview of REST Functions for Messages
 
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
 
+### **For the Messages database:**
 - The API supports **POST** to create a message and store it in a database for later retrieval.
 - The API supports **PUT** to update an existing message in the database with a new message.
 - The API supports **GET** to retrieve messages from the databse based on certain parameters.
@@ -83,13 +88,13 @@
 
 ---
 
-<a id="POST"></a>
+<a id="POST_Messages"></a>
 
-### ➜ Overview of  **POST** Command
+### ➜ Overview of  **POST** Command for Messages
 
 - The **POST** command takes in an input and creates a new message in the database.
 
-#### Syntax
+### Syntax
 - There is currently only one POST command, and the syntax is as follows:
 
 - ```http://localhost:8000/api/messages ```
@@ -112,7 +117,7 @@
 - Input **"null"** for the "CreatedAt", "UpdatedAt", and "DeletedAt" date inputs, these will be automatically filled in.
 - The message ID number cannot be reused unless the previous message with that number was hard-deleted.
 
-#### Requirements and Error Messages
+### Requirements and Error Messages
 - The inputs for the POST command must follow a specific format.
     - The Sender_ID must be **numeric** and **only four digits**.
     - The Receiver_ID must be **numeric** and **only four digits**.
@@ -121,13 +126,13 @@
 - Otherwise, the newly created message object will be returned along with a "Message created successfully." message.
 ---
 
-<a id="PUT"></a>
+<a id="PUT_Messages"></a>
 
-### ➜ Overview of  **PUT** Command
+### ➜ Overview of  **PUT** Command for Messages
 
 - The **PUT** command takes in an input to edit a message already in the database.
 
-#### Syntax
+### Syntax
 
 - There is currently only one **PUT** command, and the syntax is as follows:
 
@@ -143,20 +148,20 @@
                 "message": "Updated message"
             }
         ```
-#### Requirements and Error Messages
+### Requirements and Error Messages
 - The message with the input Sender ID and Receiver ID must already exist in the database to be edited, otherwise an error will be thrown.
     - If the message to edit cannot be found, an Internal Server Error will be returned.
     - If the message-to-change was not located, an error message saying "Message not found." will be returned.
 - Otherwise, the updated message object will be returned along with a "Message edited successfully." message.
 ---
 
-<a id="GET"></a>
+<a id="GET_Messages"></a>
 
-### ➜ Overview of  **GET** Command
+### ➜ Overview of  **GET** Command for Messages
 
 - The **GET** command prints displays messages that have been created with the **POST** request.
 
-#### Syntax
+### Syntax
 - There are currently three different **GET** functions available:
 
     - **First Option: Get Conversation**:
@@ -178,19 +183,19 @@
         ```http://localhost:8000/api/messages ```
         - **NOTE:** _This is more of a testing function rather than a function that would be frequently/practically used._
 
-#### Requirements and Error Messages
+### Requirements and Error Messages
 - The **"Get Conversation"** function must have a valid Sender and Receiver ID, or else "Messages not found." will be returned.
 - The **"Search for Message"** function must have a valid message that exists in the database, or else "Message not found." will be returned.
 - If the **"Get ALL Messages"** function cannot locate all of the messages in the database, then an Internal Server Error will be returned.
 ---
 
-<a id="DELETE"></a>
+<a id="DELETE_Messages"></a>
 
-### ➜ Overview of  **DELETE** Command
+### ➜ Overview of  **DELETE** Command for Messages
 
 - The **DELETE** command deletes messages created with the **POST** request from the database.
 
-#### Syntax
+### Syntax
 -  There are currently three different **DELETE** functions available:
 
      - **First Option: Delete a Specific Message**:
@@ -212,10 +217,18 @@
         ```http://localhost:8000/api/messages/deleteTable```
         - **NOTE:** _This function is used for testing purposes and is most likely not going to be an implemented function in the Frontend._
 
-#### Requirements and Error Messages
+### Requirements and Error Messages
 - The **"Delete a Specific Message"** function must have a valid Sender ID, Receiver ID, and message. Otherwise, an HTTP 404 not found error will be returned. If the message was found and deleted, then "Message deleted successfully." will be returned.
 - The **"Delete an Entire Conversation"** function must have a valid Sender ID and Receiver ID. If it does not, an HTTP 404 not found error will be returned. If the messages were found and deleted, then "Messages deleted successfully." will be returned.
 - The **"Delete All Conversations"** function will panic if the table is unable to be truncated/deleted. If it is able to clear the entire table, then "Table was deleted." will be returned.
 ---
+
+<a id="REST_Users"></a>
+
+### ➜ Overview of REST Functions for Users
+
+- The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
+
+### **For the Users database:**
 
 [Back to top](#TOC)
