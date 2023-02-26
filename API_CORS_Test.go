@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+    "github.com/gorilla/handlers"
 )
 
 // CONNECT TO USER MESSAGES DATABASE
@@ -319,6 +320,18 @@ func main() {
 
 	// INIT ROUTER
 	r := mux.NewRouter()
+
+	 //CREATE THE NEW CORS HANDLER
+	 corsHandler :=  handlers.CORS(
+        handlers.AllowCredentials(),
+        handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+        handlers.AllowedOrigins([]string{"*"}),
+        handlers.MaxAge(86400),
+    )
+
+    // SET THE CORS HANDLER TO THE ROUTER
+    r.Use(corsHandler)
+
 
 	// AUTO MIGRATE CURRENTLY NOT WORKING...
 	// err = db.AutoMigrate(&UserMessage{})
