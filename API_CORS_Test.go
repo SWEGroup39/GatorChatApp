@@ -62,6 +62,7 @@ func getConversation(w http.ResponseWriter, r *http.Request) {
 
 // GETS ALL MESSAGES IN DATABASE
 func getAllMessages(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting Messages List (GET)");
 	w.Header().Set("Content-Type", "application/json")
 	var messages []UserMessage
 	result := userMessagesDb.Find(&messages)
@@ -70,6 +71,7 @@ func getAllMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(messages)
+	log.Println("Got Messages sucessfully");
 }
 
 // MESSAGE PASSED IN MUST USE "%20" FOR SPACES
@@ -90,6 +92,7 @@ func searchMessage(w http.ResponseWriter, r *http.Request) {
 // CREATES A NEW ENTRY IN THE DATABASE
 // REQUEST NEEDS TO PASS IN SENDER ID, RECEIVER ID, AND MESSAGE
 func createMessage(w http.ResponseWriter, r *http.Request) {
+	log.Println("Sending a Message (POST)")
 	w.Header().Set("Content-Type", "application/json")
 	var message UserMessage
 	err := json.NewDecoder(r.Body).Decode(&message)
@@ -138,7 +141,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(message)
-	json.NewEncoder(w).Encode("Message created successfully.")
+	log.Println("Message created successfully.")
 }
 
 // UPDATES ONLY THE MESSAGE FIELD IN THE ENTRY
@@ -166,7 +169,7 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 	userMessagesDb.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], message.Message).First(&message)
 
 	json.NewEncoder(w).Encode(message)
-	json.NewEncoder(w).Encode("Message edited successfully.")
+	log.Println("Message edited successfully.")
 }
 
 // SOFT DELETES A MESSAGE
@@ -194,7 +197,7 @@ func deleteMessage(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	json.NewEncoder(w).Encode("Messages deleted successfully.")
+	log.Println("Messages deleted successfully.")
 }
 
 // HARD DELETES A SPECIFIC MESSAGE BASED ON SENDER ID, USER ID, AND THE SPECIFIC MESSAGE
@@ -207,7 +210,7 @@ func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	json.NewEncoder(w).Encode("Message deleted successfully.")
+	log.Println("Message deleted successfully.")
 }
 
 func deleteTable(w http.ResponseWriter, r *http.Request) {
@@ -217,7 +220,7 @@ func deleteTable(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	json.NewEncoder(w).Encode("Table was deleted.")
+	log.Println("Table was deleted.")
 }
 
 func createUserAccount(w http.ResponseWriter, r *http.Request) {
@@ -235,7 +238,7 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(userAccount)
-	json.NewEncoder(w).Encode("User account created successfully.")
+	log.Println("User account created successfully.")
 }
 
 // GETS ALL MESSAGES IN DATABASE
@@ -291,7 +294,7 @@ func addConversation(w http.ResponseWriter, r *http.Request) {
 	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).First(&user)
 
 	json.NewEncoder(w).Encode(user)
-	json.NewEncoder(w).Encode("ID added successfully.")
+	log.Println("ID added successfully.")
 }
 
 func handleOptions(w http.ResponseWriter, r *http.Request) {
@@ -302,6 +305,8 @@ func handleOptions(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.Println("Connecting to API")
+
 
 	//CHECK IF THERE WERE ERRORS WITH CONNECTING
 	if messageErr != nil {
@@ -354,5 +359,5 @@ func main() {
 
 	r.HandleFunc("/api/messages", handleOptions).Methods("OPTIONS")
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
