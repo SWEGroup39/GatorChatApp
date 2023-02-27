@@ -167,20 +167,20 @@
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
          - **Example Syntax:**
-        ```http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID] ```
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID] ```
         - This returns all the messages, in a slice/array, where the first ID was either the sender/receiver and the second ID was either the sender/receiver.
     
     - **Second Option: Search for Message**: 
         - This **GET** function returns the message object that matches the specified message, if it exists in the database.
          - **Example Syntax:**
-        ```http://localhost:8000/api/messages/[MESSAGE] ```
+        ```http://localhost:8080/api/messages/[MESSAGE] ```
         - If the message contains spaces, use ```%20``` in place of the space.
         - **NOTE:** _The searching functionality is currently designed to only find messages that match exactly with the input message. In the future, this will be tweaked to find messages that contain the input message._
 
      - **Third Option: Get ALL Messages**: 
         - This **GET** function returns every message in the database.
          - **Example Syntax:**
-        ```http://localhost:8000/api/messages ```
+        ```http://localhost:8080/api/messages ```
         - **NOTE:** _This is more of a testing function rather than a function that would be frequently/practically used._
 
 ### Requirements and Error Messages
@@ -201,20 +201,20 @@
      - **First Option: Delete a Specific Message**:
         - This **DELETE** function deletes a specified messaged between a sender and receiver, if it exists in the database.
          - **Example Syntax:**
-        ```http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE] ```
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE] ```
         - This function takes in a Sender ID, Receiver ID, and the message in the conversation that you want deleted.
         - If the message contains spaces, use ```%20``` in place of the space.
 
      - **Second Option: Delete an Entire Conversation**:
         - This **DELETE** function deletes all messages between a sender and receiver, if they have a current conversation.
          - **Example Syntax:**
-        ```http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID] ```
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID] ```
         - This function takes in the two IDs of the people whose conversation you want deleted.
 
      - **Third Option: Delete All Conversations**:
         - This **DELETE** function deletes the entire database of messages.
          - **Example Syntax:**
-        ```http://localhost:8000/api/messages/deleteTable```
+        ```http://localhost:8080/api/messages/deleteTable```
         - **NOTE:** _This function is used for testing purposes and is most likely not going to be an implemented function in the Frontend._
 
 ### Requirements and Error Messages
