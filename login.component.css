@@ -1,13 +1,29 @@
 .main-div mat-card{
   padding: 0px;
+ 
   
 }
 
 .login-form{
   padding: 20px;
+  
 }
 
-.main{
-  background-color: rgb(241, 150, 13);
-  
+.space{
+  flex: 1 1 auto;
+}
+
+.navBarButtons{
+  margin-right: 20px;
+}
+
+.icon{
+  vertical-align: middle;
+
+}
+
+.outline{
+  border-width: 20px;
+  background-color: rgb(254, 240, 247);
+ 
 }
