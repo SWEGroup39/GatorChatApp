@@ -215,7 +215,9 @@
 ### ➜ Overview of  **DELETE** Command for Messages
 
 - The **DELETE** command deletes messages created with the **POST** request from the messages database.
-- **NOTE:** In its current implementation, the ```deleteSpecificMessage``` function  will delete  **ALL** messages with the matching ID's and message. Nonunique messages will all be deleted.
+- **NOTE:** 
+    - In its current implementation, the ```deleteSpecificMessage``` function  will delete  **ALL** messages with the matching ID's and message. Nonunique messages will all be deleted.
+    - The delete is currently removing the message from the database. It might be changed later to merely update the DeletedAt field so users can undo a delete if they wish (i.e. a soft delete).
 
 ### Syntax
 -  There are currently three different **DELETE** functions available:
