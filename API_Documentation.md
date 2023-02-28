@@ -189,7 +189,8 @@
         - This returns all the messages, in a slice/array, where the first ID was either the sender/receiver and the second ID was either the sender/receiver.
     
     - **Second Option: Search for Message**: 
-        - This **GET** function returns the message object that matches the specified message, if it exists in the messages database. 
+        - This **GET** function returns the message object that matches the specified message, if it exists in the messages database.
+        - **NOTE:** This function currently looks for a message across **ALL** conversations. This will be changed in the future to only look in a specific conversation.
         - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/[MESSAGE]```
