@@ -2,6 +2,8 @@
 # GatorChat API Documentation
 
 ### Written by: Kevin Cen and John Struckman
+
+#### This API serves to provide an **abstraction** to the process of manually accessing the database and running MySQL commands to perform queries.
 ---
 
 ## Table of Contents
@@ -94,9 +96,6 @@
 - The API supports **PUT** to update an existing message in the messages database with a new message.
 - The API supports **GET** to retrieve messages from the messages database based on certain parameters.
 - The API supports **DELETE** to remove messages from the messages database that are no longer needed.
-
-- This API serves to provide an **abstraction** to the process of manually accessing the database and running MySQL commands to perform the actions listed above.
-
 ---
 
 <a id="POST_Messages"></a>
@@ -255,9 +254,9 @@
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
 
 - **There are currently three REST functions implemented:**
-- The API supports **POST** to create a user and store it in the users database for later retrieval.
-- The API supports **PUT** to update an existing user's conversation list in the users database with a new user.
-- The API supports **GET** to retrieve a user from the users database.
+    - The API supports **POST** to create a user and store it in the users database for later retrieval.
+    - The API supports **PUT** to update an existing user's conversation list in the users database with a new user.
+    - The API supports **GET** to retrieve a user from the users database.
 ---
 
 <a id="POST_Users"></a>
