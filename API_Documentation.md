@@ -122,7 +122,11 @@
     - The Sender_ID must be **numeric** and **only four digits**.
     - The Receiver_ID must be **numeric** and **only four digits**.
         - If these are not met, an error message will appear that describes what specifically needs to be fixed.
-- If the entry cannot be inserted into the database table, an Internal Server Error will be returned. 
+- If the Sender ID has any non-numeric characters in it, the "Invalid Sender ID (NOT NUMERIC)" message will be returned.
+- If the Receiver ID has any non-numeric characters in it, the "Invalid Receiver ID (NOT NUMERIC)" message will be returned.
+- If the Sender ID is not 4 digits long, the Invalid Sender ID (NOT FOUR DIGITS) message will be returned.
+- If the Receiver ID is not 4 digits long, the Invalid Receiver ID (NOT FOUR DIGITS) message will be returned.
+- If a message is posted with no actual text in the message the "Invalid Message: Messages cannot be empty." message will be returned.
 - Otherwise, the newly created message object will be returned along with a "Message created successfully." message.
 ---
 
