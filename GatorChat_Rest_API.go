@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"github.com/rs/cors"
 )
 
 // CONNECT TO USER MESSAGES DATABASE
@@ -49,44 +51,67 @@ type UserAccount struct {
 // RETRIEVES ALL MESSAGES BETWEEN TWO PEOPLE
 // REQUEST NEEDS TO PASS IN SENDER ID AND RECEIVER ID
 func getConversation(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting Conversations (GET)")
 	w.Header().Set("Content-Type", "application/json")
+
 	params := mux.Vars(r)
 	var messages []UserMessage
 	result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
-	if result.Error != nil {
-		http.Error(w, "Messages not found.", http.StatusNotFound)
-		return
-	}
-	json.NewEncoder(w).Encode(messages)
-}
 
-// GETS ALL MESSAGES IN DATABASE
-func getAllMessages(w http.ResponseWriter, r *http.Request) {
-	log.Println("Getting Messages List (GET)")
-	w.Header().Set("Content-Type", "application/json")
-	var messages []UserMessage
-	result := userMessagesDb.Find(&messages)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	if len(messages) == 0 {
+		http.Error(w, "Conversation not found.", http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(messages)
-	log.Println("Got Messages sucessfully")
+	log.Println("Got Conversation successfully.")
+}
+
+// GETS ALL MESSAGES IN DATABASE
+func getAllMessages(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting All Messages (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	var messages []UserMessage
+	result := userMessagesDb.Find(&messages)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(messages) == 0 {
+		http.Error(w, "Messages not found.", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(messages)
+	log.Println("Got All Messages sucessfully.")
 }
 
 // MESSAGE PASSED IN MUST USE "%20" FOR SPACES
 func searchMessage(w http.ResponseWriter, r *http.Request) {
+	log.Println("Searching for messsage (GET)")
 	w.Header().Set("Content-Type", "application/json")
+
 	params := mux.Vars(r)
 	var messages []UserMessage
 	// LIKE REQUIRES % TO BE SURROUNDED AROUND THE MESSAGE TO TELL IT TO FIND MESSAGES THAT CONTAIN IT, REGARDLESS OF WHERE IT IS
 	searchQuery := "%" + params["search"] + "%"
 	_ = userMessagesDb.Where("Message LIKE ?", searchQuery).Find(&messages)
+
 	if len(messages) == 0 {
 		http.Error(w, "No messages found.", http.StatusNotFound)
 		return
 	}
+
 	json.NewEncoder(w).Encode(messages)
+	log.Println("Found message(s) successfully.")
 }
 
 // CREATES A NEW ENTRY IN THE DATABASE
@@ -94,6 +119,7 @@ func searchMessage(w http.ResponseWriter, r *http.Request) {
 func createMessage(w http.ResponseWriter, r *http.Request) {
 	log.Println("Sending a Message (POST)")
 	w.Header().Set("Content-Type", "application/json")
+
 	var message UserMessage
 	err := json.NewDecoder(r.Body).Decode(&message)
 	if err != nil {
@@ -140,6 +166,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	json.NewEncoder(w).Encode(message)
 	log.Println("Message created successfully.")
 }
@@ -147,8 +174,11 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 // UPDATES ONLY THE MESSAGE FIELD IN THE ENTRY
 // REQUEST NEEDS TO PASS IN SENDER ID, RECEIVER ID, AND MESSAGE
 func editMessage(w http.ResponseWriter, r *http.Request) {
+	log.Println("Editing a Message (PUT)")
 	w.Header().Set("Content-Type", "application/json")
+
 	params := mux.Vars(r)
+
 	var message UserMessage
 	err := json.NewDecoder(r.Body).Decode(&message)
 	if err != nil {
@@ -156,10 +186,12 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	result := userMessagesDb.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Update("Message", message.Message)
+
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	if result.RowsAffected == 0 {
 		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
@@ -174,25 +206,42 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 
 // HARD DELETES ALL MESSAGES WITH THE MATCHING SENDER AND RECEIVER ID (EFFECTIVELY CLEARS AN ENTIRE CONVERSATION)
 func deleteMessage(w http.ResponseWriter, r *http.Request) {
+	log.Println("Deleting a Conversation (DELETE)")
 	w.Header().Set("Content-Type", "application/json")
+
 	params := mux.Vars(r)
 	var userMessage UserMessage
 	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ?", params["id_1"], params["id_2"]).Unscoped().Delete(&userMessage)
-	if result.RowsAffected == 0 {
-		http.NotFound(w, r)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Println("Messages deleted successfully.")
+
+	if result.RowsAffected == 0 {
+		http.Error(w, "Conversation not found.", http.StatusNotFound)
+		return
+	}
+
+	log.Println("Conversation deleted successfully.")
 }
 
 // HARD DELETES A SPECIFIC MESSAGE BASED ON SENDER ID, USER ID, AND THE SPECIFIC MESSAGE
 func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
+	log.Println("Deleting a Message (DELETE)")
 	w.Header().Set("Content-Type", "application/json")
+
 	params := mux.Vars(r)
 	var userMessage UserMessage
 	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Unscoped().Delete(&userMessage)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	if result.RowsAffected == 0 {
-		http.NotFound(w, r)
+		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
 	}
 	log.Println("Message deleted successfully.")
@@ -201,15 +250,18 @@ func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
 func deleteTable(w http.ResponseWriter, r *http.Request) {
 	//CLEARS THE ENTIRE DATABASE - THIS WILL ONLY EVER BE USED FOR TESTING PURPOSES
 	//THIS RESETS THE GORM ID BACK TO 1
+	log.Println("Deleting the Entire Database (DELETE)")
 	err := userMessagesDb.Exec("TRUNCATE TABLE user_messages").Error
 	if err != nil {
 		panic(err)
 	}
-	log.Println("Table was deleted.")
+	log.Println("Database deleted successfully.")
 }
 
 func createUserAccount(w http.ResponseWriter, r *http.Request) {
+	log.Println("Creating a User Account (POST)")
 	w.Header().Set("Content-Type", "application/json")
+
 	var userAccount UserAccount
 	err := json.NewDecoder(r.Body).Decode(&userAccount)
 	if err != nil {
@@ -222,23 +274,56 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	json.NewEncoder(w).Encode(userAccount)
 	log.Println("User account created successfully.")
 }
 
 // GETS ALL MESSAGES IN DATABASE
 func getAllUsers(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting All Users (GET)")
 	w.Header().Set("Content-Type", "application/json")
 	var users []UserAccount
 	result := userAccountsDb.Find(&users)
+
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	if len(users) == 0 {
+		http.Error(w, "Users not found.", http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(users)
+	log.Println("Found All Users successfully.")
+}
+
+func getUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting a User (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	var user UserAccount
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result := userAccountsDb.Model(&UserAccount{}).Where("username = ? AND password = ?", user.Username, user.Password).First(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("Found User successfully.")
 }
 
 func addConversation(w http.ResponseWriter, r *http.Request) {
+	log.Println("Adding an ID to a User's Conversation List (PUT)")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var user UserAccount
@@ -282,13 +367,6 @@ func addConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("ID added successfully.")
 }
 
-func handleOptions(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization")
-	w.WriteHeader(http.StatusNoContent)
-}
-
 func main() {
 	log.Println("Connecting to API...")
 
@@ -306,16 +384,13 @@ func main() {
 
 	log.Println("API Connected.")
 
+	corsHandler := cors.Default().Handler
+
 	// AUTO MIGRATE CURRENTLY NOT WORKING...
 	// err = db.AutoMigrate(&UserMessage{})
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
-
-	// TEXT ROUTE HANDLERS / ENDPOINTS
-
-	// OPTIONS FUNCTION SO CORS WILL ACCEPT ALL REQUESTS
-	r.HandleFunc("/api/messages", handleOptions).Methods("OPTIONS")
 
 	// API FUNCTIONS FOR THE MESSAGES DATABASE
 
@@ -340,11 +415,12 @@ func main() {
 	// POST FUNCTIONS
 	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
 
-	// GET FUNCTIONS
-	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
-
 	// PUT FUNCTIONS
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	// GET FUNCTIONS
+	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
+	r.HandleFunc("/api/users/User", getUser).Methods("GET")
+
+	log.Fatal(http.ListenAndServe(":8080", corsHandler(r)))
 }

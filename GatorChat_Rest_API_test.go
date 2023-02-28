@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -90,30 +91,34 @@ func TestEditMessage(t *testing.T) {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	req, err := http.NewRequest("PUT", "/messages/1234/5678/test", bytes.NewBuffer(requestBody))
+	r, err := http.NewRequest("PUT", "/messages/1234/5678/test", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
-	editMessage(rr, req)
+	vars := map[string]string{
+		"id_1":         "1234",
+		"id_2":         "5678",
+		"inputMessage": "test",
+	}
 
-	if rr.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, rr.Code)
+	r = mux.SetURLVars(r, vars)
+
+	editMessage(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
 	}
 
 	var responseStruct UserMessage
-	err = json.Unmarshal(rr.Body.Bytes(), &responseStruct)
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal response body: %s", err)
 	}
 
 	expectedResponse := UserMessage{
-		// NOTE: THE GORM.MODEL VALUES ARE HARDCODED TO JUST BE EQUAL TO THE VALUES IN RESPONSESTRUCT
-		// THIS WAS DONE BECAUSE IT IS NOT POSSIBLE TO HARDCODE THE TIME (TOO SPECIFIC)
-		// ALSO, THE ID IS ALWAYS ALTERING WHICH MAKES HARDCODING THE ACTUAL ID DIFFICULT
-		// THESE PARAMETERS ARE HANDLED BY GORM, SO IT CAN BE ASSUMED THAT THESE ARE ALWAYS VALID
 		Model: gorm.Model{
 			ID:        responseStruct.ID,
 			CreatedAt: responseStruct.CreatedAt,
