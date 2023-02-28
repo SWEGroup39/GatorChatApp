@@ -137,7 +137,51 @@ func TestEditMessage(t *testing.T) {
 }
 
 func TestDeleteMessage(t *testing.T) {
+	delMes := UserMessage{}
 
+	requestBody, err := json.Marshal(delMes)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("DELETE", "/messages/1234/5678", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id_1": "1234",
+		"id_2": "5678",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	deleteMessage(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserMessage
+
+	expectedResponse := UserMessage{
+		Model: gorm.Model{
+			ID:        responseStruct.ID,
+			CreatedAt: responseStruct.CreatedAt,
+			UpdatedAt: responseStruct.UpdatedAt,
+			DeletedAt: responseStruct.DeletedAt,
+		},
+		Sender_ID:   "",
+		Receiver_ID: "",
+		Message:     "",
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 }
 
 func TestDeleteSpecificMessage(t *testing.T) {
