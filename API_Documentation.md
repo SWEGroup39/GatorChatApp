@@ -9,7 +9,7 @@
 - [Setting Up Golang](#settingUp)
 
 - [Accessing the GatorChat API](#accessingAPI)
-<br>
+
 - [Overview of **REST** Functions for Messages](#REST_Messages)
 
     - [Overview of  **POST** Commands for Messages](#POST_Messages)
@@ -19,7 +19,7 @@
     - [Overview of **GET** Commands for Messages](#GET_Messages)
 
     - [Overview of **DELETE** Commands for Messages](#DELETE_Messages)
-<br>
+
 - [Overview of **REST** Functions for Users](#REST_Users)
 
     - [Overview of  **POST** Commands for Messages](#POST_Users)
