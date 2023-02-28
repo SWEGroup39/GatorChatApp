@@ -22,6 +22,12 @@
 <br>
 - [Overview of **REST** Functions for Users](#REST_Users)
 
+    - [Overview of  **POST** Commands for Messages](#POST_Users)
+
+    - [Overview of **PUT** Commands for Messages](#PUT_Users)
+
+    - [Overview of **GET** Commands for Messages](#GET_Users)
+
 ---
 <a id="settingUp"></a>
 
@@ -35,11 +41,15 @@
         - This ensures that Golang can find all of the packages and can properly run.
 
 - **NOTE:** It is important to install the dependencies/packages required to use the GatorChat API.
+
 - These include:
   - **GORM**
       - GORM is needed for the "gorm.io/driver/mysql" and "gorm.io/gorm" packages.
   - **Gorilla Mux**
     - Gorilla Mux is needed for the "github.com/gorilla/mux" package.
+  - **CORS**
+    - CORS is needed for the ""github.com/rs/cors" package.
+
 - **Quick Reference**: Use ```go get -u <package>``` in your command line to install a certain package.
 
 ---
@@ -70,6 +80,7 @@
     - In the scenario where the program cannot connect to the database, an error message will appear in the terminal:
         - If the ```user_messages``` database cannot be opened, then "Error: Failed to connect to messages database." will be displayed.
         - If the ```user_accounts``` database cannot be opened, then "Error: Failed to connect to users database." will be displayed.
+- **NOTE:** By default, the API is hosted on **port 8080**. This can be changed if the port is already being used.
 ---
 
 <a id="REST_Messages"></a>
@@ -79,10 +90,10 @@
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
 
 ### **For the Messages database:**
-- The API supports **POST** to create a message and store it in a database for later retrieval.
-- The API supports **PUT** to update an existing message in the database with a new message.
-- The API supports **GET** to retrieve messages from the databse based on certain parameters.
-- The API supports **DELETE** to remove messages from the databse that are no longer needed.
+- The API supports **POST** to create a message and store it in a messages database for later retrieval.
+- The API supports **PUT** to update an existing message in the messages database with a new message.
+- The API supports **GET** to retrieve messages from the messages database based on certain parameters.
+- The API supports **DELETE** to remove messages from the messages database that are no longer needed.
 
 - This API serves to provide an **abstraction** to the process of manually accessing the database and running MySQL commands to perform the actions listed above.
 
@@ -92,12 +103,12 @@
 
 ### ➜ Overview of  **POST** Command for Messages
 
-- The **POST** command takes in an input and creates a new message in the database.
+- The **POST** command takes in an input and creates a new message in the messages database.
 
 ### Syntax
 - There is currently only one POST command, and the syntax is as follows:
 
-- ```http://localhost:8000/api/messages ```
+- ```http://localhost:8080/api/messages ```
 
     - For post, the information passed in must be through the request **body**.
     - The required inputs are a unique message ID number, a message string, a sender ID, and a receiver ID.
@@ -118,29 +129,32 @@
 - The message ID number cannot be reused unless the previous message with that number was hard-deleted.
 
 ### Requirements and Error Messages
+- A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
 - The inputs for the POST command must follow a specific format.
     - The Sender_ID must be **numeric** and **only four digits**.
     - The Receiver_ID must be **numeric** and **only four digits**.
         - If these are not met, an error message will appear that describes what specifically needs to be fixed.
-- If the Sender ID has any non-numeric characters in it, the "Invalid Sender ID (NOT NUMERIC)" message will be returned.
-- If the Receiver ID has any non-numeric characters in it, the "Invalid Receiver ID (NOT NUMERIC)" message will be returned.
-- If the Sender ID is not 4 digits long, the Invalid Sender ID (NOT FOUR DIGITS) message will be returned.
-- If the Receiver ID is not 4 digits long, the Invalid Receiver ID (NOT FOUR DIGITS) message will be returned.
+- If the **Sender ID** has any non-numeric characters in it, the "Invalid Sender ID (NOT NUMERIC)" message will be returned.
+- If the **Receiver ID** has any non-numeric characters in it, the "Invalid Receiver ID (NOT NUMERIC)" message will be returned.
+- If the **Sender ID** is not 4 digits long, the Invalid Sender ID (NOT FOUR DIGITS) message will be returned.
+- If the **Receiver ID** is not 4 digits long, the Invalid Receiver ID (NOT FOUR DIGITS) message will be returned.
 - If a message is posted with no actual text in the message the "Invalid Message: Messages cannot be empty." message will be returned.
-- Otherwise, the newly created message object will be returned along with a "Message created successfully." message.
+- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
+- Otherwise, the newly created message object will be returned along with a "Message created successfully." console log message.
 ---
 
 <a id="PUT_Messages"></a>
 
 ### ➜ Overview of  **PUT** Command for Messages
 
-- The **PUT** command takes in an input to edit a message already in the database.
+- The **PUT** command takes in an input to edit a message already in the messages database.
+- **NOTE:** In its current implementation, this function will edit **ALL** messages with the matching ID's and message. Nonunique messages will all be edited.
 
 ### Syntax
 
 - There is currently only one **PUT** command, and the syntax is as follows:
 
-- ``` http://localhost:8000/api/messages/[FIRST ID]/[SECOND ID]/[ORIGINAL MESSAGE] ```
+- ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/[ORIGINAL MESSAGE] ```
 
 - The required inputs are the Sender ID, the Receiver ID, and the original message that you would like to have changed.
 
@@ -153,17 +167,18 @@
             }
         ```
 ### Requirements and Error Messages
-- The message with the input Sender ID and Receiver ID must already exist in the database to be edited, otherwise an error will be thrown.
-    - If the message to edit cannot be found, an Internal Server Error will be returned.
+- A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
+- The message with the input Sender ID and Receiver ID must already exist in the messages database to be edited, otherwise an error will be thrown.
     - If the message-to-change was not located, an error message saying "Message not found." will be returned.
-- Otherwise, the updated message object will be returned along with a "Message edited successfully." message.
+- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
+- Otherwise, the updated message object will be returned along with a "Message edited successfully." console log message.
 ---
 
 <a id="GET_Messages"></a>
 
 ### ➜ Overview of  **GET** Command for Messages
 
-- The **GET** command prints displays messages that have been created with the **POST** request.
+- The **GET** command returns messages that have been created with the **POST** request.
 
 ### Syntax
 - There are currently three different **GET** functions available:
@@ -171,48 +186,51 @@
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
          - **Example Syntax:**
-        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID] ```
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
         - This returns all the messages, in a slice/array, where the first ID was either the sender/receiver and the second ID was either the sender/receiver.
     
     - **Second Option: Search for Message**: 
-        - This **GET** function returns the message object that matches the specified message, if it exists in the database.
+        - This **GET** function returns the message object that matches the specified message, if it exists in the messages database. 
+        - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
          - **Example Syntax:**
-        ```http://localhost:8080/api/messages/[MESSAGE] ```
+        ```http://localhost:8080/api/messages/[MESSAGE]```
         - If the message contains spaces, use ```%20``` in place of the space.
-        - **NOTE:** _The searching functionality is currently designed to only find messages that match exactly with the input message. In the future, this will be tweaked to find messages that contain the input message._
 
      - **Third Option: Get ALL Messages**: 
-        - This **GET** function returns every message in the database.
+        - This **GET** function returns every message in the messages database.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages ```
         - **NOTE:** _This is more of a testing function rather than a function that would be frequently/practically used._
 
 ### Requirements and Error Messages
-- The **"Get Conversation"** function must have a valid Sender and Receiver ID, or else "Messages not found." will be returned.
-- The **"Search for Message"** function must have a valid message that exists in the database, or else "Message not found." will be returned.
-- If the **"Get ALL Messages"** function cannot locate all of the messages in the database, then an Internal Server Error will be returned.
+- The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
+- The **"Search for Message"** function must have a valid message that exists in the database, or else "No messages found." will be returned.
+- If the **"Get ALL Messages"** function cannot locate any messages, then "Messages not found" will be returned.
+- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
+- Otherwise, the message(s) will be returned along with a successful console log message.
 ---
 
 <a id="DELETE_Messages"></a>
 
 ### ➜ Overview of  **DELETE** Command for Messages
 
-- The **DELETE** command deletes messages created with the **POST** request from the database.
+- The **DELETE** command deletes messages created with the **POST** request from the messages database.
+- **NOTE:** In its current implementation, the ```deleteSpecificMessage``` function  will delete  **ALL** messages with the matching ID's and message. Nonunique messages will all be deleted.
 
 ### Syntax
 -  There are currently three different **DELETE** functions available:
 
      - **First Option: Delete a Specific Message**:
-        - This **DELETE** function deletes a specified messaged between a sender and receiver, if it exists in the database.
+        - This **DELETE** function deletes a specified messaged between a sender and receiver, if it exists in the messages database.
          - **Example Syntax:**
-        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE] ```
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE]```
         - This function takes in a Sender ID, Receiver ID, and the message in the conversation that you want deleted.
         - If the message contains spaces, use ```%20``` in place of the space.
 
      - **Second Option: Delete an Entire Conversation**:
         - This **DELETE** function deletes all messages between a sender and receiver, if they have a current conversation.
          - **Example Syntax:**
-        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID] ```
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
         - This function takes in the two IDs of the people whose conversation you want deleted.
 
      - **Third Option: Delete All Conversations**:
@@ -222,9 +240,10 @@
         - **NOTE:** _This function is used for testing purposes and is most likely not going to be an implemented function in the Frontend._
 
 ### Requirements and Error Messages
-- The **"Delete a Specific Message"** function must have a valid Sender ID, Receiver ID, and message. Otherwise, an HTTP 404 not found error will be returned. If the message was found and deleted, then "Message deleted successfully." will be returned.
-- The **"Delete an Entire Conversation"** function must have a valid Sender ID and Receiver ID. If it does not, an HTTP 404 not found error will be returned. If the messages were found and deleted, then "Messages deleted successfully." will be returned.
-- The **"Delete All Conversations"** function will panic if the table is unable to be truncated/deleted. If it is able to clear the entire table, then "Table was deleted." will be returned.
+- The **"Delete a Specific Message"** function must have a valid Sender ID, Receiver ID, and message. Otherwise, "Message not found." will be returned. If the message was found and deleted, then "Message deleted successfully." will be returned.
+- The **"Delete an Entire Conversation"** function must have a valid Sender ID and Receiver ID. If it does not, "Conversation not found." will be returned. If the messages were found and deleted, then "Conversation deleted successfully." will be returned.
+- The **"Delete All Conversations"** function will panic if the table is unable to be truncated/deleted. If it is able to clear the entire table, then "Database deleted successfully." will be returned.
+- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
 ---
 
 <a id="REST_Users"></a>
@@ -233,6 +252,95 @@
 
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
 
-### **For the Users database:**
+- **There are currently three REST functions implemented:**
+- The API supports **POST** to create a user and store it in the users database for later retrieval.
+- The API supports **PUT** to update an existing user's conversation list in the users database with a new user.
+- The API supports **GET** to retrieve a user from the users database.
+---
+
+<a id="POST_Users"></a>
+
+### ➜ Overview of  **POST** Command for Users
+
+- The **POST** command takes in an input and creates a new user in the users database.
+
+### Syntax
+- There is currently only one POST command, and the syntax is as follows:
+
+- ```http://localhost:8080/api/users ```
+
+    - For post, the information passed in must be through the request **body**.
+    - The required inputs are a username, a password, a user ID, and a list of current conversations that the user is in (typically left blank).
+    
+        - **Example Syntax:**
+            ```
+                {
+                    "username": "user",
+                    "password": "pass",
+                    "user_id": "1234",
+                    "current_conversations": ["4321", "5678"]
+                }
+            ```
+- **NOTE:** Have ```"current_conversations"``` be ```[]``` to have any empty slice.
+
+### Requirements and Error Messages
+- A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
+- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
+- Otherwise, the newly created user object will be returned along with a "User account created successfully." console log message.
+---
+
+<a id="PUT_Users"></a>
+
+### ➜ Overview of  **PUT** Command for Users
+
+- The **PUT** command takes in a user and updates their conversation list by adding in the passed-in user ID.
+
+### Syntax
+
+- There is currently only one **PUT** command, and the syntax is as follows:
+
+- ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
+
+- The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
+
+### Requirements and Error Messages
+- An **Internal Server Error** will be returned if it is unable to locate the passed-in user or if there are errors regarding the database connection.
+- Otherwise, the updated user object will be returned along with a "ID added successfully." console log message.
+---
+
+<a id="GET_Users"></a>
+
+### ➜ Overview of  **GET** Command for Users
+
+- The **GET** command returns users that have been created with the **POST** request.
+
+### Syntax
+- There are currently two different **GET** functions available:
+
+    - **First Option: Get All Users**:
+        - This **GET** function returns all users in the users database.
+         - **Example Syntax:**
+        ```http://localhost:8080/api/users```
+    
+    - **Second Option: Get a Specific User**: 
+        - This **GET** function returns a singular user from the users database. 
+        - It will find a user that matches the credentials.
+         - For get, the information passed in must be through the request **body**.
+            - The required input is the user's username and password.
+            
+                - **Example Syntax:**
+                    ```
+                        {
+                            "username": "user",
+                            "password": "pass"
+                        }
+                    ```
+
+### Requirements and Error Messages
+- A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
+- The **"Get All Users"** function must have users that exists in the database, or else "Users not found." will be returned.
+- An **Internal Server Error** will be returned for the **"Get a Specific User"** function if it is unable to locate the passed-in user or if there are errors regarding the database connection.
+- Otherwise, the user(s) will be returned along with a successful console log message.
+---
 
 [Back to top](#TOC)
