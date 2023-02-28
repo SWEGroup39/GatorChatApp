@@ -321,7 +321,45 @@ func TestDeleteSpecificMessage(t *testing.T) {
 }
 
 func TestCreateUserAccount(t *testing.T) {
+	user := UserAccount{
+		Username: "user",
+		Password: "pass",
+		User_ID:  "1234",
+	}
 
+	requestBody, err := json.Marshal(user)
+	if err != nil {
+		t.Fatalf("Failed to marshal user: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	rr := httptest.NewRecorder()
+
+	createUserAccount(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, rr.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(rr.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username: "user",
+		Password: "pass",
+		User_ID:  "1234",
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 }
 
 func TestGetAllUsers(t *testing.T) {
@@ -329,5 +367,9 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestAddConversation(t *testing.T) {
+
+}
+
+func TestGetUser(t *testing.T) {
 
 }
