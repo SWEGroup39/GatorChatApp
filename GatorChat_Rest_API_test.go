@@ -322,9 +322,10 @@ func TestDeleteSpecificMessage(t *testing.T) {
 
 func TestCreateUserAccount(t *testing.T) {
 	user := UserAccount{
-		Username: "user",
-		Password: "pass",
-		User_ID:  "1234",
+		Username:              "user",
+		Password:              "pass",
+		User_ID:               "1234",
+		Current_Conversations: []byte("{}"),
 	}
 
 	requestBody, err := json.Marshal(user)
@@ -352,9 +353,10 @@ func TestCreateUserAccount(t *testing.T) {
 	}
 
 	expectedResponse := UserAccount{
-		Username: "user",
-		Password: "pass",
-		User_ID:  "1234",
+		Username:              "user",
+		Password:              "pass",
+		User_ID:               "1234",
+		Current_Conversations: []byte("{}"),
 	}
 
 	if !reflect.DeepEqual(responseStruct, expectedResponse) {
