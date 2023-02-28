@@ -324,10 +324,22 @@ func main() {
 	 //CREATE THE NEW CORS HANDLER
 	 corsHandler :=  handlers.CORS(
         handlers.AllowCredentials(),
+		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization", "DNT", "Keep-Alive", "User-Agent", "If-Modified-Since", "Cache-Control", "Content-Range", "Range"}),
         handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
         handlers.AllowedOrigins([]string{"*"}),
-        handlers.MaxAge(86400),
+		handlers.ExposedHeaders([]string{"DNT", "Keep-Alive", "User-Agent", "If-Modified-Since", "Cache-Control", "Content-Type", "Content-Range", "Range", "Content-Disposition"}),
+        handlers.MaxAge(1000),
+		handlers.AllowCredentials(),
     )
+
+	// corsHandler := handlers.CORS(
+	// 	handlers.AllowedOrigins([]string{"*"}),
+	// 	handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+	// 	handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
+	// 	handlers.ExposedHeaders([]string{}),
+	// 	handlers.MaxAge(1000),
+	// 	handlers.AllowCredentials(),
+	// )
 
     // SET THE CORS HANDLER TO THE ROUTER
     r.Use(corsHandler)
