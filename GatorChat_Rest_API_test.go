@@ -74,11 +74,98 @@ func TestCreateMessage(t *testing.T) {
 }
 
 func TestGetConversation(t *testing.T) {
+	r, err := http.NewRequest("GET", "/messages/1234/5678", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
 
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id_1": "1234",
+		"id_2": "5678",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	getConversation(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct []UserMessage
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := []UserMessage{
+		{
+			Model: gorm.Model{
+				ID:        responseStruct[0].ID,
+				CreatedAt: responseStruct[0].CreatedAt,
+				UpdatedAt: responseStruct[0].UpdatedAt,
+				DeletedAt: responseStruct[0].DeletedAt,
+			},
+			Sender_ID:   "1234",
+			Receiver_ID: "5678",
+			Message:     "test",
+		},
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 }
 
 func TestSearchMessage(t *testing.T) {
+	r, err := http.NewRequest("GET", "/messages/test", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
 
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"search": "test",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	searchMessage(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	// this is what the request returns
+	var responseStruct []UserMessage
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	//we need to make a matching datatype, in this case a slice of usermessage structs
+
+	expectedResponse := []UserMessage{
+		{
+			Model: gorm.Model{
+				ID:        responseStruct[0].ID,
+				CreatedAt: responseStruct[0].CreatedAt,
+				UpdatedAt: responseStruct[0].UpdatedAt,
+				DeletedAt: responseStruct[0].DeletedAt,
+			},
+			Sender_ID:   "1234",
+			Receiver_ID: "5678",
+			Message:     "test",
+		},
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 }
 
 func TestEditMessage(t *testing.T) {
