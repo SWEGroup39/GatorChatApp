@@ -326,8 +326,10 @@
         - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend.
     
     - **Second Option: Get a Specific User**: 
-        - This **GET** function returns a singular user from the users database. 
+        - This **GET** function returns a singular user from the users database.
         - It will find a user that matches the credentials.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/users/User```
          - For get, the information passed in must be through the request **body**.
             - The required input is the user's username and password.
             
