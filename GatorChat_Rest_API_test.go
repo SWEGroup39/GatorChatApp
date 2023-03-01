@@ -30,27 +30,27 @@ func TestCreateMessage(t *testing.T) {
 	}
 
 	// CALL THE POST AND PASS IN THE USERMESSAGE STRUCT
-	req, err := http.NewRequest("POST", "/messages", bytes.NewBuffer(requestBody))
+	r, err := http.NewRequest("POST", "/messages", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 		return
 	}
 
 	// CREATES A RESPONSE RECORDER
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	// TEST THE POST BY PASSING IN THE RESPONSE RECORDER AND THE STRUCT
-	createMessage(rr, req)
+	createMessage(w, r)
 
 	// VERIFY THAT THE CALL WAS SUCCESSFUL
-	if rr.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, rr.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
 		return
 	}
 
 	// TURN THE JSON BACK INTO A STRUCT
 	var responseStruct UserMessage
-	err = json.Unmarshal(rr.Body.Bytes(), &responseStruct)
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal response body: %s", err)
 		return
