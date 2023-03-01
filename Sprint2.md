@@ -7,12 +7,24 @@
  ### Frontend:
  - Created functions (using GET & POST request from the API ) that connect to the API
     -Have getMessages() --> gets all messages from a conversation, uses GET request that takes in two userIDs as parameters
-    -Have sendMessage() --> creates a message typed by the user in the Database, uses POST request, adds message to MessageList in the Front at the              same time, takes in a message body as parameters
+    -Have sendMessage() --> creates a message typed by the user in the Database, uses POST request, adds message to MessageList in the Front at the same time, takes in a message body as parameters
     -Have searchMessage() --> gets a list of messages based on the content inside of them, uses GET Request, takes in message content as a parameter 
  - When Message Window is opnened, all mesages between the two users are displayed 
  - The Message-Window simultanisly uploads sent message to datbase while displaying it to the screen
  - Can search for specific messages and the Message-Window will autoscroll to them 
-
+ - Created a login page with a navigation bar at the top of the screen
+   - The page consists of the elements:
+      -Username field
+      -Password field
+      -Login button
+      -In the navigation bar:
+        -Home
+        -Services
+        -Chats
+        -Sign up
+  -Additionally, an icon was added along with the title of the application to the top-left of the navigation bar.
+ -A sign up page was also created which included the form fields of create username, create password, confirm password, and email address.
+ 
 <hr>
 
  ### Backend:
