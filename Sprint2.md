@@ -50,6 +50,12 @@
 
 <hr>
 
+### API Documentation
+  - The API documentation is too large to fit within Sprint.md, so it is linked in a separate .md file below:
+    - **The API documentation can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/API_Documentation.md)**
+
+<hr>
+
  ### Entire Team:
   - Connected the Frontend to the REST API.
   - CORS was implemented into the API to allow the Frontend to send requests to the API without it being blocked.
@@ -85,8 +91,3 @@
 - All the tests cases ensure that both the front and back ends are correctly connected therefore checks if the app is correctly integrated. 
 - These test files can be found in the FRONT-END branch in the folder Cypress Tests
 - **Link to Cypress Tests**: <a href="https://github.com/SWEGroup39/GatorChatApp/tree/Front-End-Branch/CypressTesting">Cypress Tests</a>
-<hr>
-
-### API Documentation
-  - The API documentation is too large to fit within Sprint.md, so it is linked in a separate .md file below:
-    - **The API documentation can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/API_Documentation.md)**
