@@ -55,7 +55,7 @@
      - Retrieving a user.
   - **The Go Test file can be found [here.]()**
 
-### Cypress Test Conducnted for FrontEnd
+### Cypress Test Conducted for Frontend
 (put here)
 
 <hr>
