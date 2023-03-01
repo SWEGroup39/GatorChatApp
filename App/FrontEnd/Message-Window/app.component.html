@@ -1,0 +1,30 @@
+<div class="contianer">
+  <div class="card">
+    <div class="search-footer">
+      <textarea id="chat-searcharea" [(ngModel)]="searchInputMessage" ></textarea>
+      <button id="search-button" (click)="search(searchInputMessage)" [disabled]="searchInputMessage?.length == 0">
+        <img src="https://static.thenounproject.com/png/1016966-200.png">
+      </button>
+    </div>
+    <div #chatList class="chat-list">
+      <ng-container *ngFor="let item of chatMessages">
+          <div class="chat-item" 
+          [ngClass]= "{'right': item?.userId == currentUser.id, 'left': item?.userId != 
+          currentUser.id}">
+           <!-- <img id="avatar" [src]="item?.userId .profileImageUrl"> -->
+           <p id="message-body">{{item?.message}}</p>
+           <span id="time-details">{{item?.created_at | date: 'shortTime'}}</span>
+          </div>
+      </ng-container>    
+    </div>
+  <div class="chat-footer">
+    <textarea id="chat-textarea" [(ngModel)]="chatInputMessage" ></textarea>
+    <button id="send-button" (click)="send()" [disabled]="chatInputMessage?.length == 0">
+      <img src="https://img.icons8.com/ios11/600/000000/filled-sent.png">
+    </button>
+  </div>
+</div>
+</div>
+<!-- <app-convo-tab></app-convo-tab> -->
+<!-- [(ngModel)] ="chatInputMessage" -->
+<!-- [disabled]="chatInputMessage?.length == 0" -->
