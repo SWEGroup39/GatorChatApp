@@ -1,4 +1,5 @@
-$bubble-background: rgb(0, 122, 255);
+$right-bubble-background: rgb(0, 122, 255);
+$left-bubble-background: rgb(209, 122, 41);
 $background: rgb(40, 44, 52);
 $message-color: white;
 $message-font: 'San Francisco', sans-serif;
@@ -14,7 +15,7 @@ $message-font: 'San Francisco', sans-serif;
 
 .card{
     background: $background;
-    height:  500px;
+    height:  600px;
     min-width: 500px;
     margin: auto;
     display: flex;
@@ -40,7 +41,7 @@ $message-font: 'San Francisco', sans-serif;
 
     #message-body{
         margin: auto 8px;
-        background: $bubble-background;
+        //background: $bubble-background;
         padding: 10px 24px;
         border-radius: 33px;
         color: $message-color;
@@ -72,6 +73,7 @@ $message-font: 'San Francisco', sans-serif;
     #message-body{
         margin-left: -15px;
         margin-top: 10px;
+        background: rgb(209, 122, 41);
 
     }
 
@@ -83,6 +85,7 @@ $message-font: 'San Francisco', sans-serif;
     #message-body{
         margin-right: -15px;
         margin-top: 10px;
+        background: $right-bubble-background;
 
     }    
 
@@ -110,7 +113,7 @@ $message-font: 'San Francisco', sans-serif;
   }
   #send-button
   {
-    background: $bubble-background;
+    background: $right-bubble-background;
     img
     {
         object-fit: cover;
@@ -130,13 +133,9 @@ $message-font: 'San Francisco', sans-serif;
   #chat-searcharea
   {
     flex: 1;
-    background-color:rgb(12, 60, 110);
+    background-color: rgb(12, 60, 110);
     color: $message-color;
     font-family: $message-font;
-   // margin: 0 6px;
-    //border: 1px solid white;
-    //border-radius: 5px;
-    //filter: drop-shadow(-5px 0px 8px grey);
 
   }
   #search-button
