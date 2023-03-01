@@ -1,0 +1,21 @@
+Video/Presentation Guide:
+
+Kevin:
+  
+
+John:
+
+
+Ria:
+  -Explain each test case/ run them
+    -test 1 - front end functionality of the send message
+    -test 2 - integrated/testing post method from api of the send message
+    -test 3 - front end functionality of the search message function
+    -test 4 - integrated/testing get method from api for search message
+    -test 5 - front end functionality for the login page - typing in username and password, clicking the login button
+    - talk about the nav bar and future implementations
+      - buttons in the nav bar will take the user to a different page when clicked
+    - did not implement:
+      - did not create a fully functioning login page therefore only has a front end test case
+
+Rafael:
