@@ -83,7 +83,7 @@
 - Test 5: Checks if local host for the login page can be accessed, types in a username: harry.k and password: harry and clicks the login button. This test case only checks the front-end functionality and not the API call because that has not been implemented yet.
 - In summary, Tests 1,2, and 5 are check the front-end functionality and Tests 3,4 are unit tests for the chat window functions. 
 - All the tests cases ensure that both the front and back ends are correctly connected therefore checks if the app is correctly integrated. 
-
+- These test files can be found in the FRONT-END branch in the folder Cypress Tests
 <hr>
 
 ### API Documentation
