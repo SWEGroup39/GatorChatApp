@@ -3,7 +3,13 @@
 ## Work Completed in Sprint 2:
 
  ### Frontend:
- - stuff here
+ - Created functions (using GET & POST request from the API ) that connect to the API
+    -Have getMessages() --> gets all messages from a conversation, uses GET request that takes in two userIDs as parameters
+    -Have sendMessage() --> creates a message typed by the user in the Database, uses POST request, adds message to MessageList in the Front at the              same time, takes in a message body as parameters
+    -Have searchMessage() --> gets a list of messages based on the content inside of them, uses GET Request, takes in message content as a parameter 
+ - When Message Window is opnened, all mesages between the two users are displayed 
+ - The Message-Window simultanisly uploads sent message to datbase while displaying it to the screen
+ - Can search for specific messages and the Message-Window will autoscroll to them 
 
 <hr>
 
@@ -48,6 +54,9 @@
      - Editing a user's conversation list by adding a new ID.
      - Retrieving a user.
   - **The Go Test file can be found [here.]()**
+
+### Cypress Test Conducnted for FrontEnd
+(put here)
 
 <hr>
 
