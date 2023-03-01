@@ -15,7 +15,6 @@
    - Wrote a function to retrieve **all** message between two users (```GetConversation```).
    - Wrote a function that would search the database for a specific message and would return either exact matches or messages that contain the query string (```searchMessage```).
    - Wrote a function that would delete all messages between two users, effectively clearing a conversation (```deleteConversation```).
- - CORS was implemented into the API to allow the Frontend to send requests to the API without it being blocked.
  - Began adding data validation to functions such as POST.
    - The ```createMessage``` function checks if IDs are four digits and if the message is empty.
  - To prevent confusion and mistakes, more error handling was added to each major step in every function to ensure that it executed correctly. 
@@ -28,6 +27,12 @@
    - Wrote a function to create a new user in the database (```createUserAccount```).
    - Wrote a function to retrieve a user based on their unique ID (```getUser```).
    - Wrote a function to edit an existing user's conversation list by adding a new ID to it (```addConversation```).
+
+<hr>
+
+ ### Entire Team:
+  - Connected the Frontend to the REST API.
+  - CORS was implemented into the API to allow the Frontend to send requests to the API without it being blocked.
 
 <hr>
 
