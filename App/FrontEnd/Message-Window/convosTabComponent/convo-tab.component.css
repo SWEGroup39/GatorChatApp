@@ -1,0 +1,19 @@
+.contianer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height: 0px; */
+    /* background-color: red; */
+    position: absolute; top: 9px; left: 122px;
+
+}
+
+.card{
+    background: red;
+    height: 600px;
+    min-width: 200px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(0px, 0px, 10px) black;
+}
