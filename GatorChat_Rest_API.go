@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
@@ -101,9 +102,15 @@ func searchMessage(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	var messages []UserMessage
+
+	searchQuery := params["search"]
+	// ADDING A SPACE MAKES IT SO IT FINDS WHOLE WORDS, NOT MESSAGES THAT HAVE THE SEARCH INSIDE THE WORD
+	searchQuery = " " + searchQuery + " "
+	// THIS IS A SECURITY MEASURE TO PREVENT SQL INJECTION
+	searchQuery = strings.ReplaceAll(searchQuery, "'", "''")
+
 	// LIKE REQUIRES % TO BE SURROUNDED AROUND THE MESSAGE TO TELL IT TO FIND MESSAGES THAT CONTAIN IT, REGARDLESS OF WHERE IT IS
-	searchQuery := "%" + params["search"] + "%"
-	_ = userMessagesDb.Where("Message LIKE ?", searchQuery).Find(&messages)
+	_ = userMessagesDb.Where("CONCAT(' ', REPLACE(Message, '\r\n', ' '), ' ') LIKE ? OR Message LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%").Find(&messages)
 
 	if len(messages) == 0 {
 		http.Error(w, "No messages found.", http.StatusNotFound)
