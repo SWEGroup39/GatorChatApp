@@ -5,25 +5,25 @@
 ## Work Completed in Sprint 2:
 
  ### Frontend:
- - Created functions (using GET & POST request from the API ) that connect to the API
-    -Have getMessages() --> gets all messages from a conversation, uses GET request that takes in two userIDs as parameters
-    -Have sendMessage() --> creates a message typed by the user in the Database, uses POST request, adds message to MessageList in the Front at the same time, takes in a message body as parameters
-    -Have searchMessage() --> gets a list of messages based on the content inside of them, uses GET Request, takes in message content as a parameter 
- - When Message Window is opnened, all mesages between the two users are displayed 
- - The Message-Window simultanisly uploads sent message to datbase while displaying it to the screen
- - Can search for specific messages and the Message-Window will autoscroll to them 
- - Created a login page with a navigation bar at the top of the screen
+ - Created functions (using GET & POST request from the API ) that connect to the API.
+    - Have ```getMessages()``` --> gets all messages from a conversation, uses GET request that takes in two userIDs as parameters.
+    - Have ```sendMessage()``` --> creates a message typed by the user in the Database, uses POST request, adds message to MessageList in the Front at the same time, takes in a message body as parameters.
+    - Have ```searchMessage()``` --> gets a list of messages based on the content inside of them, uses GET Request, takes in message content as a parameter.
+ - When Message Window is opnened, all mesages between the two users are displayed.
+ - The Message-Window simultanisly uploads sent message to datbase while displaying it to the screen.
+ - Can search for specific messages and the Message-Window will autoscroll to them.
+ - Created a login page with a navigation bar at the top of the screen.
    - The page consists of the elements:
-      -Username field
-      -Password field
-      -Login button
-      -In the navigation bar:
-        -Home
-        -Services
-        -Chats
-        -Sign up
-  -Additionally, an icon was added along with the title of the application to the top-left of the navigation bar.
- -A sign up page was also created which included the form fields of create username, create password, confirm password, and email address.
+      - Username field
+      - Password field
+      - Login button
+      - In the navigation bar:
+        - Home
+        - Services
+        - Chats
+        - Sign up
+  - Additionally, an icon was added along with the title of the application to the top-left of the navigation bar.
+ - A sign up page was also created which included the form fields of create username, create password, confirm password, and email address.
  
 <hr>
 
@@ -75,16 +75,16 @@
 - There are 5 tests in total
 - Tests 1-4 deal with the chat message window and Test 5 deals with the Login Page
 - There are a mixture of only front-end functionality and API testing cases included
-- Test 1: Checks if local host for the chat window can be accessed, types in the message "Hello! Cypress" and clicks the send button. This test case only checks the front-end functionality and not the API call. There are designated unit tests for the API.
-- Test 2: Checks if local host for the chat window can be accessed, types in the search bar "Hello" and clicks the search button. This test case ony checks the front-end functionality. It does not account for the API call.
-- Test 3: This is a unit test case for the search function where it sends a GET request and expects a response of status 200 (OK). This test case ensures that the API call of GET is properly functioning when the search function is running.
-- Test 4: This is a unit test case for the send message function where it sends a message of How is the weather along with the message id, receiver id, and sender id.    -Sends a POST request and expects a response where the message is posted to the chat window.
+- **Test 1**: Checks if local host for the chat window can be accessed, types in the message "Hello! Cypress" and clicks the send button. This test case only checks the front-end functionality and not the API call. There are designated unit tests for the API.
+- **Test 2**: Checks if local host for the chat window can be accessed, types in the search bar "Hello" and clicks the search button. This test case ony checks the front-end functionality. It does not account for the API call.
+- **Test 3**: This is a unit test case for the search function where it sends a GET request and expects a response of status 200 (OK). This test case ensures that the API call of GET is properly functioning when the search function is running.
+- **Test 4**: This is a unit test case for the send message function where it sends a message of How is the weather along with the message id, receiver id, and sender id.    -Sends a POST request and expects a response where the message is posted to the chat window.
    - This test case ensures that the API call of POST is functioning when the send message function is called
-- Test 5: Checks if local host for the login page can be accessed, types in a username: harry.k and password: harry and clicks the login button. This test case only checks the front-end functionality and not the API call because that has not been implemented yet.
-- In summary, Tests 1,2, and 5 are check the front-end functionality and Tests 3,4 are unit tests for the chat window functions. 
+- **Test 5**: Checks if local host for the login page can be accessed, types in a username: harry.k and password: harry and clicks the login button. This test case only checks the front-end functionality and not the API call because that has not been implemented yet.
+- In summary, Tests 1, 2, and 5 are check the front-end functionality and Tests 3,4 are unit tests for the chat window functions. 
 - All the tests cases ensure that both the front and back ends are correctly connected therefore checks if the app is correctly integrated. 
 - These test files can be found in the FRONT-END branch in the folder Cypress Tests
-- Link to Cypress Tests: <a href="https://github.com/SWEGroup39/GatorChatApp/tree/Front-End-Branch/CypressTesting">Cypress Tests</a>
+- **Link to Cypress Tests**: <a href="https://github.com/SWEGroup39/GatorChatApp/tree/Front-End-Branch/CypressTesting">Cypress Tests</a>
 <hr>
 
 ### API Documentation
