@@ -53,7 +53,8 @@
      - Creating a user account.
      - Editing a user's conversation list by adding a new ID.
      - Retrieving a user.
-  - **The Go Test file can be found [here.]()**
+  - **The Go Test file can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/GatorChat_Rest_API_test.go)**
+   - _**Note:** This leads to the API folder in the "main" branch. To see the full commit history, visit the working [Back-End branch.](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch)_
 
 ### Cypress Test Conducted for Frontend
 (put here)
@@ -62,4 +63,4 @@
 
 ### API Documentation
   - The API documentation is too large to fit within Sprint.md, so it is linked in a separate .md file below:
-    - **The API documentation can be found [here.]()**
+    - **The API documentation can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/API_Documentation.md)**
