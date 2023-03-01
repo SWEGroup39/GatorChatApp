@@ -51,7 +51,7 @@
 <hr>
 
 ### API Documentation
-  - The API documentation is too large to fit within Sprint.md, so it is linked in a separate .md file below:
+  - The API documentation is too large to fit within Sprint2.md, so it is linked in a separate .md file below:
     - **The API documentation can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/API_Documentation.md)**
 
 <hr>
