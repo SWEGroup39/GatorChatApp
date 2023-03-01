@@ -205,13 +205,13 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 // HARD DELETES ALL MESSAGES WITH THE MATCHING SENDER AND RECEIVER ID (EFFECTIVELY CLEARS AN ENTIRE CONVERSATION)
-func deleteMessage(w http.ResponseWriter, r *http.Request) {
+func deleteConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Deleting a Conversation (DELETE)")
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
 	var userMessage UserMessage
-	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ?", params["id_1"], params["id_2"]).Unscoped().Delete(&userMessage)
+	result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Unscoped().Delete(&userMessage)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -406,7 +406,7 @@ func main() {
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", editMessage).Methods("PUT")
 
 	// DELETE FUNCTIONS
-	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteMessage).Methods("DELETE")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteConversation).Methods("DELETE")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", deleteSpecificMessage).Methods("DELETE")
 	r.HandleFunc("/api/messages/deleteTable", deleteTable).Methods("DELETE")
 
