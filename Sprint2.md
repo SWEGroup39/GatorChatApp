@@ -78,15 +78,15 @@
 
 ### Cypress Test Conducted for Frontend
 - All the front end test cases were created using Cypress
-- There are 5 tests in total
-- Tests 1-4 deal with the chat message window and Test 5 deals with the Login Page
-- There are a mixture of only front-end functionality and API testing cases included
-- **Test 1**: Checks if local host for the chat window can be accessed, types in the message "Hello! Cypress" and clicks the send button. This test case only checks the front-end functionality and not the API call. There are designated unit tests for the API.
-- **Test 2**: Checks if local host for the chat window can be accessed, types in the search bar "Hello" and clicks the search button. This test case ony checks the front-end functionality. It does not account for the API call.
-- **Test 3**: This is a unit test case for the search function where it sends a GET request and expects a response of status 200 (OK). This test case ensures that the API call of GET is properly functioning when the search function is running.
-- **Test 4**: This is a unit test case for the send message function where it sends a message of How is the weather along with the message id, receiver id, and sender id.    -Sends a POST request and expects a response where the message is posted to the chat window.
-   - This test case ensures that the API call of POST is functioning when the send message function is called
-- **Test 5**: Checks if local host for the login page can be accessed, types in a username: harry.k and password: harry and clicks the login button. This test case only checks the front-end functionality and not the API call because that has not been implemented yet.
+- There are 5 tests in total:
+   - Tests 1-4 deal with the chat message window and Test 5 deals with the Login Page
+     - There are a mixture of only front-end functionality and API testing cases including:
+     - **Test 1**: Checks if local host for the chat window can be accessed, types in the message "Hello! Cypress" and clicks the send button. This test case only checks the front-end functionality and not the API call. There are designated unit tests for the API.
+     - **Test 2**: Checks if local host for the chat window can be accessed, types in the search bar "Hello" and clicks the search button. This test case ony checks the front-end functionality. It does not account for the API call.
+     - **Test 3**: This is a unit test case for the search function where it sends a GET request and expects a response of status 200 (OK). This test case ensures that the API call of GET is properly functioning when the search function is running.
+     - **Test 4**: This is a unit test case for the send message function where it sends a message of How is the weather along with the message id, receiver id, and sender id.    -Sends a POST request and expects a response where the message is posted to the chat window.
+       - This test case ensures that the API call of POST is functioning when the send message function is called
+  - **Test 5**: Checks if local host for the login page can be accessed, types in a username: harry.k and password: harry and clicks the login button. This test case only checks the front-end functionality and not the API call because that has not been implemented yet.
 - In summary, Tests 1, 2, and 5 are check the front-end functionality and Tests 3,4 are unit tests for the chat window functions. 
 - All the tests cases ensure that both the front and back ends are correctly connected therefore checks if the app is correctly integrated. 
 - These test files can be found in the FRONT-END branch in the folder Cypress Tests
