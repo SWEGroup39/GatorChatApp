@@ -323,6 +323,7 @@
         - This **GET** function returns all users in the users database.
          - **Example Syntax:**
         ```http://localhost:8080/api/users```
+        - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend.
     
     - **Second Option: Get a Specific User**: 
         - This **GET** function returns a singular user from the users database. 
