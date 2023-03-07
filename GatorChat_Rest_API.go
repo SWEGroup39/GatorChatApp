@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -94,19 +95,52 @@ func getAllMessages(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got All Messages sucessfully.")
 }
 
-// MESSAGE PASSED IN MUST USE "%20" FOR SPACES
-func searchMessage(w http.ResponseWriter, r *http.Request) {
-	log.Println("Searching for messsage (GET)")
+func searchAllConversations(w http.ResponseWriter, r *http.Request) {
+	log.Println("Searching for messsage in every conversation (GET)")
 	w.Header().Set("Content-Type", "application/json")
+
+	var message UserMessage
+	err := json.NewDecoder(r.Body).Decode(&message)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var messages []UserMessage
+
+	// USE REGEX TO FIND MESSAGE THAT IS A WHOLE WORD AND EXISTS EITHER AT THE VERY START, MIDDLE, OR VERY END OF MESSAGE
+	// IT LOOKS FOR MESSAGES THAT HAVE MATCHING WORD AND SURROUNDED BY EITHER A START/END OR A NON-ALPHABETIC CHARACTER
+	// QUOTEMETA USED FOR SPECIAL CHARACTERS LIKE "?"
+	searchTerm := "(^|[^[:alpha:]])" + regexp.QuoteMeta(message.Message) + "([^[:alpha:]]|$)"
+	userMessagesDb.Where("Message RLIKE ?", searchTerm).Find(&messages)
+
+	if len(messages) == 0 {
+		http.Error(w, "No messages found.", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(messages)
+	log.Println("Found message(s) successfully.")
+}
+
+func searchOneConversation(w http.ResponseWriter, r *http.Request) {
+	log.Println("Searching for messsage in one conversation (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	var message UserMessage
+	err := json.NewDecoder(r.Body).Decode(&message)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	params := mux.Vars(r)
 	var messages []UserMessage
 
-	// ADD % SO IT CAN FIND IT ANYWHERE
-	searchTerm := "%" + params["search"] + "%"
+	searchTerm := "(^|[^[:alpha:]])" + regexp.QuoteMeta(message.Message) + "([^[:alpha:]]|$)"
 
-	// USE REGEX TO FIND MESSAGE THAT IS A WHOLE WORD AND EXISTS EITHER AT THE VERY START, MIDDLE, OR VERY END OF MESSAGE
-	userMessagesDb.Where("Message RLIKE CONCAT('(^|\\s)', ? ,'(\\s|$)') OR Message LIKE ?", params["search"], searchTerm).Find(&messages)
+	// FIND MESSAGES IN INSTANCES ONLY WHERE THE ID'S MATCH
+	userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?) AND (Message RLIKE ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"], searchTerm).Find(&messages)
 
 	if len(messages) == 0 {
 		http.Error(w, "No messages found.", http.StatusNotFound)
@@ -370,6 +404,27 @@ func addConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("ID added successfully.")
 }
 
+func deleteUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("Deleting a User (DELETE)")
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	var user UserAccount
+
+	//FIND THE MATCHING USER STRUCT WITH THE MATCHING USER_ID AND DELETE IT
+	result := userAccountsDb.Where("user_id = ?", params["id"]).Unscoped().Delete(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		http.Error(w, "Message not found.", http.StatusNotFound)
+		return
+	}
+	log.Println("User deleted successfully.")
+}
+
 func main() {
 	log.Println("Connecting to API...")
 
@@ -403,7 +458,8 @@ func main() {
 	// GET FUNCTIONS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
-	r.HandleFunc("/api/messages/{search}", searchMessage).Methods("GET")
+	r.HandleFunc("/api/messages/searchAll", searchAllConversations).Methods("GET")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/search", searchOneConversation).Methods("GET")
 
 	// PUT FUNCTIONS
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", editMessage).Methods("PUT")
@@ -415,15 +471,18 @@ func main() {
 
 	// API FUNCTIONS FOR THE USERS DATABASE
 
-	// POST FUNCTIONS
+	// POST FUNCTION
 	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
 
-	// PUT FUNCTIONS
+	// PUT FUNCTION
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
 	r.HandleFunc("/api/users/User", getUser).Methods("GET")
+
+	//DELETE FUNCTION
+	r.HandleFunc("/api/users/{id}", deleteUser).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8080", corsHandler(r)))
 }

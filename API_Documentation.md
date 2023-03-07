@@ -24,11 +24,13 @@
 
 - [Overview of **REST** Functions for Users](#REST_Users)
 
-    - [Overview of  **POST** Commands for Messages](#POST_Users)
+    - [Overview of  **POST** Commands for Users](#POST_Users)
 
-    - [Overview of **PUT** Commands for Messages](#PUT_Users)
+    - [Overview of **PUT** Commands for Users](#PUT_Users)
 
-    - [Overview of **GET** Commands for Messages](#GET_Users)
+    - [Overview of **GET** Commands for Users](#GET_Users)
+
+    - [Overview of **DELETE** Commands for Users](#DELETE_Users)
 
 ---
 <a id="settingUp"></a>
@@ -180,7 +182,7 @@
 - The **GET** command returns messages that have been created with the **POST** request.
 
 ### Syntax
-- There are currently three different **GET** functions available:
+- There are currently four different **GET** functions available:
 
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
@@ -188,15 +190,30 @@
         ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
         - This returns all the messages, in a slice/array, where the first ID was either the sender/receiver and the second ID was either the sender/receiver.
     
-    - **Second Option: Search for Message**: 
+    - **Second Option: Search for Message in All Conversations**: 
         - This **GET** function returns the message object that matches the specified message, if it exists in the messages database.
-        - **NOTE:** This function currently looks for a message across **ALL** conversations. This will be changed in the future to only look in a specific conversation.
+        - This function looks for a message across **ALL** conversations.
         - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
-         - **Example Syntax:**
-        ```http://localhost:8080/api/messages/[MESSAGE]```
-        - If the message contains spaces, use ```%20``` in place of the space.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/messages/searchAll```
+    
+    - **Third Option: Search for Message in One Conversation**: 
+        - This **GET** function returns the message object that matches the specified message, if it exists in the messages database.
+        - This function looks for a message across **ONE** conversation.
+        - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/search```
 
-     - **Third Option: Get ALL Messages**: 
+    - **NOTE:** For the **second** and **third** option, the search message should be placed in the body of the GET request:
+
+        - **Example Syntax:**
+            ```
+                {
+                    "message": "Hi there"
+                }
+            ```
+
+     - **Fourth Option: Get ALL Messages**: 
         - This **GET** function returns every message in the messages database.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages ```
@@ -204,7 +221,7 @@
 
 ### Requirements and Error Messages
 - The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
-- The **"Search for Message"** function must have a valid message that exists in the database, or else "No messages found." will be returned.
+- The **"Search for Message in ALL/ONE Conversation(s)"** functions must have a valid message that exists in the database, or else "No messages found." will be returned.
 - If the **"Get ALL Messages"** function cannot locate any messages, then "Messages not found" will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
 - Otherwise, the message(s) will be returned along with a successful console log message.
@@ -254,10 +271,11 @@
 
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
 
-- **There are currently three REST functions implemented:**
-    - The API supports **POST** to create a user and store it in the users database for later retrieval.
-    - The API supports **PUT** to update an existing user's conversation list in the users database with a new user.
-    - The API supports **GET** to retrieve a user from the users database.
+### **For the Messages database:**
+- The API supports **POST** to create a user and store it in the users database for later retrieval.
+- The API supports **PUT** to update an existing user's conversation list in the users database with a new user.
+- The API supports **GET** to retrieve a user from the users database.
+- The API supports **DELETE** to delete a user from the users database.
 ---
 
 <a id="POST_Users"></a>
@@ -346,6 +364,21 @@
 - The **"Get All Users"** function must have users that exists in the database, or else "Users not found." will be returned.
 - An **Internal Server Error** will be returned for the **"Get a Specific User"** function if it is unable to locate the passed-in user or if there are errors regarding the database connection.
 - Otherwise, the user(s) will be returned along with a successful console log message.
+---
+<a id="DELETE_Users"></a>
+
+### ➜ Overview of  **DELETE** Command for Users
+
+- The **DELETE** command takes in a user and deletes them from the user database.
+
+### Syntax
+- There is currently only one DELETE command, and the syntax is as follows:
+
+- ```http://localhost:8080/users/[USER_ID] ```
+
+### Requirements and Error Messages
+- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
+- Otherwise, the user will be removed from the database along with a "User deleted successfully." console log message.
 ---
 
 [Back to top](#TOC)
