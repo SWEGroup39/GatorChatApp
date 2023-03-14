@@ -149,30 +149,45 @@
 ### ➜ Overview of  **PUT** Command for Messages
 
 - The **PUT** command takes in an input to edit a message already in the messages database.
-- **NOTE:** In its current implementation, this function will edit **ALL** messages with the matching ID's and message. Nonunique messages will all be edited.
 
 ### Syntax
 
-- There is currently only one **PUT** command, and the syntax is as follows:
+- There are currently two **PUT** commands available:
 
-- ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/[ORIGINAL MESSAGE] ```
+    - **First Option: Edit Message Contents**:
+        - This **PUT** function updates an existing message's contents with a new message.
+        - **Example Syntax:**
+        - ```http://localhost:8080/api/messages/[ID] ```
 
-- The required inputs are the Sender ID, the Receiver ID, and the original message that you would like to have changed.
+        - The required input is the unique GORM ID that is within a UserMessage struct.
 
-- The **new** message should be placed in the body of the PUT request.
+        - The **new** message should be placed in the body of the PUT request.
+            - The logic is that, when a user edits a message, that message struct will already be known (through a GET function) and the unique GORM ID can be passed into this function. This ensures that the correct message is beind edited.
 
-    - **Example Syntax:**
-        ```
-            {
-                "message": "Updated message"
-            }
-        ```
+            - **Example Syntax:**
+                ```
+                    {
+                        "message": "Updated message"
+                    }
+                ```
+    <a id="Undo"></a>
+    - **Second Option: Undo a Deleted Message**:
+        - This **PUT** function will undo a user's most recently deleted message. This is accomplished by setting the message's DeletedAt field to be null again.
+        - **Example Syntax:**
+        - ```http://localhost:8080/api/messages/undo/[ID] ```
+
+        - The required input is the user's Sender ID that is within a UserMessage struct.
+
 ### Requirements and Error Messages
-- A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
-- The message with the input Sender ID and Receiver ID must already exist in the messages database to be edited, otherwise an error will be thrown.
-    - If the message-to-change was not located, an error message saying "Message not found." will be returned.
+- For the **Edit Message** function:
+    - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
+    - The message with the input Sender ID and Receiver ID must already exist in the messages database to be edited, otherwise an error will be thrown.
+        - If the message-to-change was not located, an error message saying "Message not found." will be returned.
+    - Otherwise, the updated message object will be returned along with a "Message edited successfully." console log message.
+- For the **Undo Deleted Message** function:
+    - If the message cannot be located in the database, then "Message not found." will be returned.
+    - Otherwise, the message will be reinstated into the database (which can be verified by calling the **Get Conversation** function), the updated message object will be returned, and a successful console log message will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- Otherwise, the updated message object will be returned along with a "Message edited successfully." console log message.
 ---
 
 <a id="GET_Messages"></a>
@@ -182,7 +197,7 @@
 - The **GET** command returns messages that have been created with the **POST** request.
 
 ### Syntax
-- There are currently four different **GET** functions available:
+- There are currently five different **GET** functions available:
 
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
@@ -219,10 +234,16 @@
         ```http://localhost:8080/api/messages ```
         - **NOTE:** _This is more of a testing function rather than a function that would be frequently/practically used._
 
+     - **Fifth Option: Get ALL Deleted Messages**: 
+        - This **GET** function returns every soft deleted message in the messages database.
+        - **Example Syntax:**
+     ```http://localhost:8080/api/deleted ```
+        - **NOTE:** _This is considered a testing function and not for Frontend purposes._
+
 ### Requirements and Error Messages
 - The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
 - The **"Search for Message in ALL/ONE Conversation(s)"** functions must have a valid message that exists in the database, or else "No messages found." will be returned.
-- If the **"Get ALL Messages"** function cannot locate any messages, then "Messages not found" will be returned.
+- If the **"Get ALL Messages/Get ALL Deleted Messages"** function cannot locate any messages, then a message describing how no messages were found will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
 - Otherwise, the message(s) will be returned along with a successful console log message.
 ---
@@ -232,25 +253,25 @@
 ### ➜ Overview of  **DELETE** Command for Messages
 
 - The **DELETE** command deletes messages created with the **POST** request from the messages database.
-- **NOTE:** 
-    - In its current implementation, the ```deleteSpecificMessage``` function  will delete  **ALL** messages with the matching ID's and message. Nonunique messages will all be deleted.
-    - The delete is currently removing the message from the database. It might be changed later to merely update the DeletedAt field so users can undo a delete if they wish (i.e. a soft delete).
 
 ### Syntax
--  There are currently three different **DELETE** functions available:
+-  There are currently four different **DELETE** functions available:
 
      - **First Option: Delete a Specific Message**:
         - This **DELETE** function deletes a specified messaged between a sender and receiver, if it exists in the messages database.
          - **Example Syntax:**
-        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/[MESSAGE]```
-        - This function takes in a Sender ID, Receiver ID, and the message in the conversation that you want deleted.
-        - If the message contains spaces, use ```%20``` in place of the space.
+        ```http://localhost:8080/api/messages/[ID]```
+        - This function takes in the unique GORM ID in a UserMessage struct.
+        - **NOTE:** This function soft deletes a message. In other words, the message still exists, but there is a timestamp in its "DeletedAt" property. It will not appear in the normal GET functions or search functions.
+            - If a specific user deletes a message (e.g. message A), and then deletes another message (e.g. message B), then message A will be hard deleted and unable to be brought back. This is because **a user is only able to bring back their most recently deleted message.**
+                - For information on how to **undo a delete**, [click here](#Undo) to visit the associated PUT function.
 
      - **Second Option: Delete an Entire Conversation**:
         - This **DELETE** function deletes all messages between a sender and receiver, if they have a current conversation.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
         - This function takes in the two IDs of the people whose conversation you want deleted.
+        - **NOTE:** This function "hard" deletes the conversation. In other words, this action cannot be reversed and the conversation will be permanently deleted.
 
      - **Third Option: Delete All Conversations**:
         - This **DELETE** function deletes the entire database of messages.
@@ -258,10 +279,17 @@
         ```http://localhost:8080/api/messages/deleteTable```
         - **NOTE:** _This function is used for testing purposes and is most likely not going to be an implemented function in the Frontend._
 
+    - **Fourth Option: Delete All Deleted Messages**:
+        - This **DELETE** function deletes all messages that are currently **soft deleted**.
+         - **Example Syntax:**
+        ```http://localhost:8080/api/messages/deleteDeleted```
+        - **NOTE:** _This function is used for testing purposes and is not considered a Frontend feature._
+
 ### Requirements and Error Messages
 - The **"Delete a Specific Message"** function must have a valid Sender ID, Receiver ID, and message. Otherwise, "Message not found." will be returned. If the message was found and deleted, then "Message deleted successfully." will be returned.
 - The **"Delete an Entire Conversation"** function must have a valid Sender ID and Receiver ID. If it does not, "Conversation not found." will be returned. If the messages were found and deleted, then "Conversation deleted successfully." will be returned.
 - The **"Delete All Conversations"** function will panic if the table is unable to be truncated/deleted. If it is able to clear the entire table, then "Database deleted successfully." will be returned.
+- The **"Delete All Deleted Messages"** function requires there to be at least one deleted message in the database. If there is not, then "Messages not found." will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
 ---
 
@@ -341,13 +369,14 @@
         - This **GET** function returns all users in the users database.
          - **Example Syntax:**
         ```http://localhost:8080/api/users```
-        - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend.
+        - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend._
     
     - **Second Option: Get a Specific User**: 
         - This **GET** function returns a singular user from the users database.
         - It will find a user that matches the credentials.
         - **Example Syntax:**
         ```http://localhost:8080/api/users/User```
+         - **NOTE:** User in this case is the word "User". In cases where the syntax involves filling in a parameter, brackets ([]) will surround the word.
          - For get, the information passed in must be through the request **body**.
             - The required input is the user's username and password.
             

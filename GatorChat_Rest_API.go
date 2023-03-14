@@ -73,7 +73,7 @@ func getConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got Conversation successfully.")
 }
 
-// GETS ALL MESSAGES IN DATABASE
+// GETS ALL NON-DELETED MESSAGES IN DATABASE
 func getAllMessages(w http.ResponseWriter, r *http.Request) {
 	log.Println("Getting All Messages (GET)")
 	w.Header().Set("Content-Type", "application/json")
@@ -95,6 +95,48 @@ func getAllMessages(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got All Messages sucessfully.")
 }
 
+// TEST FUNCTION TO SEE SOFT DELETED MESSAGES
+func getDeletedMessages(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting Deleted Messages (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	var messages []UserMessage
+	result := userMessagesDb.Unscoped().Where("deleted_at IS NOT NULL").Find(&messages)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(messages) == 0 {
+		http.Error(w, "Deleted messages not found.", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(messages)
+	log.Println("Got Deleted Messages successfully.")
+}
+
+// TEST FUNCTION TO REMOVE ALL SOFT DELETED MESSAGES
+func deleteDeletedMessages(w http.ResponseWriter, r *http.Request) {
+	log.Println("Deleting Deleted Messages (DELETE)")
+	w.Header().Set("Content-Type", "application/json")
+
+	var messages []UserMessage
+	result := userMessagesDb.Unscoped().Where("deleted_at IS NOT NULL").Unscoped().Delete(&messages)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		http.Error(w, "Messages not found.", http.StatusNotFound)
+		return
+	}
+	log.Println("Message(s) deleted successfully.")
+}
+
 func searchAllConversations(w http.ResponseWriter, r *http.Request) {
 	log.Println("Searching for messsage in every conversation (GET)")
 	w.Header().Set("Content-Type", "application/json")
@@ -111,7 +153,8 @@ func searchAllConversations(w http.ResponseWriter, r *http.Request) {
 	// USE REGEX TO FIND MESSAGE THAT IS A WHOLE WORD AND EXISTS EITHER AT THE VERY START, MIDDLE, OR VERY END OF MESSAGE
 	// IT LOOKS FOR MESSAGES THAT HAVE MATCHING WORD AND SURROUNDED BY EITHER A START/END OR A NON-ALPHABETIC CHARACTER
 	// QUOTEMETA USED FOR SPECIAL CHARACTERS LIKE "?"
-	searchTerm := "(^|[^[:alpha:]])" + regexp.QuoteMeta(message.Message) + "([^[:alpha:]]|$)"
+	searchTerm := "(^|[^[:alnum:]])" + regexp.QuoteMeta(message.Message) + "([^[:alnum:]]*|$)"
+
 	userMessagesDb.Where("Message RLIKE ?", searchTerm).Find(&messages)
 
 	if len(messages) == 0 {
@@ -209,7 +252,7 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 // UPDATES ONLY THE MESSAGE FIELD IN THE ENTRY
-// REQUEST NEEDS TO PASS IN SENDER ID, RECEIVER ID, AND MESSAGE
+// REQUEST NEEDS TO PASS IN UNIQUE GORM ID
 func editMessage(w http.ResponseWriter, r *http.Request) {
 	log.Println("Editing a Message (PUT)")
 	w.Header().Set("Content-Type", "application/json")
@@ -222,7 +265,7 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	result := userMessagesDb.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Update("Message", message.Message)
+	result := userMessagesDb.Model(&UserMessage{}).Where("id = ?", params["id"]).Update("Message", message.Message)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -235,7 +278,7 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// GET THE ENTRY AGAIN (WITH THE UPDATED MESSAGE) TO RETURN BACK TO THE REQUESTER
-	userMessagesDb.Model(&UserMessage{}).Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], message.Message).First(&message)
+	userMessagesDb.Model(&UserMessage{}).Where("id = ?", params["id"]).First(&message)
 
 	json.NewEncoder(w).Encode(message)
 	log.Println("Message edited successfully.")
@@ -263,14 +306,18 @@ func deleteConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Conversation deleted successfully.")
 }
 
-// HARD DELETES A SPECIFIC MESSAGE BASED ON SENDER ID, USER ID, AND THE SPECIFIC MESSAGE
+// HARD DELETES A SPECIFIC MESSAGE BASED ON UNIQUE GORM ID
 func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
 	log.Println("Deleting a Message (DELETE)")
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
+
+	checkRecentlyDeleted(params["id"], w, r)
+
+	// NOW SOFT DELETE THIS MESSAGE AS IT IS NOW THE MOST RECENTLY DELETED MESSAGE
 	var userMessage UserMessage
-	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ? AND message = ?", params["id_1"], params["id_2"], params["inputMessage"]).Unscoped().Delete(&userMessage)
+	result := userMessagesDb.Where("id = ?", params["id"]).Delete(&userMessage)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -282,6 +329,77 @@ func deleteSpecificMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Message deleted successfully.")
+}
+
+// INTERNAL FUNCTION, NOT REALLY A CRUD OPERATION
+func checkRecentlyDeleted(gormID string, w http.ResponseWriter, r *http.Request) {
+	log.Println("Checking If User Already Has Deleted Message (INTERNAL FUNCTION)")
+	w.Header().Set("Content-Type", "application/json")
+	// FIRST, CHECK IF THE SENDING USER (DERIVED FROM THE GORM ID'S MESSAGE) ALREADY HAS A STORED DELETED MESSAGE
+	var user UserMessage
+
+	result := userMessagesDb.Where("id = ?", gormID).Find(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var deletedMessage UserMessage
+
+	result = userMessagesDb.Unscoped().Where("deleted_at IS NOT NULL AND Sender_ID = ?", user.Sender_ID).Find(&deletedMessage)
+
+	// IF THEY DO, THEN HARD DELETE IT AS ONE USER CAN ONLY UNDO THEIR MOST RECENTLY DELETED MESSAGE
+	if result.RowsAffected != 0 {
+		result = userMessagesDb.Unscoped().Delete(&deletedMessage)
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+		log.Println("Found a previously stored deleted message and permanently deleted it.")
+	}
+}
+
+func undoDelete(w http.ResponseWriter, r *http.Request) {
+	log.Println("Undoing a Delete (PUT)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	var message UserMessage
+
+	result := userMessagesDb.Unscoped().Where("Sender_ID = ? AND Deleted_At IS NOT NULL", params["id"]).Find(&message)
+
+	var ID = message.ID
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// CHANGE THE MESSAGE ID'S DELETEDAT TO NULL TO BRING IT BACK
+	result = userMessagesDb.Model(&UserMessage{}).Unscoped().Where("Sender_ID = ? AND Deleted_At IS NOT NULL", params["id"]).Update("Deleted_At", nil)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		http.Error(w, "Message not found.", http.StatusNotFound)
+		return
+	}
+
+	// LOOK FOR THE MESSAGE AGAIN TO RETURN IT
+	result = userMessagesDb.Unscoped().Where("id = ?", ID).Find(&message)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(message)
+	log.Println("Message brought back successfully.")
 }
 
 func deleteTable(w http.ResponseWriter, r *http.Request) {
@@ -444,30 +562,27 @@ func main() {
 
 	corsHandler := cors.Default().Handler
 
-	// AUTO MIGRATE CURRENTLY NOT WORKING...
-	// err = db.AutoMigrate(&UserMessage{})
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
 	// API FUNCTIONS FOR THE MESSAGES DATABASE
 
 	// POST FUNCTIONS
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
 
 	// GET FUNCTIONS
-	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
 	r.HandleFunc("/api/messages/searchAll", searchAllConversations).Methods("GET")
+	r.HandleFunc("/api/messages/deleted", getDeletedMessages).Methods("GET")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/search", searchOneConversation).Methods("GET")
 
 	// PUT FUNCTIONS
-	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", editMessage).Methods("PUT")
+	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")
+	r.HandleFunc("/api/messages/undo/{id}", undoDelete).Methods("PUT")
 
 	// DELETE FUNCTIONS
-	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteConversation).Methods("DELETE")
-	r.HandleFunc("/api/messages/{id_1}/{id_2}/{inputMessage}", deleteSpecificMessage).Methods("DELETE")
+	r.HandleFunc("/api/messages/deleteDeleted", deleteDeletedMessages).Methods("DELETE")
 	r.HandleFunc("/api/messages/deleteTable", deleteTable).Methods("DELETE")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteConversation).Methods("DELETE")
+	r.HandleFunc("/api/messages/{id}", deleteSpecificMessage).Methods("DELETE")
 
 	// API FUNCTIONS FOR THE USERS DATABASE
 
