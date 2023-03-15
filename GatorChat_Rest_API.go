@@ -42,6 +42,8 @@ type UserAccount struct {
 	Password string `json:"password"`
 	// THE USER'S ID
 	User_ID string `json:"user_id"`
+	// THE USER'S EMAIL ADDRESS
+	Email string `json:"email"`
 	// A SLICE OF USER ID'S THAT REPRESENT THE PEOPLE THEY ARE IN A CURRENT CONVERSATION WITH
 	// JSON.RAWMESSAGE IS A TYPE THAT ALLOWS FOR ARRAYS OF STRINGS
 	Current_Conversations json.RawMessage `json:"current_conversations"`
@@ -421,6 +423,14 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	// SEARCHES IF THE USER EMAIL ALREADY EXISTS AND GIVES AN ERROR IF IT DOES
+	dup := userAccountsDb.Model(&UserAccount{}).Where("email = ?", userAccount.Email).First(&userAccount)
+	if dup.Error != nil {
+		http.Error(w, dup.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	result := userAccountsDb.Create(&userAccount)
 
 	if result.Error != nil {
