@@ -94,7 +94,7 @@
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
 
 ### **For the Messages database:**
-- The API supports **POST** to create a message and store it in a messages database for later retrieval.
+- The API supports **POST** to create a message and store it in a messages database for later retrieval. **POST** is also used for functions that require passing in information through the body.
 - The API supports **PUT** to update an existing message in the messages database with a new message.
 - The API supports **GET** to retrieve messages from the messages database based on certain parameters.
 - The API supports **DELETE** to remove messages from the messages database that are no longer needed.
@@ -104,15 +104,19 @@
 
 ### ➜ Overview of  **POST** Command for Messages
 
-- The **POST** command takes in an input and creates a new message in the messages database.
+- The first **POST** command takes in an input and creates a new message in the messages database. The second and third focus on message retrieval. _While the remaining two options seem more like a "GET", it is not possible to send a GET request with information in the body. Therefore, a POST is used._
 
 ### Syntax
-- There is currently only one POST command, and the syntax is as follows:
 
-- ```http://localhost:8080/api/messages ```
+- There are currently three POST commands, available:
 
-    - For post, the information passed in must be through the request **body**.
-    - The required inputs are a unique message ID number, a message string, a sender ID, and a receiver ID.
+     - **First Option: Create a Message**: 
+        - This **POST** function creates a message object in the messages database and returns the object back to the requester.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/messages ```
+
+        - For post, the information passed in must be through the request **body**.
+        - The required inputs are a unique message ID number, a message string, a sender ID, and a receiver ID.
     
         - **Example Syntax:**
             ```
@@ -126,8 +130,31 @@
                     "receiver_id": "4321"
                 }
             ```
-- Input **"null"** for the "CreatedAt", "UpdatedAt", and "DeletedAt" date inputs, these will be automatically filled in.
-- The message ID number cannot be reused unless the previous message with that number was hard-deleted.
+    - Input **"null"** for the "CreatedAt", "UpdatedAt", and "DeletedAt" date inputs, these will be automatically filled in.
+    - The message ID number cannot be reused unless the previous message with that number was hard-deleted.
+    
+    - **Second Option: Search for Message in All Conversations**: 
+        - This **POST** function returns the message object that matches the specified message, if it exists in the messages database.
+        - This function looks for a message across **ALL** conversations.
+        - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/messages/searchAll```
+    
+    - **Third Option: Search for Message in One Conversation**: 
+        - This **POST** function returns the message object that matches the specified message, if it exists in the messages database.
+        - This function looks for a message across **ONE** conversation.
+        - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/search```
+
+    - **NOTE:** For the **second** and **third** option, the search message should be placed in the body of the GET request:
+
+        - **Example Syntax:**
+            ```
+                {
+                    "message": "Hi there"
+                }
+            ```
 
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
@@ -140,8 +167,9 @@
 - If the **Sender ID** is not 4 digits long, the Invalid Sender ID (NOT FOUR DIGITS) message will be returned.
 - If the **Receiver ID** is not 4 digits long, the Invalid Receiver ID (NOT FOUR DIGITS) message will be returned.
 - If a message is posted with no actual text in the message the "Invalid Message: Messages cannot be empty." message will be returned.
+- The **"Search for Message in ALL/ONE Conversation(s)"** functions must have a valid message that exists in the database, or else "No messages found." will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- Otherwise, the newly created message object will be returned along with a "Message created successfully." console log message.
+- Otherwise, either a single user object or a slice of user objects will be returned along with a successful console log message.
 ---
 
 <a id="PUT_Messages"></a>
@@ -157,7 +185,7 @@
     - **First Option: Edit Message Contents**:
         - This **PUT** function updates an existing message's contents with a new message.
         - **Example Syntax:**
-        - ```http://localhost:8080/api/messages/[ID] ```
+        ```http://localhost:8080/api/messages/[ID] ```
 
         - The required input is the unique GORM ID that is within a UserMessage struct.
 
@@ -174,7 +202,7 @@
     - **Second Option: Undo a Deleted Message**:
         - This **PUT** function will undo a user's most recently deleted message. This is accomplished by setting the message's DeletedAt field to be null again.
         - **Example Syntax:**
-        - ```http://localhost:8080/api/messages/undo/[ID] ```
+        ```http://localhost:8080/api/messages/undo/[ID] ```
 
         - The required input is the user's Sender ID that is within a UserMessage struct.
 
@@ -197,52 +225,28 @@
 - The **GET** command returns messages that have been created with the **POST** request.
 
 ### Syntax
-- There are currently five different **GET** functions available:
+- There are currently three different **GET** functions available:
 
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
         - This returns all the messages, in a slice/array, where the first ID was either the sender/receiver and the second ID was either the sender/receiver.
-    
-    - **Second Option: Search for Message in All Conversations**: 
-        - This **GET** function returns the message object that matches the specified message, if it exists in the messages database.
-        - This function looks for a message across **ALL** conversations.
-        - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
-        - **Example Syntax:**
-        ```http://localhost:8080/api/messages/searchAll```
-    
-    - **Third Option: Search for Message in One Conversation**: 
-        - This **GET** function returns the message object that matches the specified message, if it exists in the messages database.
-        - This function looks for a message across **ONE** conversation.
-        - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
-        - **Example Syntax:**
-        ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/search```
 
-    - **NOTE:** For the **second** and **third** option, the search message should be placed in the body of the GET request:
-
-        - **Example Syntax:**
-            ```
-                {
-                    "message": "Hi there"
-                }
-            ```
-
-     - **Fourth Option: Get ALL Messages**: 
+     - **Second Option: Get ALL Messages**: 
         - This **GET** function returns every message in the messages database.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages ```
         - **NOTE:** _This is more of a testing function rather than a function that would be frequently/practically used._
 
-     - **Fifth Option: Get ALL Deleted Messages**: 
+     - **Third Option: Get ALL Deleted Messages**: 
         - This **GET** function returns every soft deleted message in the messages database.
         - **Example Syntax:**
-     ```http://localhost:8080/api/deleted ```
+        ```http://localhost:8080/api/deleted ```
         - **NOTE:** _This is considered a testing function and not for Frontend purposes._
 
 ### Requirements and Error Messages
 - The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
-- The **"Search for Message in ALL/ONE Conversation(s)"** functions must have a valid message that exists in the database, or else "No messages found." will be returned.
 - If the **"Get ALL Messages/Get ALL Deleted Messages"** function cannot locate any messages, then a message describing how no messages were found will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
 - Otherwise, the message(s) will be returned along with a successful console log message.
@@ -300,7 +304,7 @@
 - The GatorChat API is built upon the **REST** functions **POST**, **PUT**, **GET**, and **DELETE**.
 
 ### **For the Messages database:**
-- The API supports **POST** to create a user and store it in the users database for later retrieval.
+- The API supports **POST** to create a user and store it in the users database for later retrieval. **POST** is also used for functions that require passing in information through the body.
 - The API supports **PUT** to update an existing user's conversation list in the users database with a new user.
 - The API supports **GET** to retrieve a user from the users database.
 - The API supports **DELETE** to delete a user from the users database.
@@ -310,31 +314,57 @@
 
 ### ➜ Overview of  **POST** Command for Users
 
-- The **POST** command takes in an input and creates a new user in the users database.
+- The first **POST** command takes in an input and creates a new user in the users database. The second command is focused on a retrieving a specific user. _The second option appears to be more of a "GET", but a "GET" does not allow for a body request. Therefore a POST is used._
 
 ### Syntax
-- There is currently only one POST command, and the syntax is as follows:
 
-- ```http://localhost:8080/api/users ```
+- There are currently two POST commands available:
 
-    - For post, the information passed in must be through the request **body**.
-    - The required inputs are a username, a password, a user ID, and a list of current conversations that the user is in (typically left blank).
-    
+    - **First Option: Create a User:**
+        - This **POST** function creates a user in the users database and returns the user object back to the requester.
         - **Example Syntax:**
-            ```
-                {
-                    "username": "user",
-                    "password": "pass",
-                    "user_id": "1234",
-                    "current_conversations": ["4321", "5678"]
-                }
-            ```
-- **NOTE:** Have ```"current_conversations"``` be ```[]``` to have any empty slice.
+        ```http://localhost:8080/api/users ```
+
+        - For post, the information passed in must be through the request **body**.
+        - The required inputs are a username, a password, a user ID, an email, and a list of current conversations that the user is in (typically left blank).
+        
+            - **Example Syntax:**
+                ```
+                    {
+                        "username": "user",
+                        "password": "pass",
+                        "user_id": "1234",
+                        "email": "example@gmail.com",
+                        "current_conversations": ["4321", "5678"]
+                    }
+                    ```
+        - **NOTE:** Have ```"current_conversations"``` be ```[]``` to have any empty slice.
+
+    - **Second Option: Get a Specific User**: 
+        - This **POST** function returns a singular user from the users database.
+        - It will find a user that matches the credentials.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/users/User```
+         - **NOTE:** User in this case is the word "User". In cases where the syntax involves filling in a parameter, brackets ([]) will surround the word.
+         - For get, the information passed in must be through the request **body**.
+            - The required input is the user's username and password.
+            
+                - **Example Syntax:**
+                    ```
+                        {
+                            "username": "user",
+                            "password": "pass"
+                        }
+                    ```
 
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
+- The **Create User** function must have:
+    - A **unique**, **four-digit** ID. Otherwise, a 500 Internal Server Error will be returned.
+    - An email that contains an "**@**" symbol and a **domain name** (e.g. ".com" or ".edu"). Otherwise, a 400 Bad Request will be returned.
+        - The email must also be unique, in the sense that no other existing accounts currently have that email. A 
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- Otherwise, the newly created user object will be returned along with a "User account created successfully." console log message.
+- Otherwise, a user object will be returned along with a successful console log message.
 ---
 
 <a id="PUT_Users"></a>
@@ -363,35 +393,17 @@
 - The **GET** command returns users that have been created with the **POST** request.
 
 ### Syntax
-- There are currently two different **GET** functions available:
+- There is currently one **GET** function available:
 
     - **First Option: Get All Users**:
         - This **GET** function returns all users in the users database.
          - **Example Syntax:**
         ```http://localhost:8080/api/users```
         - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend._
-    
-    - **Second Option: Get a Specific User**: 
-        - This **GET** function returns a singular user from the users database.
-        - It will find a user that matches the credentials.
-        - **Example Syntax:**
-        ```http://localhost:8080/api/users/User```
-         - **NOTE:** User in this case is the word "User". In cases where the syntax involves filling in a parameter, brackets ([]) will surround the word.
-         - For get, the information passed in must be through the request **body**.
-            - The required input is the user's username and password.
-            
-                - **Example Syntax:**
-                    ```
-                        {
-                            "username": "user",
-                            "password": "pass"
-                        }
-                    ```
 
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
 - The **"Get All Users"** function must have users that exists in the database, or else "Users not found." will be returned.
-- An **Internal Server Error** will be returned for the **"Get a Specific User"** function if it is unable to locate the passed-in user or if there are errors regarding the database connection.
 - Otherwise, the user(s) will be returned along with a successful console log message.
 ---
 <a id="DELETE_Users"></a>

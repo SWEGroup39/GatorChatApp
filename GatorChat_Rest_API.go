@@ -32,6 +32,8 @@ type UserMessage struct {
 	Sender_ID string `json:"sender_id"`
 	//USER ID OF WHOEVER RECEIVED THE MESSAGE
 	Receiver_ID string `json:"receiver_id"`
+
+	//MAYBE ADD A USERMESSAGE SLICE TO KEEP TRACK OF GROUP CHATS?
 }
 
 // USER STRUCT FOR EACH USER TABLE ENTRY
@@ -167,7 +169,7 @@ func searchAllConversations(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchOneConversation(w http.ResponseWriter, r *http.Request) {
-	log.Println("Searching for messsage in one conversation (GET)")
+	log.Println("Searching for messsage in one conversation (POST)")
 	w.Header().Set("Content-Type", "application/json")
 
 	var message UserMessage
@@ -424,10 +426,41 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// CHECK IF THE USER_ID IS NUMERIC AND FOUR DIGITS
+	_, err = strconv.Atoi(userAccount.User_ID)
+
+	if err != nil {
+		http.Error(w, "Invalid User_ID (NOT NUMERIC): "+userAccount.User_ID+" is not a valid ID.", http.StatusBadRequest)
+		return
+	}
+
+	if len(userAccount.User_ID) != 4 {
+		http.Error(w, "Invalid User_ID (NOT FOUR DIGITS): "+userAccount.User_ID+" is not a valid ID.", http.StatusBadRequest)
+		return
+	}
+
+	// CHECK IF THE EMAIL FITS THE EMAIL REGEX
+	emailPattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	regex, err := regexp.Compile(emailPattern)
+
+	if err != nil {
+		http.Error(w, "Problem with compiling regex pattern.", http.StatusBadRequest)
+		return
+	}
+
+	if !regex.MatchString(userAccount.Email) {
+		http.Error(w, "Invalid Email: "+userAccount.Email+" is not a valid email address.", http.StatusBadRequest)
+		return
+	}
+
 	// SEARCHES IF THE USER EMAIL ALREADY EXISTS AND GIVES AN ERROR IF IT DOES
-	dup := userAccountsDb.Model(&UserAccount{}).Where("email = ?", userAccount.Email).First(&userAccount)
-	if dup.Error != nil {
-		http.Error(w, dup.Error.Error(), http.StatusInternalServerError)
+	var dupAccount UserAccount
+
+	dup := userAccountsDb.Where("email = ?", userAccount.Email).First(&dupAccount)
+
+	if dup.RowsAffected != 0 {
+		http.Error(w, "Email already exists", http.StatusBadRequest)
 		return
 	}
 
@@ -464,7 +497,7 @@ func getAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("Getting a User (GET)")
+	log.Println("Getting a User (POST)")
 	w.Header().Set("Content-Type", "application/json")
 
 	var user UserAccount
@@ -574,13 +607,13 @@ func main() {
 
 	// POST FUNCTIONS
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/search", searchOneConversation).Methods("POST") //
+	r.HandleFunc("/api/messages/searchAll", searchAllConversations).Methods("POST")           //
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
-	r.HandleFunc("/api/messages/searchAll", searchAllConversations).Methods("GET")
 	r.HandleFunc("/api/messages/deleted", getDeletedMessages).Methods("GET")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
-	r.HandleFunc("/api/messages/{id_1}/{id_2}/search", searchOneConversation).Methods("GET")
 
 	// PUT FUNCTIONS
 	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")
@@ -594,15 +627,15 @@ func main() {
 
 	// API FUNCTIONS FOR THE USERS DATABASE
 
-	// POST FUNCTION
+	// POST FUNCTIONS
 	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
+	r.HandleFunc("/api/users/User", getUser).Methods("POST") //
 
 	// PUT FUNCTION
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
-	r.HandleFunc("/api/users/User", getUser).Methods("GET")
 
 	//DELETE FUNCTION
 	r.HandleFunc("/api/users/{id}", deleteUser).Methods("DELETE")

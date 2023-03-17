@@ -195,7 +195,7 @@ func TestSearchMessageAll(t *testing.T) {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	r, err := http.NewRequest("GET", "/messages/searchAll", bytes.NewBuffer(requestBody))
+	r, err := http.NewRequest("POST", "/messages/searchAll", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -261,7 +261,7 @@ func TestSearchMessage(t *testing.T) {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	r, err := http.NewRequest("GET", "/messages/0001/0002/search", bytes.NewBuffer(requestBody))
+	r, err := http.NewRequest("POST", "/messages/0001/0002/search", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -645,7 +645,7 @@ func TestUndoDelete(t *testing.T) {
 // 		t.Fatalf("Failed to marshal message: %s", err)
 // 	}
 
-// 	r, err := http.NewRequest("GET", "/users/User", bytes.NewBuffer(requestBody))
+// 	r, err := http.NewRequest("POST", "/users/User", bytes.NewBuffer(requestBody))
 // 	if err != nil {
 // 		t.Fatalf("Failed to create request: %s", err)
 // 	}
