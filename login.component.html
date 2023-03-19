@@ -1,0 +1,37 @@
+
+<!-- <mat-toolbar color="primary" class="mat-elevation-z8">
+ <span ><mat-icon class="icon">chat</mat-icon>&nbsp; &nbsp;GatorChat</span>
+  <div class="space"></div>
+  <a mat-button class="navBarButtons" >Home</a>
+  <a mat-button class="navBarButtons" >About Us</a>
+  <a mat-button class="navBarButtons">Services</a>
+  <a mat-raised-button color="accent" class="navBarButtons">Sign Up</a>
+
+</mat-toolbar> -->
+<router-outlet></router-outlet>
+
+<div  fxLayoutAlign="center center" fxFlexFill class="outline">
+  
+  <div fxLayoutAlign="center center" fxFlexFill class="main-div">
+    <mat-card fxFlex="25">
+      <mat-toolbar  color="primary" style="text-align: justify; ">Login Page</mat-toolbar>
+      <form fxLayoutAlign="stretch" fxLayout="column" class="login-form" (ngSubmit)="onGetUser()" #myForm="ngForm">
+        <mat-form-field>
+          <input class="validate" matInput placeholder="Username" name = "username" [(ngModel)]="user.username" #UserName="ngModel" required>
+          
+        </mat-form-field>
+  
+        <mat-form-field>
+          <input  class="validate" matInput type="password" placeholder="Password" name = "password" [(ngModel)]="user.password" #Password="ngModel" required>
+        </mat-form-field>
+        <button mat-raised-button [disabled]="!myForm.valid" type="submit" color="primary" >Login</button>
+        
+       
+      </form>
+      <p style="align-self: center;">New User? &nbsp;<a routerLink="/signup">Sign up</a></p>
+    </mat-card>
+  </div>
+ 
+  
+</div>
+
