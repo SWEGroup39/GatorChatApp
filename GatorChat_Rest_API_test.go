@@ -133,11 +133,27 @@ func deleteTestMessage(messageID uint) {
 // THIS TEST RETRIEVES ALL THE MESSAGES BETWEEN TWO PEOPLE
 func TestGetConversation(t *testing.T) {
 
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
+	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
+	rand.Seed(time.Now().UnixNano())
+	var s1 int = rand.Intn(10)
+	var s2 int = rand.Intn(10)
+	var s3 int = rand.Intn(10)
+	var s4 int = rand.Intn(10)
+	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
 
-	secondID, _ := createTestMessage("0002", "0001", "Testing_2")
+	var r1 int = rand.Intn(10)
+	var r2 int = rand.Intn(10)
+	var r3 int = rand.Intn(10)
+	var r4 int = rand.Intn(10)
+	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
 
-	r, err := http.NewRequest("GET", "/messages/0001/0002", nil)
+	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
+
+	secondID, _ := createTestMessage(rcvr, sndr, "Testing_2")
+
+	url := "/messages/" + sndr + "/" + rcvr
+
+	r, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -145,8 +161,8 @@ func TestGetConversation(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": sndr,
+		"id_2": rcvr,
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -171,8 +187,8 @@ func TestGetConversation(t *testing.T) {
 				UpdatedAt: responseStruct[0].UpdatedAt,
 				DeletedAt: responseStruct[0].DeletedAt,
 			},
-			Sender_ID:   "0001",
-			Receiver_ID: "0002",
+			Sender_ID:   sndr,
+			Receiver_ID: rcvr,
 			Message:     "Testing",
 		},
 		{
@@ -182,8 +198,8 @@ func TestGetConversation(t *testing.T) {
 				UpdatedAt: responseStruct[1].UpdatedAt,
 				DeletedAt: responseStruct[1].DeletedAt,
 			},
-			Sender_ID:   "0002",
-			Receiver_ID: "0001",
+			Sender_ID:   rcvr,
+			Receiver_ID: sndr,
 			Message:     "Testing_2",
 		},
 	}
@@ -265,8 +281,36 @@ func TestSearchMessageAll(t *testing.T) {
 }
 
 func TestSearchMessage(t *testing.T) {
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
-	secondID, _ := createTestMessage("0003", "0004", "Testing")
+	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
+	rand.Seed(time.Now().UnixNano())
+	var s1 int = rand.Intn(10)
+	var s2 int = rand.Intn(10)
+	var s3 int = rand.Intn(10)
+	var s4 int = rand.Intn(10)
+	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
+
+	var r1 int = rand.Intn(10)
+	var r2 int = rand.Intn(10)
+	var r3 int = rand.Intn(10)
+	var r4 int = rand.Intn(10)
+	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
+
+	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
+	rand.Seed(time.Now().UnixNano())
+	var os1 int = rand.Intn(10)
+	var os2 int = rand.Intn(10)
+	var os3 int = rand.Intn(10)
+	var os4 int = rand.Intn(10)
+	osndr := strconv.Itoa(os1) + strconv.Itoa(os2) + strconv.Itoa(os3) + strconv.Itoa(os4)
+
+	var or1 int = rand.Intn(10)
+	var or2 int = rand.Intn(10)
+	var or3 int = rand.Intn(10)
+	var or4 int = rand.Intn(10)
+	orcvr := strconv.Itoa(or1) + strconv.Itoa(or2) + strconv.Itoa(or3) + strconv.Itoa(or4)
+
+	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
+	secondID, _ := createTestMessage(osndr, orcvr, "Testing")
 
 	searchMes := UserMessage{
 		Message: "Testing",
@@ -277,7 +321,9 @@ func TestSearchMessage(t *testing.T) {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	r, err := http.NewRequest("POST", "/messages/0001/0002/search", bytes.NewBuffer(requestBody))
+	url := "/messages/" + sndr + "/" + rcvr + "/" + "search"
+
+	r, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -285,8 +331,8 @@ func TestSearchMessage(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": sndr,
+		"id_2": rcvr,
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -311,8 +357,8 @@ func TestSearchMessage(t *testing.T) {
 				UpdatedAt: responseStruct[0].UpdatedAt,
 				DeletedAt: responseStruct[0].DeletedAt,
 			},
-			Sender_ID:   "0001",
-			Receiver_ID: "0002",
+			Sender_ID:   sndr,
+			Receiver_ID: rcvr,
 			Message:     "Testing",
 		},
 	}
