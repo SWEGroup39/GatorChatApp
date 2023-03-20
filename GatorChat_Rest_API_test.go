@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -16,13 +18,27 @@ import (
 
 // THIS TESTS THE ABILITY TO CREATE A MESSAGE IN THE MESSAGES DATABASE
 func TestCreateMessage(t *testing.T) {
+	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
+	rand.Seed(time.Now().UnixNano())
+	var s1 int = rand.Intn(10)
+	var s2 int = rand.Intn(10)
+	var s3 int = rand.Intn(10)
+	var s4 int = rand.Intn(10)
+	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
+
+	var r1 int = rand.Intn(10)
+	var r2 int = rand.Intn(10)
+	var r3 int = rand.Intn(10)
+	var r4 int = rand.Intn(10)
+	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
+
 	// CREATE A NEW USERMESSAGE STRUCT THAT WILL BE USED TO TEST THE POST
 	message := UserMessage{
 		Model: gorm.Model{
 			ID: 9900,
 		},
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
+		Sender_ID:   sndr,
+		Receiver_ID: rcvr,
 		Message:     "Hello",
 	}
 
@@ -71,8 +87,8 @@ func TestCreateMessage(t *testing.T) {
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
+		Sender_ID:   sndr,
+		Receiver_ID: rcvr,
 		Message:     "Hello",
 	}
 
@@ -312,7 +328,21 @@ func TestSearchMessage(t *testing.T) {
 
 // THIS TEST EDITS A CREATED MESSAGE
 func TestEditMessage(t *testing.T) {
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
+	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
+	rand.Seed(time.Now().UnixNano())
+	var s1 int = rand.Intn(10)
+	var s2 int = rand.Intn(10)
+	var s3 int = rand.Intn(10)
+	var s4 int = rand.Intn(10)
+	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
+
+	var r1 int = rand.Intn(10)
+	var r2 int = rand.Intn(10)
+	var r3 int = rand.Intn(10)
+	var r4 int = rand.Intn(10)
+	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
+
+	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
 
 	newMes := UserMessage{
 		Message: "Update",
@@ -357,8 +387,8 @@ func TestEditMessage(t *testing.T) {
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
+		Sender_ID:   sndr,
+		Receiver_ID: rcvr,
 		Message:     "Update",
 	}
 
@@ -449,8 +479,22 @@ func TestDeleteConversation(t *testing.T) {
 }
 
 func TestUndoDelete(t *testing.T) {
+	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
+	rand.Seed(time.Now().UnixNano())
+	var s1 int = rand.Intn(10)
+	var s2 int = rand.Intn(10)
+	var s3 int = rand.Intn(10)
+	var s4 int = rand.Intn(10)
+	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
+
+	var r1 int = rand.Intn(10)
+	var r2 int = rand.Intn(10)
+	var r3 int = rand.Intn(10)
+	var r4 int = rand.Intn(10)
+	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
+
 	// CREATE A MESSAGE
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
+	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
 
 	// DELETE IT
 	var userMessage UserMessage
@@ -461,7 +505,7 @@ func TestUndoDelete(t *testing.T) {
 	}
 
 	// CALL THE UNDO FUNCTION
-	url := "/messages/undo/0001"
+	url := "/messages/undo/" + sndr
 	r, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
@@ -470,7 +514,7 @@ func TestUndoDelete(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id": "0001",
+		"id": sndr,
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -499,8 +543,8 @@ func TestUndoDelete(t *testing.T) {
 				Valid: false,
 			},
 		},
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
+		Sender_ID:   sndr,
+		Receiver_ID: rcvr,
 		Message:     "Testing",
 	}
 
