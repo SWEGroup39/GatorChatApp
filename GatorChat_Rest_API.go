@@ -507,7 +507,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := userAccountsDb.Model(&UserAccount{}).Where("username = ? AND password = ?", user.Username, user.Password).First(&user)
+	result := userAccountsDb.Model(&UserAccount{}).Where("email = ? AND password = ?", user.Email, user.Password).First(&user)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -578,7 +578,7 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if result.RowsAffected == 0 {
-		http.Error(w, "Message not found.", http.StatusNotFound)
+		http.Error(w, "User not found.", http.StatusNotFound)
 		return
 	}
 	log.Println("User deleted successfully.")
@@ -607,8 +607,8 @@ func main() {
 
 	// POST FUNCTIONS
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
-	r.HandleFunc("/api/messages/{id_1}/{id_2}/search", searchOneConversation).Methods("POST") //
-	r.HandleFunc("/api/messages/searchAll", searchAllConversations).Methods("POST")           //
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/search", searchOneConversation).Methods("POST")
+	r.HandleFunc("/api/messages/searchAll", searchAllConversations).Methods("POST")
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
@@ -629,7 +629,7 @@ func main() {
 
 	// POST FUNCTIONS
 	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
-	r.HandleFunc("/api/users/User", getUser).Methods("POST") //
+	r.HandleFunc("/api/users/User", getUser).Methods("POST")
 
 	// PUT FUNCTION
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")

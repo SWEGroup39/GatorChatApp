@@ -513,203 +513,208 @@ func TestUndoDelete(t *testing.T) {
 	deleteTestMessage(firstID)
 }
 
-// // THIS TEST CREATES A NEW USER ACCOUNT
-// func TestCreateUserAccount(t *testing.T) {
-// 	user := UserAccount{
-// 		Username:              "user",
-// 		Password:              "pass",
-// 		User_ID:               "0001",
-// 		Current_Conversations: json.RawMessage([]byte("[]")),
-// 	}
+// THIS TEST CREATES A NEW USER ACCOUNT
+func TestCreateUserAccount(t *testing.T) {
+	user := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "unitTestPassword",
+		User_ID:               "9999",
+		Email:                 "unitTest@gmail.com",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
 
-// 	requestBody, err := json.Marshal(user)
-// 	if err != nil {
-// 		t.Fatalf("Failed to marshal user: %s", err)
-// 	}
+	requestBody, err := json.Marshal(user)
+	if err != nil {
+		t.Fatalf("Failed to marshal user: %s", err)
+	}
 
-// 	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(requestBody))
-// 	if err != nil {
-// 		t.Fatalf("Failed to create request: %s", err)
-// 	}
+	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
 
-// 	rr := httptest.NewRecorder()
+	rr := httptest.NewRecorder()
 
-// 	createUserAccount(rr, req)
+	createUserAccount(rr, req)
 
-// 	if rr.Code != http.StatusOK {
-// 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, rr.Code)
-// 	}
+	if rr.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, rr.Code)
+	}
 
-// 	var responseStruct UserAccount
-// 	err = json.Unmarshal(rr.Body.Bytes(), &responseStruct)
-// 	if err != nil {
-// 		t.Fatalf("Failed to unmarshal response body: %s", err)
-// 	}
+	var responseStruct UserAccount
+	err = json.Unmarshal(rr.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
 
-// 	expectedResponse := UserAccount{
-// 		Username:              "user",
-// 		Password:              "pass",
-// 		User_ID:               "0001",
-// 		Current_Conversations: json.RawMessage([]byte("[]")),
-// 	}
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "unitTestPassword",
+		User_ID:               "9999",
+		Email:                 "unitTest@gmail.com",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
 
-// 	if !reflect.DeepEqual(responseStruct, expectedResponse) {
-// 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
-// 	}
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 
-// 	deleteTestUser("0001")
-// }
+	deleteTestUser("9999")
+}
 
-// // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
-// func createTestUser(username string, password string, ID string) {
-// 	user := UserAccount{
-// 		Username:              username,
-// 		Password:              password,
-// 		User_ID:               ID,
-// 		Current_Conversations: []byte(`[]`),
-// 	}
+// GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
+func createTestUser(username string, password string, email string, ID string) {
+	user := UserAccount{
+		Username:              username,
+		Password:              password,
+		Email:                 email,
+		User_ID:               ID,
+		Current_Conversations: []byte(`[]`),
+	}
 
-// 	result := userAccountsDb.Create(&user)
-// 	if result.Error != nil {
-// 		fmt.Println("Error with creating a user.")
-// 		return
-// 	}
-// }
+	result := userAccountsDb.Create(&user)
+	if result.Error != nil {
+		fmt.Println("Error with creating a user.")
+		return
+	}
+}
 
-// // CLEARS THE TEST DATA AFTER TEST
-// func deleteTestUser(ID string) {
-// 	var user UserAccount
-// 	result := userAccountsDb.Where("user_id = ?", ID).Unscoped().Delete(&user)
-// 	if result.Error != nil {
-// 		fmt.Println("Error with deleting the user.")
-// 		return
-// 	}
-// }
+// CLEARS THE TEST DATA AFTER TEST
+func deleteTestUser(ID string) {
+	var user UserAccount
+	result := userAccountsDb.Where("user_id = ?", ID).Unscoped().Delete(&user)
+	if result.Error != nil {
+		fmt.Println("Error with deleting the user.")
+		return
+	}
+}
 
-// // THIS TEST ADDS A NEW CONVERSATION
-// func TestAddConversation(t *testing.T) {
-// 	createTestUser("user", "pass", "0001")
+// THIS TEST ADDS A NEW CONVERSATION
+func TestAddConversation(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
 
-// 	r, err := http.NewRequest("PUT", "/api/0001/0002", nil)
-// 	if err != nil {
-// 		t.Fatalf("Failed to create request: %s", err)
-// 	}
+	r, err := http.NewRequest("PUT", "/api/9999/0000", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
 
-// 	w := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
-// 	vars := map[string]string{
-// 		"id_1": "0001",
-// 		"id_2": "0002",
-// 	}
+	vars := map[string]string{
+		"id_1": "9999",
+		"id_2": "0000",
+	}
 
-// 	r = mux.SetURLVars(r, vars)
+	r = mux.SetURLVars(r, vars)
 
-// 	addConversation(w, r)
+	addConversation(w, r)
 
-// 	if w.Code != http.StatusOK {
-// 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-// 	}
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
 
-// 	var responseStruct UserAccount
-// 	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
-// 	if err != nil {
-// 		t.Fatalf("Failed to unmarshal response body: %s", err)
-// 	}
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
 
-// 	expectedResponse := UserAccount{
-// 		Username:              "user",
-// 		Password:              "pass",
-// 		User_ID:               "0001",
-// 		Current_Conversations: []byte(`["0002"]`),
-// 	}
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "unitTestPass",
+		Email:                 "unitTest@gmail.com",
+		User_ID:               "9999",
+		Current_Conversations: []byte(`["0000"]`),
+	}
 
-// 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
-// 	if !reflect.DeepEqual(responseStruct, expectedResponse) {
-// 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
-// 	}
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 
-// 	deleteTestUser("0001")
-// }
+	deleteTestUser("9999")
+}
 
-// // THIS TEST RETURNS A USER
-// func TestGetUser(t *testing.T) {
-// 	createTestUser("user", "pass", "0001")
+// THIS TEST RETURNS A USER
+func TestGetUser(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
 
-// 	user := UserAccount{
-// 		Username: "user",
-// 		Password: "pass",
-// 	}
+	user := UserAccount{
+		Email:    "unitTest@gmail.com",
+		Password: "unitTestPass",
+	}
 
-// 	requestBody, err := json.Marshal(user)
-// 	if err != nil {
-// 		t.Fatalf("Failed to marshal message: %s", err)
-// 	}
+	requestBody, err := json.Marshal(user)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
 
-// 	r, err := http.NewRequest("POST", "/users/User", bytes.NewBuffer(requestBody))
-// 	if err != nil {
-// 		t.Fatalf("Failed to create request: %s", err)
-// 	}
+	r, err := http.NewRequest("POST", "/users/User", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
 
-// 	w := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
-// 	getUser(w, r)
+	getUser(w, r)
 
-// 	if w.Code != http.StatusOK {
-// 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-// 	}
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
 
-// 	var responseStruct UserAccount
-// 	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
-// 	if err != nil {
-// 		t.Fatalf("Failed to unmarshal response body: %s", err)
-// 	}
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
 
-// 	expectedResponse := UserAccount{
-// 		Username:              "user",
-// 		Password:              "pass",
-// 		User_ID:               "0001",
-// 		Current_Conversations: []byte(`[]`),
-// 	}
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "unitTestPass",
+		Email:                 "unitTest@gmail.com",
+		User_ID:               "9999",
+		Current_Conversations: []byte(`[]`),
+	}
 
-// 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
-// 	if !reflect.DeepEqual(responseStruct, expectedResponse) {
-// 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
-// 	}
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 
-// 	deleteTestUser("0001")
-// }
+	deleteTestUser("9999")
+}
 
-// // THIS TEST DELETES A USER
-// func TestDeleteUser(t *testing.T) {
-// 	createTestUser("user", "pass", "0001")
+// THIS TEST DELETES A USER
+func TestDeleteUser(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
 
-// 	r, err := http.NewRequest("DELETE", "/users/0001", nil)
-// 	if err != nil {
-// 		t.Fatalf("Failed to create request: %s", err)
-// 	}
+	r, err := http.NewRequest("DELETE", "/users/9999", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
 
-// 	w := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
-// 	vars := map[string]string{
-// 		"id": "0001",
-// 	}
+	vars := map[string]string{
+		"id": "9999",
+	}
 
-// 	r = mux.SetURLVars(r, vars)
+	r = mux.SetURLVars(r, vars)
 
-// 	deleteUser(w, r)
+	deleteUser(w, r)
 
-// 	if w.Code != http.StatusOK {
-// 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-// 		return
-// 	}
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+		return
+	}
 
-// 	// TRY TO LOOK FOR THE USER AGAIN
-// 	var user UserAccount
-// 	result := userAccountsDb.Where("user = ?", "0001").First(&user)
+	// TRY TO LOOK FOR THE USER AGAIN
+	var user UserAccount
+	result := userAccountsDb.Where("user_id = ?", "9999").First(&user)
 
-// 	// THE USER SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
-// 	if result.Error == nil {
-// 		t.Errorf("Expected message to be deleted, but it still exists.")
-// 		return
-// 	}
-// }
+	// THE USER SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
+	if result.Error == nil {
+		t.Errorf("Expected message to be deleted, but it still exists.")
+		return
+	}
+}

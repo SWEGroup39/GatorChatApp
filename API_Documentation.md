@@ -147,7 +147,7 @@
         - **Example Syntax:**
         ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/search```
 
-    - **NOTE:** For the **second** and **third** option, the search message should be placed in the body of the GET request:
+    - **NOTE:** For the **second** and **third** option, the search message should be placed in the body of the POST request:
 
         - **Example Syntax:**
             ```
@@ -327,6 +327,7 @@
 
         - For post, the information passed in must be through the request **body**.
         - The required inputs are a username, a password, a user ID, an email, and a list of current conversations that the user is in (typically left blank).
+        - **NOTE:** The ID value should be manually inserted and must be a number between 0000 and 9998 (9999 is being reserved for the unit tests).
         
             - **Example Syntax:**
                 ```
@@ -347,12 +348,12 @@
         ```http://localhost:8080/api/users/User```
          - **NOTE:** User in this case is the word "User". In cases where the syntax involves filling in a parameter, brackets ([]) will surround the word.
          - For get, the information passed in must be through the request **body**.
-            - The required input is the user's username and password.
+            - The required input is the user's email and password.
             
                 - **Example Syntax:**
                     ```
                         {
-                            "username": "user",
+                            "email": "example@gmail.com",
                             "password": "pass"
                         }
                     ```
@@ -362,8 +363,8 @@
 - The **Create User** function must have:
     - A **unique**, **four-digit** ID. Otherwise, a 500 Internal Server Error will be returned.
     - An email that contains an "**@**" symbol and a **domain name** (e.g. ".com" or ".edu"). Otherwise, a 400 Bad Request will be returned.
-        - The email must also be unique, in the sense that no other existing accounts currently have that email. A 
-- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
+        - The email must also be unique, in the sense that no other existing accounts currently have that email.
+- An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself (e.g. the requested user could not be found in the database).
 - Otherwise, a user object will be returned along with a successful console log message.
 ---
 
