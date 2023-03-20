@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
@@ -18,27 +16,13 @@ import (
 
 // THIS TESTS THE ABILITY TO CREATE A MESSAGE IN THE MESSAGES DATABASE
 func TestCreateMessage(t *testing.T) {
-	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
-	rand.Seed(time.Now().UnixNano())
-	var s1 int = rand.Intn(10)
-	var s2 int = rand.Intn(10)
-	var s3 int = rand.Intn(10)
-	var s4 int = rand.Intn(10)
-	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
-
-	var r1 int = rand.Intn(10)
-	var r2 int = rand.Intn(10)
-	var r3 int = rand.Intn(10)
-	var r4 int = rand.Intn(10)
-	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
-
 	// CREATE A NEW USERMESSAGE STRUCT THAT WILL BE USED TO TEST THE POST
 	message := UserMessage{
 		Model: gorm.Model{
 			ID: 9900,
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
+		Sender_ID:   "0001",
+		Receiver_ID: "0002",
 		Message:     "Hello",
 	}
 
@@ -87,8 +71,8 @@ func TestCreateMessage(t *testing.T) {
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
+		Sender_ID:   "0001",
+		Receiver_ID: "0002",
 		Message:     "Hello",
 	}
 
@@ -132,6 +116,7 @@ func deleteTestMessage(messageID uint) {
 
 // THIS TEST RETRIEVES ALL THE MESSAGES BETWEEN TWO PEOPLE
 func TestGetConversation(t *testing.T) {
+
 	firstID, _ := createTestMessage("0001", "0002", "Testing")
 
 	secondID, _ := createTestMessage("0002", "0001", "Testing_2")
@@ -327,21 +312,7 @@ func TestSearchMessage(t *testing.T) {
 
 // THIS TEST EDITS A CREATED MESSAGE
 func TestEditMessage(t *testing.T) {
-	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
-	rand.Seed(time.Now().UnixNano())
-	var s1 int = rand.Intn(10)
-	var s2 int = rand.Intn(10)
-	var s3 int = rand.Intn(10)
-	var s4 int = rand.Intn(10)
-	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
-
-	var r1 int = rand.Intn(10)
-	var r2 int = rand.Intn(10)
-	var r3 int = rand.Intn(10)
-	var r4 int = rand.Intn(10)
-	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
-
-	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
+	firstID, _ := createTestMessage("0001", "0002", "Testing")
 
 	newMes := UserMessage{
 		Message: "Update",
@@ -386,8 +357,8 @@ func TestEditMessage(t *testing.T) {
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
+		Sender_ID:   "0001",
+		Receiver_ID: "0002",
 		Message:     "Update",
 	}
 
@@ -401,7 +372,6 @@ func TestEditMessage(t *testing.T) {
 
 // THIS TEST DELETES A CREATED MESSAGE
 func TestDeleteSpecificMessage(t *testing.T) {
-
 	firstID, _ := createTestMessage("0001", "0002", "Testing")
 
 	url := "/messages/" + fmt.Sprint(firstID)
@@ -479,22 +449,8 @@ func TestDeleteConversation(t *testing.T) {
 }
 
 func TestUndoDelete(t *testing.T) {
-	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
-	rand.Seed(time.Now().UnixNano())
-	var s1 int = rand.Intn(10)
-	var s2 int = rand.Intn(10)
-	var s3 int = rand.Intn(10)
-	var s4 int = rand.Intn(10)
-	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
-
-	var r1 int = rand.Intn(10)
-	var r2 int = rand.Intn(10)
-	var r3 int = rand.Intn(10)
-	var r4 int = rand.Intn(10)
-	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
-
 	// CREATE A MESSAGE
-	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
+	firstID, _ := createTestMessage("0001", "0002", "Testing")
 
 	// DELETE IT
 	var userMessage UserMessage
@@ -505,7 +461,7 @@ func TestUndoDelete(t *testing.T) {
 	}
 
 	// CALL THE UNDO FUNCTION
-	url := "/messages/undo/" + sndr
+	url := "/messages/undo/0001"
 	r, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
@@ -514,7 +470,7 @@ func TestUndoDelete(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id": sndr,
+		"id": "0001",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -543,8 +499,8 @@ func TestUndoDelete(t *testing.T) {
 				Valid: false,
 			},
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
+		Sender_ID:   "0001",
+		Receiver_ID: "0002",
 		Message:     "Testing",
 	}
 
