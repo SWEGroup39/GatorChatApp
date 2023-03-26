@@ -3,6 +3,7 @@ package main
 //API IS INTERFACED/TESTED USING POSTMAN
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -55,6 +56,28 @@ type UserAccount struct {
 // RETRIEVES ALL MESSAGES BETWEEN TWO PEOPLE
 // REQUEST NEEDS TO PASS IN SENDER ID AND RECEIVER ID
 func getConversation(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting Conversations (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+	var messages []UserMessage
+	result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(messages) == 0 {
+		http.Error(w, "Conversation not found.", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(messages)
+	log.Println("Got Conversation successfully.")
+}
+
+func getConversationLongPoll(w http.ResponseWriter, r *http.Request) {
 	log.Println("Getting Conversations (GET)")
 	w.Header().Set("Content-Type", "application/json")
 
@@ -309,6 +332,7 @@ func deleteConversation(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Conversation not found.", http.StatusNotFound)
 		return
 	}
+
 	log.Println("Conversation deleted successfully.")
 }
 
@@ -444,7 +468,7 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// CHECK IF THE EMAIL FITS THE EMAIL REGEX
-	emailPattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	emailPattern := `^[a-zA-Z0-9._%+-]+@ufl.edu$`
 
 	regex, err := regexp.Compile(emailPattern)
 
@@ -454,7 +478,7 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !regex.MatchString(userAccount.Email) {
-		http.Error(w, "Invalid Email: "+userAccount.Email+" is not a valid email address.", http.StatusBadRequest)
+		http.Error(w, "Invalid Email: "+userAccount.Email+" is not a valid email address. It must be an @ufl.edu email address.", http.StatusBadRequest)
 		return
 	}
 
@@ -464,10 +488,11 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 	dup := userAccountsDb.Where("email = ?", userAccount.Email).First(&dupAccount)
 
 	if dup.RowsAffected != 0 {
-		http.Error(w, "Email already exists", http.StatusBadRequest)
+		http.Error(w, "Email already exists.", http.StatusBadRequest)
 		return
 	}
 
+	// CREATE THE USER IF IT PASSES ALL THE CHECKS
 	result := userAccountsDb.Create(&userAccount)
 
 	if result.Error != nil {
@@ -500,7 +525,6 @@ func getAllUsers(w http.ResponseWriter, r *http.Request) {
 	log.Println("Found All Users successfully.")
 }
 
-// GETS A SINGLE USER IN THE DATABASE
 func getUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("Getting a User (POST)")
 	w.Header().Set("Content-Type", "application/json")
@@ -520,7 +544,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(user)
-	log.Println("Found User successfully.")
+	log.Println("Found user successfully.")
 }
 
 func addConversation(w http.ResponseWriter, r *http.Request) {
@@ -589,6 +613,53 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("User deleted successfully.")
 }
 
+func getNextUserID(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting Next Valid ID (GET)")
+	var currentID int = 1
+
+	// GO UNTIL A VALID ID HAS BEEN FOUND
+	for {
+		// PAD NUMBER WITH ZEROS IF NOT FOUR DIGITS LONG
+		paddedID := fmt.Sprintf("%04d", currentID)
+
+		// CHECK IF THE ID IS ALREADY IN THE DATABASE
+		var count int64
+
+		userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", paddedID).Count(&count)
+		if count == 0 {
+			// IF IT WAS NOT FOUND, THEN RETURN IT
+			json.NewEncoder(w).Encode(paddedID)
+			return
+		}
+
+		// OTHERWISE INCREMENT ID TO THE NEXT ONE
+		currentID++
+
+		if currentID == 9996 {
+			json.NewEncoder(w).Encode("Max number of users reached!")
+			return
+		}
+	}
+}
+
+func getUserByID(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting a User by ID (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+	var user UserAccount
+
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("Found user successfully.")
+}
+
 func main() {
 	log.Println("Connecting to API...")
 
@@ -619,6 +690,7 @@ func main() {
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
 	r.HandleFunc("/api/messages/deleted", getDeletedMessages).Methods("GET")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/longPoll", getConversationLongPoll).Methods("GET")
 
 	// PUT FUNCTIONS
 	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")
@@ -641,6 +713,8 @@ func main() {
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
+	r.HandleFunc("/api/users/nextID", getNextUserID).Methods("GET")
+	r.HandleFunc("/api/users/{id}", getUserByID).Methods("GET")
 
 	//DELETE FUNCTION
 	r.HandleFunc("/api/users/{id}", deleteUser).Methods("DELETE")

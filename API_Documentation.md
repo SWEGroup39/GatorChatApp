@@ -169,7 +169,7 @@
 - If a message is posted with no actual text in the message the "Invalid Message: Messages cannot be empty." message will be returned.
 - The **"Search for Message in ALL/ONE Conversation(s)"** functions must have a valid message that exists in the database, or else "No messages found." will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- Otherwise, either a single user object or a slice of user objects will be returned along with a successful console log message.
+- If all requirements are met, either a single user object or a slice of user objects will be returned along with a successful console log message.
 ---
 
 <a id="PUT_Messages"></a>
@@ -249,7 +249,7 @@
 - The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
 - If the **"Get ALL Messages/Get ALL Deleted Messages"** function cannot locate any messages, then a message describing how no messages were found will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- Otherwise, the message(s) will be returned along with a successful console log message.
+- If all requirements are met, the message(s) will be returned along with a successful console log message.
 ---
 
 <a id="DELETE_Messages"></a>
@@ -327,7 +327,7 @@
 
         - For post, the information passed in must be through the request **body**.
         - The required inputs are a username, a password, a user ID, an email, and a list of current conversations that the user is in (typically left blank).
-        - **NOTE:** The ID value should be manually inserted and must be a number between 0000 and 9998 (9999 is being reserved for the unit tests).
+        - **NOTE:** The ID value should be manually inserted and must be **a number between 0000 and 9995** (9996 to 9999 are being reserved for the unit tests).
         
             - **Example Syntax:**
                 ```
@@ -335,11 +335,11 @@
                         "username": "user",
                         "password": "pass",
                         "user_id": "1234",
-                        "email": "example@gmail.com",
+                        "email": "example@ufl.edu",
                         "current_conversations": ["4321", "5678"]
                     }
-                    ```
-        - **NOTE:** Have ```"current_conversations"``` be ```[]``` to have any empty slice.
+                ```
+        - **NOTE:** Have ```"current_conversations"``` be ```[]``` if you want a user to have no current conversations.
 
     - **Second Option: Get a Specific User**: 
         - This **POST** function returns a singular user from the users database.
@@ -353,7 +353,7 @@
                 - **Example Syntax:**
                     ```
                         {
-                            "email": "example@gmail.com",
+                            "email": "example@ufl.edu",
                             "password": "pass"
                         }
                     ```
@@ -361,11 +361,12 @@
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
 - The **Create User** function must have:
-    - A **unique**, **four-digit** ID. Otherwise, a 500 Internal Server Error will be returned.
-    - An email that contains an "**@**" symbol and a **domain name** (e.g. ".com" or ".edu"). Otherwise, a 400 Bad Request will be returned.
+    - A **unique**, **four-digit ID** that is **less than 9996**.
+    - The email must have a University of Florida **domain name** (i.e. it must end with "@ufl.edu").
         - The email must also be unique, in the sense that no other existing accounts currently have that email.
+    - Otherwise, a 400 Bad Request will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself (e.g. the requested user could not be found in the database).
-- Otherwise, a user object will be returned along with a successful console log message.
+- If all requirements are met, a user object will be returned along with a successful console log message.
 ---
 
 <a id="PUT_Users"></a>
@@ -378,23 +379,23 @@
 
 - There is currently only one **PUT** command, and the syntax is as follows:
 
-- ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
+- ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
 
 - The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if it is unable to locate the passed-in user or if there are errors regarding the database connection.
-- Otherwise, the updated user object will be returned along with a "ID added successfully." console log message.
+- If all requirements are met, the updated user object will be returned along with a "ID added successfully." console log message.
 ---
 
 <a id="GET_Users"></a>
 
 ### ➜ Overview of  **GET** Command for Users
 
-- The **GET** command returns users that have been created with the **POST** request.
+- The **GET** command returns information about users that have been created with a **POST** request.
 
 ### Syntax
-- There is currently one **GET** function available:
+- There are currently three **GET** function available:
 
     - **First Option: Get All Users**:
         - This **GET** function returns all users in the users database.
@@ -402,10 +403,22 @@
         ```http://localhost:8080/api/users```
         - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend._
 
+    - **Second Option: Get Next ID**:
+        - This **GET** function returns a valid ID that has not been used inserted yet in the users database.
+            - **Example Syntax:**
+        ```http://localhost:8080/api/users/nextID```
+
+    - **Third Option: Get User by ID**:
+        - This **GET** function returns a user from the users database based on the user's unique ID.
+            - **Example Syntax:**
+        ```http://localhost:8080/api/users/[ID]```
+
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
 - The **"Get All Users"** function must have users that exists in the database, or else "Users not found." will be returned.
-- Otherwise, the user(s) will be returned along with a successful console log message.
+- The **"Get Next ID"** function must still have available user IDs in the users database (0000 to 9995), or else "Max number of users reached!" will be returned.
+- The **"Get User by ID"** function must have the requested user exist in the users dataabse, or else a StatusBadRequest error will be returned.
+- If all requirements are met, the user(s) will be returned along with a successful console log message.
 ---
 <a id="DELETE_Users"></a>
 
@@ -420,7 +433,7 @@
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- Otherwise, the user will be removed from the database along with a "User deleted successfully." console log message.
+- If all requirements are met, the user will be removed from the database along with a "User deleted successfully." console log message.
 ---
 
 [Back to top](#TOC)

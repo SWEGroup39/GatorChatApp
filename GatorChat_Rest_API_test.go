@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -18,28 +17,14 @@ import (
 
 // THIS TESTS THE ABILITY TO CREATE A MESSAGE IN THE MESSAGES DATABASE
 func TestCreateMessage(t *testing.T) {
-	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
-	rand.Seed(time.Now().UnixNano())
-	var s1 int = rand.Intn(10)
-	var s2 int = rand.Intn(10)
-	var s3 int = rand.Intn(10)
-	var s4 int = rand.Intn(10)
-	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
-
-	var r1 int = rand.Intn(10)
-	var r2 int = rand.Intn(10)
-	var r3 int = rand.Intn(10)
-	var r4 int = rand.Intn(10)
-	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
-
 	// CREATE A NEW USERMESSAGE STRUCT THAT WILL BE USED TO TEST THE POST
 	message := UserMessage{
 		Model: gorm.Model{
 			ID: 9900,
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
-		Message:     "Hello",
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific hello",
 	}
 
 	// TURN THE STRUCT INTO A JSON
@@ -87,9 +72,9 @@ func TestCreateMessage(t *testing.T) {
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
-		Message:     "Hello",
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific hello",
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -132,12 +117,13 @@ func deleteTestMessage(messageID uint) {
 
 // THIS TEST RETRIEVES ALL THE MESSAGES BETWEEN TWO PEOPLE
 func TestGetConversation(t *testing.T) {
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestGetConversation")
 
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
+	secondID, _ := createTestMessage("9999", "9998", "Specific other message for TestGetConversation")
 
-	secondID, _ := createTestMessage("0002", "0001", "Testing_2")
+	url := "/messages/" + "9998" + "/" + "9999"
 
-	r, err := http.NewRequest("GET", "/messages/0001/0002", nil)
+	r, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -145,8 +131,8 @@ func TestGetConversation(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": "9998",
+		"id_2": "9999",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -171,9 +157,9 @@ func TestGetConversation(t *testing.T) {
 				UpdatedAt: responseStruct[0].UpdatedAt,
 				DeletedAt: responseStruct[0].DeletedAt,
 			},
-			Sender_ID:   "0001",
-			Receiver_ID: "0002",
-			Message:     "Testing",
+			Sender_ID:   "9998",
+			Receiver_ID: "9999",
+			Message:     "Specific message for TestGetConversation",
 		},
 		{
 			Model: gorm.Model{
@@ -182,9 +168,9 @@ func TestGetConversation(t *testing.T) {
 				UpdatedAt: responseStruct[1].UpdatedAt,
 				DeletedAt: responseStruct[1].DeletedAt,
 			},
-			Sender_ID:   "0002",
-			Receiver_ID: "0001",
-			Message:     "Testing_2",
+			Sender_ID:   "9999",
+			Receiver_ID: "9998",
+			Message:     "Specific other message for TestGetConversation",
 		},
 	}
 
@@ -198,12 +184,11 @@ func TestGetConversation(t *testing.T) {
 
 // THIS TEST SEARCHES FOR A CREATED MESSAGE ACROSS ALL CONVERSATIONS
 func TestSearchMessageAll(t *testing.T) {
-
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
-	secondID, _ := createTestMessage("0003", "0004", "Testing")
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessageAll")
+	secondID, _ := createTestMessage("9996", "9997", "Specific message for TestSearchMessageAll")
 
 	searchMes := UserMessage{
-		Message: "Testing",
+		Message: "Specific message for TestSearchMessageAll",
 	}
 
 	requestBody, err := json.Marshal(searchMes)
@@ -238,9 +223,9 @@ func TestSearchMessageAll(t *testing.T) {
 				UpdatedAt: responseStruct[0].UpdatedAt,
 				DeletedAt: responseStruct[0].DeletedAt,
 			},
-			Sender_ID:   "0001",
-			Receiver_ID: "0002",
-			Message:     "Testing",
+			Sender_ID:   "9998",
+			Receiver_ID: "9999",
+			Message:     "Specific message for TestSearchMessageAll",
 		},
 		{
 			Model: gorm.Model{
@@ -249,9 +234,9 @@ func TestSearchMessageAll(t *testing.T) {
 				UpdatedAt: responseStruct[1].UpdatedAt,
 				DeletedAt: responseStruct[1].DeletedAt,
 			},
-			Sender_ID:   "0003",
-			Receiver_ID: "0004",
-			Message:     "Testing",
+			Sender_ID:   "9996",
+			Receiver_ID: "9997",
+			Message:     "Specific message for TestSearchMessageAll",
 		},
 	}
 
@@ -264,12 +249,13 @@ func TestSearchMessageAll(t *testing.T) {
 	deleteTestMessage(secondID)
 }
 
+// THIS TEST SEARCHES FOR A SPECIFIC MESSAGE BETWEEN A SENDER AND USER
 func TestSearchMessage(t *testing.T) {
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
-	secondID, _ := createTestMessage("0003", "0004", "Testing")
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessage")
+	secondID, _ := createTestMessage("9996", "9997", "Specific other message for TestSearchMessage")
 
 	searchMes := UserMessage{
-		Message: "Testing",
+		Message: "Specific message for TestSearchMessage",
 	}
 
 	requestBody, err := json.Marshal(searchMes)
@@ -277,7 +263,9 @@ func TestSearchMessage(t *testing.T) {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	r, err := http.NewRequest("POST", "/messages/0001/0002/search", bytes.NewBuffer(requestBody))
+	url := "/messages/" + "9998" + "/" + "9999" + "/" + "search"
+
+	r, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -285,8 +273,8 @@ func TestSearchMessage(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": "9998",
+		"id_2": "9999",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -311,9 +299,9 @@ func TestSearchMessage(t *testing.T) {
 				UpdatedAt: responseStruct[0].UpdatedAt,
 				DeletedAt: responseStruct[0].DeletedAt,
 			},
-			Sender_ID:   "0001",
-			Receiver_ID: "0002",
-			Message:     "Testing",
+			Sender_ID:   "9998",
+			Receiver_ID: "9999",
+			Message:     "Specific message for TestSearchMessage",
 		},
 	}
 
@@ -328,24 +316,10 @@ func TestSearchMessage(t *testing.T) {
 
 // THIS TEST EDITS A CREATED MESSAGE
 func TestEditMessage(t *testing.T) {
-	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
-	rand.Seed(time.Now().UnixNano())
-	var s1 int = rand.Intn(10)
-	var s2 int = rand.Intn(10)
-	var s3 int = rand.Intn(10)
-	var s4 int = rand.Intn(10)
-	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
-
-	var r1 int = rand.Intn(10)
-	var r2 int = rand.Intn(10)
-	var r3 int = rand.Intn(10)
-	var r4 int = rand.Intn(10)
-	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
-
-	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
+	firstID, _ := createTestMessage("9998", "9999", "This is a specific message for firstID in TestEditMessage")
 
 	newMes := UserMessage{
-		Message: "Update",
+		Message: "Specific updated message for TestEditMessge",
 	}
 
 	requestBody, err := json.Marshal(newMes)
@@ -387,9 +361,9 @@ func TestEditMessage(t *testing.T) {
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
-		Message:     "Update",
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific updated message for TestEditMessge",
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -402,7 +376,7 @@ func TestEditMessage(t *testing.T) {
 
 // THIS TEST DELETES A CREATED MESSAGE
 func TestDeleteSpecificMessage(t *testing.T) {
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
+	firstID, _ := createTestMessage("9998", "9999", "This is a very specific message that can't possibly be accidentally replicated outside of this test")
 
 	url := "/messages/" + fmt.Sprint(firstID)
 	r, err := http.NewRequest("DELETE", url, nil)
@@ -440,8 +414,8 @@ func TestDeleteSpecificMessage(t *testing.T) {
 
 // THIS TEST DELETES AN ENTIRE CONVERSATION BETWEEN TWO PEOPLE
 func TestDeleteConversation(t *testing.T) {
-	firstID, _ := createTestMessage("0001", "0002", "Testing")
-	secondID, _ := createTestMessage("0002", "0001", "Testing_2")
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for firstID")
+	secondID, _ := createTestMessage("9999", "9998", "Specific message for secondID")
 
 	url := "/messages/" + fmt.Sprint(firstID) + "/" + fmt.Sprint(secondID)
 	r, err := http.NewRequest("DELETE", url, nil)
@@ -452,8 +426,8 @@ func TestDeleteConversation(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": "9998",
+		"id_2": "9999",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -466,7 +440,7 @@ func TestDeleteConversation(t *testing.T) {
 
 	// TRY TO LOOK FOR A MESSAGE
 	var userMessage UserMessage
-	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ?", "0001", "0002").First(&userMessage)
+	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ?", "9998", "9999").First(&userMessage)
 
 	// THE CONVERSATION SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
 	if result.Error == nil {
@@ -478,23 +452,10 @@ func TestDeleteConversation(t *testing.T) {
 	deleteTestMessage(secondID)
 }
 
+// THIS TEST DELETES A MESSAGE BETWEEN TWO PEOPLE THEN UNDOES THE DELETE
 func TestUndoDelete(t *testing.T) {
-	// CREATE TWO 4-DIGIT STRINGS MADE OF 4 RANDOM NUMBERS EACH
-	rand.Seed(time.Now().UnixNano())
-	var s1 int = rand.Intn(10)
-	var s2 int = rand.Intn(10)
-	var s3 int = rand.Intn(10)
-	var s4 int = rand.Intn(10)
-	sndr := strconv.Itoa(s1) + strconv.Itoa(s2) + strconv.Itoa(s3) + strconv.Itoa(s4)
-
-	var r1 int = rand.Intn(10)
-	var r2 int = rand.Intn(10)
-	var r3 int = rand.Intn(10)
-	var r4 int = rand.Intn(10)
-	rcvr := strconv.Itoa(r1) + strconv.Itoa(r2) + strconv.Itoa(r3) + strconv.Itoa(r4)
-
 	// CREATE A MESSAGE
-	firstID, _ := createTestMessage(sndr, rcvr, "Testing")
+	firstID, _ := createTestMessage("9998", "9999", "Specific undo message for firstID")
 
 	// DELETE IT
 	var userMessage UserMessage
@@ -505,7 +466,7 @@ func TestUndoDelete(t *testing.T) {
 	}
 
 	// CALL THE UNDO FUNCTION
-	url := "/messages/undo/" + sndr
+	url := "/messages/undo/" + "9998"
 	r, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
@@ -514,7 +475,7 @@ func TestUndoDelete(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id": sndr,
+		"id": "9998",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -543,9 +504,9 @@ func TestUndoDelete(t *testing.T) {
 				Valid: false,
 			},
 		},
-		Sender_ID:   sndr,
-		Receiver_ID: rcvr,
-		Message:     "Testing",
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific undo message for firstID",
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -679,7 +640,7 @@ func TestAddConversation(t *testing.T) {
 	deleteTestUser("9999")
 }
 
-// THIS TEST RETURNS A USER
+// THIS TEST RETURNS A USER (BASED ON EMAIL AND PASSWORD)
 func TestGetUser(t *testing.T) {
 	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
 
@@ -701,6 +662,51 @@ func TestGetUser(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	getUser(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "unitTestPass",
+		Email:                 "unitTest@gmail.com",
+		User_ID:               "9999",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST RETURNS A USER (BASED ON ID)
+func TestGetUserByID(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+
+	r, err := http.NewRequest("GET", "/users/9999", bytes.NewBuffer(nil))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	getUserByID(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
@@ -758,7 +764,57 @@ func TestDeleteUser(t *testing.T) {
 
 	// THE USER SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
 	if result.Error == nil {
-		t.Errorf("Expected message to be deleted, but it still exists.")
+		t.Errorf("Expected user to be deleted, but it still exists.")
+		return
+	}
+}
+
+// SINCE THIS FUNCTION IS VALID IF IT RETURNS A FOUR DIGIT ID THAT DOES NOT EXIST IN THE DATABASE, THE UNIT TEST WILL BE TESTING THIS PROPERTY
+// IT IS DIFFICULT TO PREDICT THE EXPECTED ID SINCE THE DATABASE IS ALWAYS BEING UPDATED
+func TestGetNextUserID(t *testing.T) {
+
+	r, err := http.NewRequest("GET", "/users/nextID", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	r = mux.SetURLVars(r, nil)
+
+	getNextUserID(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+		return
+	}
+
+	// CHECK IF THIS ID IS NOT IN THE TABLE, FOUR DIGITS, AND LESS THAN 9996
+	var returnedID string
+
+	err = json.Unmarshal(w.Body.Bytes(), &returnedID)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	// SEE IF IT IS IN THE DATABASE
+	var user UserAccount
+	result := userAccountsDb.Where("user_id = ?", returnedID).First(&user)
+
+	if result.Error == nil {
+		t.Errorf("Expected user to not exist, but it does.")
+		return
+	}
+
+	_, err = strconv.Atoi(returnedID)
+
+	if err != nil {
+		t.Errorf("Returned ID is not numeric.")
+		return
+	}
+
+	if len(returnedID) != 4 {
+		t.Errorf("Returned ID is not four digits long.")
 		return
 	}
 }
