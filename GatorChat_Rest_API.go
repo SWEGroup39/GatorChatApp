@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
@@ -59,18 +60,22 @@ func getConversation(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	var messages []UserMessage
-	result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
 
-	if result.Error != nil {
-		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
-		return
+	for i := 0; i < 10; i++ {
+		result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
+
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if len(messages) == 0 {
+			http.Error(w, "Conversation not found.", http.StatusNotFound)
+			return
+		}
+
+		time.Sleep(time.Second)
 	}
-
-	if len(messages) == 0 {
-		http.Error(w, "Conversation not found.", http.StatusNotFound)
-		return
-	}
-
 	json.NewEncoder(w).Encode(messages)
 	log.Println("Got Conversation successfully.")
 }
@@ -304,7 +309,6 @@ func deleteConversation(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Conversation not found.", http.StatusNotFound)
 		return
 	}
-
 	log.Println("Conversation deleted successfully.")
 }
 
@@ -496,6 +500,7 @@ func getAllUsers(w http.ResponseWriter, r *http.Request) {
 	log.Println("Found All Users successfully.")
 }
 
+// GETS A SINGLE USER IN THE DATABASE
 func getUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("Getting a User (POST)")
 	w.Header().Set("Content-Type", "application/json")
