@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-notification',
@@ -7,4 +8,10 @@ import { Component } from '@angular/core';
 })
 export class NotificationComponent {
 
+  constructor(private location: Location) {}
+
+  goBack() {
+    this.location.back();
+  }
+  
 }

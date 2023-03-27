@@ -17,8 +17,7 @@ import { AppRoutingModule } from './app-routing/app-routing.module';
 import { HeaderComponent } from './components/header/header.component';
 import { AboutComponent } from './components/about/about.component';
 import { HomeComponent } from './components/home/home.component';
-import {AccordionModule} from 'primeng/accordion';     //accordion and accordion tab
-import {StyleClassModule} from 'primeng/styleclass';
+
 import { FooterComponent } from './components/footer/footer.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { MessagesComponent } from './components/messages/messages.component';
@@ -26,6 +25,8 @@ import { ContactsComponent } from './components/contacts/contacts.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { NotificationComponent } from './components/notification/notification.component';
+import { ChatListComponent } from './components/chat-list/chat-list.component';
+
 
 
 @NgModule({
@@ -43,6 +44,7 @@ import { NotificationComponent } from './components/notification/notification.co
     ProfileComponent,
     SettingsComponent,
     NotificationComponent,
+    ChatListComponent,
     
   ],
   imports: [
@@ -57,8 +59,8 @@ import { NotificationComponent } from './components/notification/notification.co
     MatToolbarModule,
     MatIconModule,
     HttpClientModule,
-    AccordionModule,
-    StyleClassModule, 
+   // AccordionModule,
+    //StyleClassModule, 
     FormsModule,
     
   ],

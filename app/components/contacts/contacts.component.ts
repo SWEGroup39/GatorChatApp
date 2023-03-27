@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-contacts',
@@ -7,4 +8,10 @@ import { Component } from '@angular/core';
 })
 export class ContactsComponent {
 
+  constructor( private location: Location) {}
+
+
+  goBack() {
+    this.location.back();
+  }
 }

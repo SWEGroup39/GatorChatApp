@@ -46,7 +46,10 @@ export class LoginComponent implements OnInit {
         this.resetForm()
         this.submitSuccess = true;
         this.isloggedIn(this.submitSuccess);
-        this.router.navigateByUrl('/dashboard')
+       const { user_id, username, password } = response;
+       console.log(`/dashboard/${username}/${password}`);
+       this.router.navigate(['/dashboard'], { queryParams: { username: username, password: password, id: user_id }});
+
       },
       (error:any) => {alert(`Username or Password is incorrect! Please try again`)
       this.resetForm()

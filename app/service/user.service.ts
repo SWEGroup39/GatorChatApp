@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../interface/user';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,7 +27,7 @@ export class UserService {
     };
     return this.http.post<any>('http://localhost:8080/api/users/User',requestBody);
   }
- 
+
 }
 
 

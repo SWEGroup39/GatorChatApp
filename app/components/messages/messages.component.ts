@@ -3,7 +3,8 @@ import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { EMPTY, Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { tap, catchError } from 'rxjs/operators';
-
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 
 
 @Component({
@@ -12,19 +13,44 @@ import { tap, catchError } from 'rxjs/operators';
   styleUrls: ['./messages.component.scss']
 })
 export class MessagesComponent implements OnInit{
-
-  constructor(private http: HttpClient) { }
-  
-  ngOninit(){
-
-  }
-  @ViewChild('chatList', { static: true }) chatList!: ElementRef;
+  // currId: string ='';
+  // otherId: string = ''
 
   chatInputMessage: string = "";
   searchInputMessage: string = "";
+
+  chatMessages: {
+    userId: number,
+    recieverId: number,
+    message: string,
+    created_at: number,
+    messageId: number,
+  }[] =[]
+
+  APIurl: string = `http://localhost:8080/api/messages`;
+
+  constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location) { }
+  
+  ngOnInit() {
+
+    this.route.queryParams.subscribe(params => {
+    this.currentUser.id  = params['id1'] ?? '0000';
+    this.user1.id = params['id2'] ?? '0000';
+
+    this.getMessages( this.currentUser.id , this.user1.id  ).subscribe((result) => {
+    this.chatMessages = result.chatMessages;
+
+
+    });
+
+    });
+  }
+
+  @ViewChild('chatList', { static: true }) chatList!: ElementRef;
+
   currentUser = {
-    name: 'John ',
-    id: 1234,
+    name: 'moe ',
+    id: '0001',
     profileImageUrl:
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKQmFYe2KZvQcnKEfGNICxM4I4udEh_-uG90chKLlXMx2HDGPr_ODubOdkpUFdJVGSKs0&usqp=CAU',
 
@@ -32,41 +58,23 @@ export class MessagesComponent implements OnInit{
 
   user1= {
     name: 'Jane ',
-    id: 5678,
+    id: '0002',
     profileImageUrl:
     'https://ps.w.org/user-avatar-reloaded/assets/icon-256x256.png?rev=2540745',
 
   }
 
-  user2= {
-    name: 'Jill ',
-    id: 3,
-    profileImageUrl:
-    'https://e7.pngegg.com/pngimages/348/800/png-clipart-man-wearing-blue-shirt-illustration-computer-icons-avatar-user-login-avatar-blue-child.png',
-    
-
+  goBack() {
+    this.location.back();
   }
 
-  
-  // getMessages() {
-  //   this.http.get('http://localhost:8080/api/messages').subscribe(response => {
-  //     console.log(response);
-  //   });
-  // }
-
-  // public getUser(userName: string, Password: string): Observable<{ userInfo: {userId: number, username: string, password: string, convos: number[]}>
-  // {
-  //   return this.http.get<{ID: number, Name: string, PassWord: string, Conversations: number[] }>('http://localhost:8080/api/messages/${userName}/${Password}')
-  //   .pipe(
-  //     map((response: any) => {
-  //       console.log('User found:', response);
-  //       const chatMessage = { messageId: response[0].ID };
-  //       return { chatMessage };
-  //     });
-  // }
-
-  public getMessages(): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
-    return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>('http://localhost:8080/api/messages')
+  goBackTwice() {
+    this.location.back();
+    this.location.back();
+  }
+   public getMessages(Id1: string, Id2: string ): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
+    const url = `${this.APIurl}/${Id1}/${Id2}`;
+    return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url)
       .pipe(
         map((response: any[]) => {
           console.log('Response:', response);
@@ -126,44 +134,6 @@ export class MessagesComponent implements OnInit{
     ); 
   }
 
-  // getUser(username: string, password: string): Observable<any> {
-  //   const url = `http://localhost:8080/api/user/${username}/${password}`;
-    
-  //   return this.http.get<any>(url).pipe(
-  //     map(response => {
-  //       const user = {
-  //         username: response.username,
-  //         password: response.password,
-  //         userId: response.userId,
-  //       };
-  //       return user;
-  //     }),
-  //     tap(response => {
-  //       console.log('User found:', response);
-  //     })
-  //   );
-  // }
-  
-  
-  
-  
-
-  chatMessages: {
-    userId: number,
-    recieverId: number,
-    message: string,
-    created_at: number,
-    messageId: number,
-  }[] =[]
-
-  ngOnInit() {
-    this.getMessages().subscribe((result) => {
-      this.chatMessages = result.chatMessages;
-    });
-  }
-  
-
-  
 
   title = 'chat-app';
 
