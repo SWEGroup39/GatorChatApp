@@ -15,6 +15,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/rs/cors"
+
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 // CONNECT TO USER MESSAGES DATABASE
@@ -77,30 +80,79 @@ func getConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got Conversation successfully.")
 }
 
-func getConversationLongPoll(w http.ResponseWriter, r *http.Request) {
-	log.Println("Getting Conversations (GET)")
+// func getConversationLongPoll(w http.ResponseWriter, r *http.Request) {
+// 	log.Println("Getting Conversations (GET)")
+// 	w.Header().Set("Content-Type", "application/json")
+
+// 	params := mux.Vars(r)
+// 	var messages []UserMessage
+
+// 	for i := 0; i < 10; i++ {
+// 		result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
+
+// 		if result.Error != nil {
+// 			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 		if len(messages) == 0 {
+// 			http.Error(w, "Conversation not found.", http.StatusNotFound)
+// 			return
+// 		}
+
+// 		time.Sleep(time.Second)
+// 	}
+// 	json.NewEncoder(w).Encode(messages)
+// 	log.Println("Got Conversation successfully.")
+// }
+
+func getConversationLP(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting Conversations (GET (LONG POLL))")
+
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
-	var messages []UserMessage
 
-	for i := 0; i < 10; i++ {
-		result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
+	// CREATE A CHANNEL THAT FACILITATES INFO BETWEEN API AND FRONTEND
+	channel := make(chan []UserMessage)
 
-		if result.Error != nil {
-			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+	// CREATE A GOROUTINE THAT HANDLES THE GETCONVERSATION FUNCTIONALITY
+	// THIS IS ACTUALLY DOING THE WORK
+	go func() {
+		for {
+			// SEE IF THERE ARE NEW MESSAGES
+			var messages []UserMessage
+			result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
+			if result.Error != nil {
+				log.Println(result.Error)
+			}
+
+			// SEND CONVERSATION TO FRONTEND (WON'T SEND IF THERE ARE ZERO MESSAGES IN THE CONVERSATION)
+			if len(messages) > 0 {
+				channel <- messages
+				return
+			}
+
+			// WAIT ONE SECOND THEN DO IT AGAIN
+			time.Sleep(time.Second)
+		}
+	}()
+
+	// LISTENS TO SEE IF A NEW MESSAGE IS AVAILABLE (GETTING IT FROM THE GOROUTINE)
+	// ALSO SEES IF THE CONNECTION WAS CLOSED
+	for {
+		select {
+		case messages := <-channel:
+			// SEND NEW MESSAGE TO FRONTEND THROUGH JSON
+			json.NewEncoder(w).Encode(messages)
+			log.Println("Updated conversation successfully.")
+			return
+		case <-r.Context().Done():
+			// CLOSE LONG POLLING IF FRONTEND CLOSES CONNECTION
+			log.Println("Long polling closed.")
 			return
 		}
-
-		if len(messages) == 0 {
-			http.Error(w, "Conversation not found.", http.StatusNotFound)
-			return
-		}
-
-		time.Sleep(time.Second)
 	}
-	json.NewEncoder(w).Encode(messages)
-	log.Println("Got Conversation successfully.")
 }
 
 // GETS ALL NON-DELETED MESSAGES IN DATABASE
@@ -492,6 +544,9 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// HASH THE PASSWORD
+	userAccount.Password = hashPassword(userAccount.Password)
+
 	// CREATE THE USER IF IT PASSES ALL THE CHECKS
 	result := userAccountsDb.Create(&userAccount)
 
@@ -535,6 +590,9 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	
+	// HASH THE PASSWORD
+	user.Password = hashPassword(user.Password)
 
 	result := userAccountsDb.Model(&UserAccount{}).Where("email = ? AND password = ?", user.Email, user.Password).First(&user)
 
@@ -660,6 +718,17 @@ func getUserByID(w http.ResponseWriter, r *http.Request) {
 	log.Println("Found user successfully.")
 }
 
+// FUNCTION TO HASH THE PASSWORD
+func hashPassword(rawPassword string) string {
+	// USE SHA-256 TO HASH THE PASSWORD
+	hashedPassword := sha256.Sum256([]byte(rawPassword))
+
+	// CONVERT IT TO A HEX STRING
+	encodedPassword := hex.EncodeToString(hashedPassword[:])
+
+	return encodedPassword
+}
+
 func main() {
 	log.Println("Connecting to API...")
 
@@ -690,7 +759,7 @@ func main() {
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
 	r.HandleFunc("/api/messages/deleted", getDeletedMessages).Methods("GET")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
-	r.HandleFunc("/api/messages/{id_1}/{id_2}/longPoll", getConversationLongPoll).Methods("GET")
+	r.HandleFunc("/api/messages/{id_1}/{id_2}/longPoll", getConversationLP).Methods("GET")
 
 	// PUT FUNCTIONS
 	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")

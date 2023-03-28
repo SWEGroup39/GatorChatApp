@@ -339,7 +339,9 @@
                         "current_conversations": ["4321", "5678"]
                     }
                 ```
-        - **NOTE:** Have ```"current_conversations"``` be ```[]``` if you want a user to have no current conversations.
+        - **NOTES:** 
+            - Have ```"current_conversations"``` be ```[]``` if you want a user to have no current conversations.
+            - The password will be **hashed** using **SHA256** for security purposes. After calling this create user function, any subsequent retrievals of the user will have the hashed password.
 
     - **Second Option: Get a Specific User**: 
         - This **POST** function returns a singular user from the users database.

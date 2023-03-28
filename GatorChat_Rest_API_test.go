@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -524,7 +526,7 @@ func TestCreateUserAccount(t *testing.T) {
 		Username:              "unitTestUser",
 		Password:              "unitTestPassword",
 		User_ID:               "9999",
-		Email:                 "unitTest@gmail.com",
+		Email:                 "unitTest@ufl.edu",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -553,10 +555,11 @@ func TestCreateUserAccount(t *testing.T) {
 	}
 
 	expectedResponse := UserAccount{
-		Username:              "unitTestUser",
-		Password:              "unitTestPassword",
+		Username: "unitTestUser",
+		// IT WILL RETURN THE SHA256 HASHED PASSWORD
+		Password:              "b1b348465a1b06c150af3704f5a5f81466e77826f8351422db59b40c7a13f47e",
 		User_ID:               "9999",
-		Email:                 "unitTest@gmail.com",
+		Email:                 "unitTest@ufl.edu",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -569,9 +572,16 @@ func TestCreateUserAccount(t *testing.T) {
 
 // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
 func createTestUser(username string, password string, email string, ID string) {
+
+	//HASH THE PASSWORD
+	hashedPassword := sha256.Sum256([]byte(password))
+
+	// CONVERT IT TO A HEX STRING
+	encodedPassword := hex.EncodeToString(hashedPassword[:])
+
 	user := UserAccount{
 		Username:              username,
-		Password:              password,
+		Password:              encodedPassword,
 		Email:                 email,
 		User_ID:               ID,
 		Current_Conversations: []byte(`[]`),
@@ -596,7 +606,7 @@ func deleteTestUser(ID string) {
 
 // THIS TEST ADDS A NEW CONVERSATION
 func TestAddConversation(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	r, err := http.NewRequest("PUT", "/api/9999/0000", nil)
 	if err != nil {
@@ -626,8 +636,8 @@ func TestAddConversation(t *testing.T) {
 
 	expectedResponse := UserAccount{
 		Username:              "unitTestUser",
-		Password:              "unitTestPass",
-		Email:                 "unitTest@gmail.com",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
 		Current_Conversations: []byte(`["0000"]`),
 	}
@@ -642,10 +652,10 @@ func TestAddConversation(t *testing.T) {
 
 // THIS TEST RETURNS A USER (BASED ON EMAIL AND PASSWORD)
 func TestGetUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	user := UserAccount{
-		Email:    "unitTest@gmail.com",
+		Email:    "unitTest@ufl.edu",
 		Password: "unitTestPass",
 	}
 
@@ -675,8 +685,8 @@ func TestGetUser(t *testing.T) {
 
 	expectedResponse := UserAccount{
 		Username:              "unitTestUser",
-		Password:              "unitTestPass",
-		Email:                 "unitTest@gmail.com",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
 		Current_Conversations: []byte(`[]`),
 	}
@@ -691,7 +701,7 @@ func TestGetUser(t *testing.T) {
 
 // THIS TEST RETURNS A USER (BASED ON ID)
 func TestGetUserByID(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	r, err := http.NewRequest("GET", "/users/9999", bytes.NewBuffer(nil))
 	if err != nil {
@@ -720,8 +730,8 @@ func TestGetUserByID(t *testing.T) {
 
 	expectedResponse := UserAccount{
 		Username:              "unitTestUser",
-		Password:              "unitTestPass",
-		Email:                 "unitTest@gmail.com",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
 		Current_Conversations: []byte(`[]`),
 	}
@@ -736,7 +746,7 @@ func TestGetUserByID(t *testing.T) {
 
 // THIS TEST DELETES A USER
 func TestDeleteUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	r, err := http.NewRequest("DELETE", "/users/9999", nil)
 	if err != nil {
