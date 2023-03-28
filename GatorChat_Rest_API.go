@@ -366,6 +366,34 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 	log.Println("Message edited successfully.")
 }
 
+func editName(w http.ResponseWriter, r *http.Request) {
+	log.Println("Editing a Username (PUT)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	var user UserAccount
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Username", user.Username)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
+
+	log.Println("Username edited successfully.")
+}
+
+func editPass(w http.ResponseWriter, r *http.Request) {
+
+}
+
 // HARD DELETES ALL MESSAGES WITH THE MATCHING SENDER AND RECEIVER ID (EFFECTIVELY CLEARS AN ENTIRE CONVERSATION)
 func deleteConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Deleting a Conversation (DELETE)")
@@ -590,7 +618,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	// HASH THE PASSWORD
 	user.Password = hashPassword(user.Password)
 
@@ -611,7 +639,7 @@ func addConversation(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var user UserAccount
 
-	//FIND THE MATCHING USER STRUCT WITH THE MATCHING USER_ID
+	// FIND THE MATCHING USER STRUCT WITH THE MATCHING USER_ID
 	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).First(&user)
 
 	if result.Error != nil {
@@ -778,6 +806,8 @@ func main() {
 	r.HandleFunc("/api/users/User", getUser).Methods("POST")
 
 	// PUT FUNCTION
+	r.HandleFunc("/api/users/updateN/{id}", editName).Methods("PUT")
+	r.HandleFunc("/api/users/updateP/{id}", editPass).Methods("PUT")
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
 
 	// GET FUNCTIONS
