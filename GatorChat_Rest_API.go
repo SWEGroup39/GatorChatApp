@@ -391,7 +391,28 @@ func editName(w http.ResponseWriter, r *http.Request) {
 }
 
 func editPass(w http.ResponseWriter, r *http.Request) {
+	log.Println("Editing a Username (PUT)")
+	w.Header().Set("Content-Type", "application/json")
 
+	params := mux.Vars(r)
+
+	var user UserAccount
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Password", hashPassword(user.Password))
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
+
+	log.Println("Password edited successfully")
 }
 
 // HARD DELETES ALL MESSAGES WITH THE MATCHING SENDER AND RECEIVER ID (EFFECTIVELY CLEARS AN ENTIRE CONVERSATION)
