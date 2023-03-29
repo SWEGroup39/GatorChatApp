@@ -98,8 +98,11 @@
 <hr>
 
  ### Entire Team:
-  - 
-
+  - Connected Frontend login page with the Backend function to receive and validate a user's login information.
+  - Began to integrate long polling into the **getConversation** function which will allow for real-time message updates.
+  - Integrated the **deleteSpecificMessage** function into the message window.
+  - Used the **getUser** function to retrieve a user from the database, display their personal information (name, conversation list, messages).
+ 
 <hr>
 
 ### Unit Tests Conducted for Backend
