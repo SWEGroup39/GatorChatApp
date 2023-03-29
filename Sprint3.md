@@ -44,10 +44,14 @@
    
    
   **Cypress Tests**:
-     -Test6LoginPost: This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard component. This test is mainly to test the API and whether a user is authenticated or not. 
-     -Test7Home: This test visits the home page of the application and clicks on the about us button which routes the user to the about us page. This test is mainly to test routing.
-     -Test8GetStarted: This test visits the home page and clicks on the Get Started button which gets routed to the sign up page. This test also tests the routing functionality.
-     -Test9SignUpPost: This test creates a user with an email, username, and password and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test routing and the POST Api call. 
+     **Test6LoginPost:**
+      - This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard     component. This test is mainly to test the API and whether a user is authenticated or not. 
+     **Test7Home:**
+      - This test visits the home page of the application and clicks on the about us button which routes the user to the about us page. This test is mainly to test routing.
+     **Test8GetStarted:**
+      - This test visits the home page and clicks on the Get Started button which gets routed to the sign up page. This test also tests the routing functionality.
+     **Test9SignUpPost:**
+      - This test creates a user with an email, username, and password and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test routing and the POST Api call. 
 
 
 <hr>
