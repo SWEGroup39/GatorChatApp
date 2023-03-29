@@ -2,12 +2,16 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -17,9 +21,9 @@ import (
 func TestCreateMessage(t *testing.T) {
 	// CREATE A NEW USERMESSAGE STRUCT THAT WILL BE USED TO TEST THE POST
 	message := UserMessage{
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
-		Message:     "Hello",
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific hello",
 	}
 
 	// TURN THE STRUCT INTO A JSON
@@ -60,7 +64,6 @@ func TestCreateMessage(t *testing.T) {
 	expectedResponse := UserMessage{
 		// NOTE: THE GORM.MODEL VALUES ARE HARDCODED TO JUST BE EQUAL TO THE VALUES IN RESPONSESTRUCT
 		// THIS WAS DONE BECAUSE IT IS NOT POSSIBLE TO HARDCODE THE TIME (TOO SPECIFIC)
-		// ALSO, THE ID IS ALWAYS ALTERING WHICH MAKES HARDCODING THE ACTUAL ID DIFFICULT
 		// THESE PARAMETERS ARE HANDLED BY GORM, SO IT CAN BE ASSUMED THAT THESE ARE ALWAYS VALID
 		Model: gorm.Model{
 			ID:        responseStruct.ID,
@@ -68,9 +71,9 @@ func TestCreateMessage(t *testing.T) {
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
-		Message:     "Hello",
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific hello",
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -80,72 +83,31 @@ func TestCreateMessage(t *testing.T) {
 	}
 
 	// REMOVE THAT MESSAGE ONCE TEST IS DONE
-	deleteSingleTestMessage("Hello")
+	// PASS IN THE GORM ID
+	deleteTestMessage(responseStruct.ID)
 }
 
 // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
-func createTestConversation() {
-	messageTo0002 := UserMessage{
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
-		Message:     "Testing",
-	}
-
-	messageTo0001 := UserMessage{
-		Sender_ID:   "0002",
-		Receiver_ID: "0001",
-		Message:     "Testing_2",
-	}
-
-	result := userMessagesDb.Create(&messageTo0002)
-
-	if result.Error != nil {
-		fmt.Println("Error with creating test message one.")
-		return
-	}
-
-	result = userMessagesDb.Create(&messageTo0001)
-
-	if result.Error != nil {
-		fmt.Println("Error with creating test message two.")
-		return
-	}
-}
-
-// CLEARS THE TEST DATA AFTER TEST
-func deleteTestConversation() {
-	var userMessage UserMessage
-	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ? AND message = ?", "0001", "0002", "Testing").Unscoped().Delete(&userMessage)
-	if result.Error != nil {
-		fmt.Println("Error with deleting test message one.")
-		return
-	}
-	result = userMessagesDb.Where("sender_id = ? AND receiver_id = ? AND message = ?", "0002", "0001", "Testing_2").Unscoped().Delete(&userMessage)
-	if result.Error != nil {
-		fmt.Println("Error with creating test message two.")
-		return
-	}
-}
-
-// GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
-func createSingleTestMessage() {
+func createTestMessage(sender string, receiver string, mess string) (uint, error) {
 	testMessage := UserMessage{
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
-		Message:     "Testing",
+		Sender_ID:   sender,
+		Receiver_ID: receiver,
+		Message:     mess,
 	}
 
 	result := userMessagesDb.Create(&testMessage)
 	if result.Error != nil {
-		fmt.Println("Error with creating single test message.")
-		return
+		return 0, result.Error
 	}
+
+	return testMessage.ID, nil
 }
 
 // CLEARS THE TEST DATA AFTER TEST
-func deleteSingleTestMessage(message string) {
+// PERFORMS A HARD DELETE AS WE DO NOT WANT THESE TEST MESSAGES BEING SOFT DELETED (WILL STAY AROUND)
+func deleteTestMessage(messageID uint) {
 	var userMessage UserMessage
-	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ? AND message = ?", "0001", "0002", message).Unscoped().Delete(&userMessage)
+	result := userMessagesDb.Where("ID = ?", messageID).Unscoped().Delete(&userMessage)
 	if result.Error != nil {
 		fmt.Println("Error with deleting the single test message.")
 		return
@@ -154,10 +116,13 @@ func deleteSingleTestMessage(message string) {
 
 // THIS TEST RETRIEVES ALL THE MESSAGES BETWEEN TWO PEOPLE
 func TestGetConversation(t *testing.T) {
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestGetConversation")
 
-	createTestConversation()
+	secondID, _ := createTestMessage("9999", "9998", "Specific other message for TestGetConversation")
 
-	r, err := http.NewRequest("GET", "/messages/0001/0002", nil)
+	url := "/messages/" + "9998" + "/" + "9999"
+
+	r, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -165,8 +130,8 @@ func TestGetConversation(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": "9998",
+		"id_2": "9999",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -186,25 +151,25 @@ func TestGetConversation(t *testing.T) {
 	expectedResponse := []UserMessage{
 		{
 			Model: gorm.Model{
-				ID:        responseStruct[0].ID,
+				ID:        firstID,
 				CreatedAt: responseStruct[0].CreatedAt,
 				UpdatedAt: responseStruct[0].UpdatedAt,
 				DeletedAt: responseStruct[0].DeletedAt,
 			},
-			Sender_ID:   "0001",
-			Receiver_ID: "0002",
-			Message:     "Testing",
+			Sender_ID:   "9998",
+			Receiver_ID: "9999",
+			Message:     "Specific message for TestGetConversation",
 		},
 		{
 			Model: gorm.Model{
-				ID:        responseStruct[1].ID,
+				ID:        secondID,
 				CreatedAt: responseStruct[1].CreatedAt,
 				UpdatedAt: responseStruct[1].UpdatedAt,
 				DeletedAt: responseStruct[1].DeletedAt,
 			},
-			Sender_ID:   "0002",
-			Receiver_ID: "0001",
-			Message:     "Testing_2",
+			Sender_ID:   "9999",
+			Receiver_ID: "9998",
+			Message:     "Specific other message for TestGetConversation",
 		},
 	}
 
@@ -212,52 +177,65 @@ func TestGetConversation(t *testing.T) {
 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
 	}
 
-	deleteTestConversation()
+	deleteTestMessage(firstID)
+	deleteTestMessage(secondID)
 }
 
-// THIS TEST SEARCHES FOR A CREATED MESSAGE
-func TestSearchMessage(t *testing.T) {
-	createSingleTestMessage()
+// THIS TEST SEARCHES FOR A CREATED MESSAGE ACROSS ALL CONVERSATIONS
+func TestSearchMessageAll(t *testing.T) {
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessageAll")
+	secondID, _ := createTestMessage("9996", "9997", "Specific message for TestSearchMessageAll")
 
-	r, err := http.NewRequest("GET", "/messages/Testing", nil)
+	searchMes := UserMessage{
+		Message: "Specific message for TestSearchMessageAll",
+	}
+
+	requestBody, err := json.Marshal(searchMes)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("POST", "/messages/searchAll", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
 
 	w := httptest.NewRecorder()
 
-	vars := map[string]string{
-		"search": "Testing",
-	}
-
-	r = mux.SetURLVars(r, vars)
-
-	searchMessage(w, r)
+	searchAllConversations(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
 	}
 
-	// this is what the request returns
 	var responseStruct []UserMessage
 	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal response body: %s", err)
 	}
 
-	//we need to make a matching datatype, in this case a slice of usermessage structs
-
 	expectedResponse := []UserMessage{
 		{
 			Model: gorm.Model{
-				ID:        responseStruct[0].ID,
+				ID:        firstID,
 				CreatedAt: responseStruct[0].CreatedAt,
 				UpdatedAt: responseStruct[0].UpdatedAt,
 				DeletedAt: responseStruct[0].DeletedAt,
 			},
-			Sender_ID:   "0001",
-			Receiver_ID: "0002",
-			Message:     "Testing",
+			Sender_ID:   "9998",
+			Receiver_ID: "9999",
+			Message:     "Specific message for TestSearchMessageAll",
+		},
+		{
+			Model: gorm.Model{
+				ID:        secondID,
+				CreatedAt: responseStruct[1].CreatedAt,
+				UpdatedAt: responseStruct[1].UpdatedAt,
+				DeletedAt: responseStruct[1].DeletedAt,
+			},
+			Sender_ID:   "9996",
+			Receiver_ID: "9997",
+			Message:     "Specific message for TestSearchMessageAll",
 		},
 	}
 
@@ -266,23 +244,27 @@ func TestSearchMessage(t *testing.T) {
 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
 	}
 
-	deleteSingleTestMessage("Testing")
+	deleteTestMessage(firstID)
+	deleteTestMessage(secondID)
 }
 
-// THIS TEST EDITS A CREATED MESSAGE
-func TestEditMessage(t *testing.T) {
-	createSingleTestMessage()
+// THIS TEST SEARCHES FOR A SPECIFIC MESSAGE BETWEEN A SENDER AND USER
+func TestSearchMessage(t *testing.T) {
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessage")
+	secondID, _ := createTestMessage("9996", "9997", "Specific other message for TestSearchMessage")
 
-	newMes := UserMessage{
-		Message: "Update",
+	searchMes := UserMessage{
+		Message: "Specific message for TestSearchMessage",
 	}
 
-	requestBody, err := json.Marshal(newMes)
+	requestBody, err := json.Marshal(searchMes)
 	if err != nil {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	r, err := http.NewRequest("PUT", "/messages/0001/0002/Testing", bytes.NewBuffer(requestBody))
+	url := "/messages/" + "9998" + "/" + "9999" + "/" + "search"
+
+	r, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -290,9 +272,71 @@ func TestEditMessage(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1":         "0001",
-		"id_2":         "0002",
-		"inputMessage": "Testing",
+		"id_1": "9998",
+		"id_2": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	searchOneConversation(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct []UserMessage
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := []UserMessage{
+		{
+			Model: gorm.Model{
+				ID:        firstID,
+				CreatedAt: responseStruct[0].CreatedAt,
+				UpdatedAt: responseStruct[0].UpdatedAt,
+				DeletedAt: responseStruct[0].DeletedAt,
+			},
+			Sender_ID:   "9998",
+			Receiver_ID: "9999",
+			Message:     "Specific message for TestSearchMessage",
+		},
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestMessage(firstID)
+	deleteTestMessage(secondID)
+}
+
+// THIS TEST EDITS A CREATED MESSAGE
+func TestEditMessage(t *testing.T) {
+	firstID, _ := createTestMessage("9998", "9999", "This is a specific message for firstID in TestEditMessage")
+
+	newMes := UserMessage{
+		Message: "Specific updated message for TestEditMessge",
+	}
+
+	requestBody, err := json.Marshal(newMes)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	url := "/messages/" + fmt.Sprint(firstID)
+
+	r, err := http.NewRequest("PUT", url, bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": fmt.Sprint(firstID),
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -311,14 +355,14 @@ func TestEditMessage(t *testing.T) {
 
 	expectedResponse := UserMessage{
 		Model: gorm.Model{
-			ID:        responseStruct.ID,
+			ID:        firstID,
 			CreatedAt: responseStruct.CreatedAt,
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
 		},
-		Sender_ID:   "0001",
-		Receiver_ID: "0002",
-		Message:     "Update",
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific updated message for TestEditMessge",
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -326,14 +370,15 @@ func TestEditMessage(t *testing.T) {
 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
 	}
 
-	deleteSingleTestMessage("Update")
+	deleteTestMessage(firstID)
 }
 
 // THIS TEST DELETES A CREATED MESSAGE
 func TestDeleteSpecificMessage(t *testing.T) {
-	createSingleTestMessage()
+	firstID, _ := createTestMessage("9998", "9999", "This is a very specific message that can't possibly be accidentally replicated outside of this test")
 
-	r, err := http.NewRequest("DELETE", "/messages/0001/0002/Testing", nil)
+	url := "/messages/" + fmt.Sprint(firstID)
+	r, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -341,9 +386,7 @@ func TestDeleteSpecificMessage(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1":         "0001",
-		"id_2":         "0002",
-		"inputMessage": "Testing",
+		"id": fmt.Sprint(firstID),
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -357,20 +400,24 @@ func TestDeleteSpecificMessage(t *testing.T) {
 
 	// TRY TO LOOK FOR THE MESSAGE AGAIN
 	var userMessage UserMessage
-	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ? AND message = ?", "0001", "0002", "Testing").First(&userMessage)
+	result := userMessagesDb.Where("id = ?", fmt.Sprint(firstID)).First(&userMessage)
 
 	// THE MESSAGE SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
 	if result.Error == nil {
 		t.Errorf("Expected message to be deleted, but it still exists.")
 		return
 	}
+
+	deleteTestMessage(firstID)
 }
 
 // THIS TEST DELETES AN ENTIRE CONVERSATION BETWEEN TWO PEOPLE
 func TestDeleteConversation(t *testing.T) {
-	createTestConversation()
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for firstID")
+	secondID, _ := createTestMessage("9999", "9998", "Specific message for secondID")
 
-	r, err := http.NewRequest("DELETE", "/messages/0001/0002", nil)
+	url := "/messages/" + fmt.Sprint(firstID) + "/" + fmt.Sprint(secondID)
+	r, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -378,8 +425,8 @@ func TestDeleteConversation(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": "9998",
+		"id_2": "9999",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -392,21 +439,91 @@ func TestDeleteConversation(t *testing.T) {
 
 	// TRY TO LOOK FOR A MESSAGE
 	var userMessage UserMessage
-	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ?", "0001", "0002").First(&userMessage)
+	result := userMessagesDb.Where("sender_id = ? AND receiver_id = ?", "9998", "9999").First(&userMessage)
 
 	// THE CONVERSATION SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
 	if result.Error == nil {
 		t.Errorf("Expected conversation to be deleted, but it still exists.")
 		return
 	}
+
+	deleteTestMessage(firstID)
+	deleteTestMessage(secondID)
+}
+
+// THIS TEST DELETES A MESSAGE BETWEEN TWO PEOPLE THEN UNDOES THE DELETE
+func TestUndoDelete(t *testing.T) {
+	// CREATE A MESSAGE
+	firstID, _ := createTestMessage("9998", "9999", "Specific undo message for firstID")
+
+	// DELETE IT
+	var userMessage UserMessage
+	result := userMessagesDb.Where("ID = ?", firstID).Delete(&userMessage)
+	if result.Error != nil {
+		fmt.Println("Error with deleting the single test message.")
+		return
+	}
+
+	// CALL THE UNDO FUNCTION
+	url := "/messages/undo/" + "9998"
+	r, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9998",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	//CALL UNDO
+	undoDelete(w, r)
+
+	//VERIFY IT IS RIGHT BY CHECKING THE MESSAGE'S DELETEDAT AS NULL
+
+	// TURN THE JSON BACK INTO A STRUCT
+	var responseStruct UserMessage
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+		return
+	}
+
+	expectedResponse := UserMessage{
+		// NOTE: WE ARE TESTING IF DELETEDAT IS NULL NOW
+		Model: gorm.Model{
+			ID:        firstID,
+			CreatedAt: responseStruct.CreatedAt,
+			UpdatedAt: responseStruct.UpdatedAt,
+			DeletedAt: gorm.DeletedAt{
+				Time:  time.Time{},
+				Valid: false,
+			},
+		},
+		Sender_ID:   "9998",
+		Receiver_ID: "9999",
+		Message:     "Specific undo message for firstID",
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+		return
+	}
+
+	deleteTestMessage(firstID)
 }
 
 // THIS TEST CREATES A NEW USER ACCOUNT
 func TestCreateUserAccount(t *testing.T) {
 	user := UserAccount{
-		Username:              "user",
-		Password:              "pass",
-		User_ID:               "0001",
+		Username:              "unitTestUser",
+		Password:              "unitTestPassword",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -435,9 +552,11 @@ func TestCreateUserAccount(t *testing.T) {
 	}
 
 	expectedResponse := UserAccount{
-		Username:              "user",
-		Password:              "pass",
-		User_ID:               "0001",
+		Username: "unitTestUser",
+		// IT WILL RETURN THE SHA256 HASHED PASSWORD
+		Password:              "b1b348465a1b06c150af3704f5a5f81466e77826f8351422db59b40c7a13f47e",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -445,15 +564,23 @@ func TestCreateUserAccount(t *testing.T) {
 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
 	}
 
-	deleteTestUser()
+	deleteTestUser("9999")
 }
 
 // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
-func createTestUser() {
+func createTestUser(username string, password string, email string, ID string) {
+
+	//HASH THE PASSWORD
+	hashedPassword := sha256.Sum256([]byte(password))
+
+	// CONVERT IT TO A HEX STRING
+	encodedPassword := hex.EncodeToString(hashedPassword[:])
+
 	user := UserAccount{
-		Username:              "user",
-		Password:              "pass",
-		User_ID:               "0001",
+		Username:              username,
+		Password:              encodedPassword,
+		Email:                 email,
+		User_ID:               ID,
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -465,9 +592,9 @@ func createTestUser() {
 }
 
 // CLEARS THE TEST DATA AFTER TEST
-func deleteTestUser() {
+func deleteTestUser(ID string) {
 	var user UserAccount
-	result := userAccountsDb.Where("user_id = ?", "0001").Unscoped().Delete(&user)
+	result := userAccountsDb.Where("user_id = ?", ID).Unscoped().Delete(&user)
 	if result.Error != nil {
 		fmt.Println("Error with deleting the user.")
 		return
@@ -476,9 +603,9 @@ func deleteTestUser() {
 
 // THIS TEST ADDS A NEW CONVERSATION
 func TestAddConversation(t *testing.T) {
-	createTestUser()
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
-	r, err := http.NewRequest("PUT", "/api/0001/0002", nil)
+	r, err := http.NewRequest("PUT", "/api/9999/0000", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -486,8 +613,8 @@ func TestAddConversation(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
-		"id_1": "0001",
-		"id_2": "0002",
+		"id_1": "9999",
+		"id_2": "0000",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -505,10 +632,11 @@ func TestAddConversation(t *testing.T) {
 	}
 
 	expectedResponse := UserAccount{
-		Username:              "user",
-		Password:              "pass",
-		User_ID:               "0001",
-		Current_Conversations: []byte(`["0002"]`),
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: []byte(`["0000"]`),
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -516,16 +644,118 @@ func TestAddConversation(t *testing.T) {
 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
 	}
 
-	deleteTestUser()
+	deleteTestUser("9999")
 }
 
-// THIS TEST RETURNS A USER
+// THIS TEST EDITS THE USERNAME
+func TestEditName(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	newName := UserAccount{
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	requestBody, err := json.Marshal(newName)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateN/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	editName(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST EDITS THE PASSWORD
+func TestEditPass(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	newName := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "newTestPass",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	requestBody, err := json.Marshal(newName)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateP/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	editPass(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "c8eef775bc0e26d0fd2479eb35fdf0e568e6fb7ad36abd9b58198a1be248fe99",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST RETURNS A USER (BASED ON EMAIL AND PASSWORD)
 func TestGetUser(t *testing.T) {
-	createTestUser()
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	user := UserAccount{
-		Username: "user",
-		Password: "pass",
+		Email:    "unitTest@ufl.edu",
+		Password: "unitTestPass",
 	}
 
 	requestBody, err := json.Marshal(user)
@@ -533,7 +763,7 @@ func TestGetUser(t *testing.T) {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	r, err := http.NewRequest("GET", "/users/User", bytes.NewBuffer(requestBody))
+	r, err := http.NewRequest("POST", "/users/User", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -553,9 +783,10 @@ func TestGetUser(t *testing.T) {
 	}
 
 	expectedResponse := UserAccount{
-		Username:              "user",
-		Password:              "pass",
-		User_ID:               "0001",
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -564,5 +795,135 @@ func TestGetUser(t *testing.T) {
 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
 	}
 
-	deleteTestUser()
+	deleteTestUser("9999")
+}
+
+// THIS TEST RETURNS A USER (BASED ON ID)
+func TestGetUserByID(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	r, err := http.NewRequest("GET", "/users/9999", bytes.NewBuffer(nil))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	getUserByID(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST DELETES A USER
+func TestDeleteUser(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	r, err := http.NewRequest("DELETE", "/users/9999", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	deleteUser(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+		return
+	}
+
+	// TRY TO LOOK FOR THE USER AGAIN
+	var user UserAccount
+	result := userAccountsDb.Where("user_id = ?", "9999").First(&user)
+
+	// THE USER SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
+	if result.Error == nil {
+		t.Errorf("Expected user to be deleted, but it still exists.")
+		return
+	}
+}
+
+// SINCE THIS FUNCTION IS VALID IF IT RETURNS A FOUR DIGIT ID THAT DOES NOT EXIST IN THE DATABASE, THE UNIT TEST WILL BE TESTING THIS PROPERTY
+// IT IS DIFFICULT TO PREDICT THE EXPECTED ID SINCE THE DATABASE IS ALWAYS BEING UPDATED
+func TestGetNextUserID(t *testing.T) {
+
+	r, err := http.NewRequest("GET", "/users/nextID", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	r = mux.SetURLVars(r, nil)
+
+	getNextUserID(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+		return
+	}
+
+	// CHECK IF THIS ID IS NOT IN THE TABLE, FOUR DIGITS, AND LESS THAN 9996
+	var returnedID string
+
+	err = json.Unmarshal(w.Body.Bytes(), &returnedID)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	// SEE IF IT IS IN THE DATABASE
+	var user UserAccount
+	result := userAccountsDb.Where("user_id = ?", returnedID).First(&user)
+
+	if result.Error == nil {
+		t.Errorf("Expected user to not exist, but it does.")
+		return
+	}
+
+	_, err = strconv.Atoi(returnedID)
+
+	if err != nil {
+		t.Errorf("Returned ID is not numeric.")
+		return
+	}
+
+	if len(returnedID) != 4 {
+		t.Errorf("Returned ID is not four digits long.")
+		return
+	}
 }
