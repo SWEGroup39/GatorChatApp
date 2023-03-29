@@ -1,13 +1,16 @@
+import { ResourceLoader } from '@angular/compiler';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ConvoService } from 'src/app/service/convo.service';
+import { ConvoService } from './../../service/convo.service';
 import { Location } from '@angular/common';
+
 @Component({
-  selector: 'app-chat-list-component',
-  templateUrl: './chat-list-component.component.html',
-  styleUrls: ['./chat-list-component.component.css']
+  selector: 'app-chat-list',
+  templateUrl: './chat-list.component.html',
+  styleUrls: ['./chat-list.component.css']
 })
-export class ChatListComponentComponent {
+export class ChatListComponent {
+
   convos: {
     id: string,
     username: string,
