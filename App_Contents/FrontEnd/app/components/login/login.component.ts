@@ -17,12 +17,12 @@ import { Router } from '@angular/router';
 })
 
 export class LoginComponent implements OnInit {
-  @Input() username: string =``;
+  @Input() email: string =``;
   @Input() password: string = ``;
   
   submitSuccess:boolean=false;
   user: User = {
-    username :this.username,
+    email:this.email,
     password: this.password,
   
   }
@@ -41,14 +41,14 @@ export class LoginComponent implements OnInit {
 
   onGetUser():void{
 
-    this.userService.getUser(this.user.password, this.user.username).subscribe(
+    this.userService.getUser(this.user.password, this.user.email).subscribe(
       (response) => {
         this.resetForm()
         this.submitSuccess = true;
         this.isloggedIn(this.submitSuccess);
-       const { user_id, username, password } = response;
+       const { user_id, username, password, email, current_conversations } = response;
        console.log(`/dashboard/${username}/${password}`);
-       this.router.navigate(['/dashboard'], { queryParams: { email: username, password: password, id: user_id }});
+       this.router.navigate(['/dashboard'], { queryParams: { email: email, password: password, id: user_id, username: username }});
 
       },
       (error:any) => {alert(`Username or Password is incorrect! Please try again`)
@@ -86,7 +86,7 @@ export class LoginComponent implements OnInit {
     if(form != null)
     form.reset();
     this.user = {
-      username: '',
+      email: '',
       password: ''
 
     }
