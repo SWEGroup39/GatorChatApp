@@ -10,21 +10,42 @@
 <hr>
 
  ### Backend:
- - Added More Functionality to the ”UserAccount” Struct
+ - **Added More Functionality to the ”UserAccount” Struct**
     - Incorporated a **Delete User** function to allow Users to be deleted.
+    - Added an "Email" field to the UserAccount struct to allow users a more logical way of logging in.
+    - Updated the request type for "GET" functions that took in a body to be "POST" as Angular does not allow a GET request with request body.
+    - Added data validation on the **Create User** function that checks:
+      - If IDs are four digit and numerical.
+      - The email is a UF email (has @ufl.edu).
+      - The email is not already in use.
+     - Added a function that locates returns an available User ID that the Frontend can assign to a user that signs up.
+     - Added a function that returns a user's information by passing in the User ID.
+     - Updated functions that involve taking in the "Password" field to hash it using SHA-256. This is done for security purposes.
 
- - Added More Functionality to the ”UserMessage” Struct
+ - **Added More Functionality to the ”UserMessage” Struct**
     - Updated the **Edit Message** function to search for the to-be-edited message by using the unique GORM ID instead of nonunique information.
     - Updated the **Delete Specific Message** function to search for the to-be-deleted message by using the unique GORM ID instead of nonunique information.
       - Added additional logic to the **Delete Specific Message** function that will soft delete the most recently deleted message by a user and hard deletes any existing soft deleted messages.
         - This is used in the implementation of a newly added function that allows a User to undo their most recently deleted message.
+       - Added a function that will delete **ALL** soft deleted messages in the messages database (Testing Function).
+       - Added a function that will return **ALL** currently soft deleted messages in the messages database (Testing Function).
     - Fixed the **Search Message** function so it will only search for whole words instead of searching for words that match but are within a larger word.
-    - 
+    - Implemented a potential solution to making the **GetConversation** have long polling (to be incorporated into the actual application). This makes the messages appear in real-time.
+    - Implemented a WIP function that allows users to update their username (to be completed).
+    - Implemented a WIP function that allows users to update their password (to be completed).
+ 
+ - **Updated the Structure of the Backend Unit Tests**
+    - To prevent the Sprint2 issue of potentially having conflicting entries in the database that would mess up the unit tests, we made the following structural changes to ensure that all unit test results will be what is expected.
+      - Unit tests for the "UserMessage" Struct no longer have a hardcoded GORM ID but will instead take on the next auto-generated ID. Previously, since a large number was selected for the hardcoded GORM ID, subsequent messages will continue off of that large value and cut off a large chunk of potential GORM ID values.
+      - Unit tests for the "UserAccount" Struct now have reserved IDs and messages to prevent confounding users that may mess up some of the unit tests' expected values.
+        - User IDs from 9996 to 9999 have now been reserved solely for unit testing purposes. Additionally, unique messages that will not be messages by users of the app have been used as the hardcoded message.
+
+- The API Documentation Was Also Updated for All of the Above Changes.
 
 <hr>
 
 ### API Documentation
-  - The API documentation is too large to fit within Sprint2.md, so it is linked in a separate .md file below:
+  - The API documentation is too large to fit within Sprint3.md, so it is linked in a separate .md file below:
     - **The API documentation can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/API_Documentation.md)**
 
 <hr>
