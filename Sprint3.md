@@ -18,7 +18,7 @@
       - If IDs are four digit and numerical.
       - The email is a UF email (has @ufl.edu).
       - The email is not already in use.
-     - Added a function that locates returns an available User ID that the Frontend can assign to a user that signs up.
+     - Added a function that locates and returns an available User ID that the Frontend can assign to a user that signs up.
      - Added a function that returns a user's information by passing in the User ID.
      - Updated functions that involve taking in the "Password" field to hash it using SHA-256. This is done for security purposes.
 
