@@ -43,7 +43,7 @@
       - These were included in the About Us page and the Home page
    
    
- <h3>Cypress Tests<h3>
+ #Cypress Tests
     
  - **Test6LoginPost:** This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard      - component. This test is mainly to test the API and whether a user is authenticated or not.<br>
   
