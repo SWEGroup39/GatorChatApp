@@ -556,9 +556,58 @@ func TestEditName(t *testing.T) {
 	}
 
 	expectedResponse := UserAccount{
-		Username: "uuunitTestUuuser",
-		// IT WILL RETURN THE SHA256 HASHED PASSWORD
-		Password:              "b1b348465a1b06c150af3704f5a5f81466e77826f8351422db59b40c7a13f47e",
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+func TestEditPass(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	newName := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "newTestPass",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	requestBody, err := json.Marshal(newName)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateP/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	editPass(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "c8eef775bc0e26d0fd2479eb35fdf0e568e6fb7ad36abd9b58198a1be248fe99",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
 		Current_Conversations: json.RawMessage([]byte("[]")),
