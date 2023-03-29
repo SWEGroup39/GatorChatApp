@@ -5,6 +5,43 @@
 ## Work Completed in Sprint 3:
 
  ### Frontend:
+  - Changed the whole color scheme of the application to a gradient blue and orange.
+  - Added routing for the entire application. 
+    - Routed to the pages that include:
+       -Home
+       -About Us
+       -Login
+       -Sign Up
+       -Dashboard
+       -Contacts
+       -Profile
+       -Settings
+       -Conversations
+       -Notifications
+   - Additionally the login page and sign up page have form validation 
+      - A red line appears underneath the textbox if the field is left empty
+      - The login and signup button are both grayed out until all the fields are inputted
+      - If the login credentials are wrong, an alert box will pop up saying "Incorrect Username and Password! Please try again."
+      - It will then reset the form and allow the user to type his or her credentials again. 
+   - The login and sign up page both have easy access links at the bottom
+      - For the login it has New User? Sign up
+      - For the sign up page it has Already a User? Login
+   -The home page has a learn more and get started button
+      - The learn more button routes to the about us page
+      - The get started button routes to the sign up page
+   - Added a gator icon to the navigation bar
+   - The navigation bar is exists throughout the different pages of the application
+   - Finished the POST method for the login page where each user is authenticated and then redirected to the dashboard.
+   - Finished the POST method for the sign up page where after a user is successfully created they are redirected to the login page to log in with their credentials
+   - Authentication guards were added to prevent not authenticated users from accessing the dashboard component
+         - For example: if the url /dashboard is searched it will not take the user to the dashboard page if they are not logged in. 
+         - It will redirect them to the login page
+   - Once a user enters their dashboard page they have a left side bar where they can access the Notifications, Profile, Settings, Conversations, and Contacts.
+   - They also have a sign out button at the right corner of the navigation bar. 
+       - If clicked this will redirect them to the login page.
+   -Images were added to some parts of the application to make it more visually appealing. 
+      - These were included in the About Us page and the Home page
+     
 
  
 <hr>
