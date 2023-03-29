@@ -386,7 +386,7 @@ func editName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
-
+	json.NewEncoder(w).Encode(user)
 	log.Println("Username edited successfully.")
 }
 
@@ -403,7 +403,9 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Password", hashPassword(user.Password))
+	user.Password = hashPassword(user.Password)
+
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Password", user.Password)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -411,7 +413,7 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
-
+	json.NewEncoder(w).Encode(user)
 	log.Println("Password edited successfully")
 }
 
@@ -838,6 +840,5 @@ func main() {
 
 	//DELETE FUNCTION
 	r.HandleFunc("/api/users/{id}", deleteUser).Methods("DELETE")
-
 	log.Fatal(http.ListenAndServe(":8080", corsHandler(r)))
 }
