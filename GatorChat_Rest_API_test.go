@@ -2,11 +2,14 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -517,13 +520,64 @@ func TestUndoDelete(t *testing.T) {
 	deleteTestMessage(firstID)
 }
 
+func TestEditName(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	newName := UserAccount{
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	requestBody, err := json.Marshal(newName)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateN/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	editName(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username: "uuunitTestUuuser",
+		// IT WILL RETURN THE SHA256 HASHED PASSWORD
+		Password:              "b1b348465a1b06c150af3704f5a5f81466e77826f8351422db59b40c7a13f47e",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
 // THIS TEST CREATES A NEW USER ACCOUNT
 func TestCreateUserAccount(t *testing.T) {
 	user := UserAccount{
 		Username:              "unitTestUser",
 		Password:              "unitTestPassword",
 		User_ID:               "9999",
-		Email:                 "unitTest@gmail.com",
+		Email:                 "unitTest@ufl.edu",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -552,10 +606,11 @@ func TestCreateUserAccount(t *testing.T) {
 	}
 
 	expectedResponse := UserAccount{
-		Username:              "unitTestUser",
-		Password:              "unitTestPassword",
+		Username: "unitTestUser",
+		// IT WILL RETURN THE SHA256 HASHED PASSWORD
+		Password:              "b1b348465a1b06c150af3704f5a5f81466e77826f8351422db59b40c7a13f47e",
 		User_ID:               "9999",
-		Email:                 "unitTest@gmail.com",
+		Email:                 "unitTest@ufl.edu",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -568,9 +623,16 @@ func TestCreateUserAccount(t *testing.T) {
 
 // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
 func createTestUser(username string, password string, email string, ID string) {
+
+	//HASH THE PASSWORD
+	hashedPassword := sha256.Sum256([]byte(password))
+
+	// CONVERT IT TO A HEX STRING
+	encodedPassword := hex.EncodeToString(hashedPassword[:])
+
 	user := UserAccount{
 		Username:              username,
-		Password:              password,
+		Password:              encodedPassword,
 		Email:                 email,
 		User_ID:               ID,
 		Current_Conversations: []byte(`[]`),
@@ -595,7 +657,7 @@ func deleteTestUser(ID string) {
 
 // THIS TEST ADDS A NEW CONVERSATION
 func TestAddConversation(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	r, err := http.NewRequest("PUT", "/api/9999/0000", nil)
 	if err != nil {
@@ -625,8 +687,8 @@ func TestAddConversation(t *testing.T) {
 
 	expectedResponse := UserAccount{
 		Username:              "unitTestUser",
-		Password:              "unitTestPass",
-		Email:                 "unitTest@gmail.com",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
 		Current_Conversations: []byte(`["0000"]`),
 	}
@@ -639,12 +701,12 @@ func TestAddConversation(t *testing.T) {
 	deleteTestUser("9999")
 }
 
-// THIS TEST RETURNS A USER
+// THIS TEST RETURNS A USER (BASED ON EMAIL AND PASSWORD)
 func TestGetUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	user := UserAccount{
-		Email:    "unitTest@gmail.com",
+		Email:    "unitTest@ufl.edu",
 		Password: "unitTestPass",
 	}
 
@@ -674,8 +736,53 @@ func TestGetUser(t *testing.T) {
 
 	expectedResponse := UserAccount{
 		Username:              "unitTestUser",
-		Password:              "unitTestPass",
-		Email:                 "unitTest@gmail.com",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST RETURNS A USER (BASED ON ID)
+func TestGetUserByID(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	r, err := http.NewRequest("GET", "/users/9999", bytes.NewBuffer(nil))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	getUserByID(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
 		Current_Conversations: []byte(`[]`),
 	}
@@ -690,7 +797,7 @@ func TestGetUser(t *testing.T) {
 
 // THIS TEST DELETES A USER
 func TestDeleteUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@gmail.com", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
 
 	r, err := http.NewRequest("DELETE", "/users/9999", nil)
 	if err != nil {
@@ -718,7 +825,57 @@ func TestDeleteUser(t *testing.T) {
 
 	// THE USER SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
 	if result.Error == nil {
-		t.Errorf("Expected message to be deleted, but it still exists.")
+		t.Errorf("Expected user to be deleted, but it still exists.")
+		return
+	}
+}
+
+// SINCE THIS FUNCTION IS VALID IF IT RETURNS A FOUR DIGIT ID THAT DOES NOT EXIST IN THE DATABASE, THE UNIT TEST WILL BE TESTING THIS PROPERTY
+// IT IS DIFFICULT TO PREDICT THE EXPECTED ID SINCE THE DATABASE IS ALWAYS BEING UPDATED
+func TestGetNextUserID(t *testing.T) {
+
+	r, err := http.NewRequest("GET", "/users/nextID", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	r = mux.SetURLVars(r, nil)
+
+	getNextUserID(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+		return
+	}
+
+	// CHECK IF THIS ID IS NOT IN THE TABLE, FOUR DIGITS, AND LESS THAN 9996
+	var returnedID string
+
+	err = json.Unmarshal(w.Body.Bytes(), &returnedID)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	// SEE IF IT IS IN THE DATABASE
+	var user UserAccount
+	result := userAccountsDb.Where("user_id = ?", returnedID).First(&user)
+
+	if result.Error == nil {
+		t.Errorf("Expected user to not exist, but it does.")
+		return
+	}
+
+	_, err = strconv.Atoi(returnedID)
+
+	if err != nil {
+		t.Errorf("Returned ID is not numeric.")
+		return
+	}
+
+	if len(returnedID) != 4 {
+		t.Errorf("Returned ID is not four digits long.")
 		return
 	}
 }
