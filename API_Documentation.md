@@ -375,15 +375,38 @@
 
 ### ➜ Overview of  **PUT** Command for Users
 
-- The **PUT** command takes in a user and updates their conversation list by adding in the passed-in user ID.
+- The **PUT** command 
 
 ### Syntax
 
-- There is currently only one **PUT** command, and the syntax is as follows:
+- There are currently three **PUT** commands available:
 
-- ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
-
-- The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
+    - **First Option: Add Conversation**
+        - This **PUT** function takes in a user and updates their conversation list by adding in the passed-in user ID.
+        - **Example Syntax:** ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
+        - The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
+    - **Second Option: Edit Name**
+        - This **PUT** function takes in a user and changes their username based on an input
+        - **Example Syntax:** ```http://localhost:8080/api/users/updateN/[ID]```
+            - The required input is new username.
+            
+                - **Example Syntax:**
+                    ```
+                        {
+                            "username": "example",
+                        }
+                    ```
+    - **Third Option: Edit Password**
+        - This **PUT** funciton takes in a user, changes their password based on an input, and encrypts it again
+        - **Example Syntax:** ```http://localhost:8080/api/users/updateP/[ID]```
+            - The required input is new password.
+            
+                - **Example Syntax:**
+                    ```
+                        {
+                            "password": "pass",
+                        }
+                    ```
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if it is unable to locate the passed-in user or if there are errors regarding the database connection.
