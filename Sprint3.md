@@ -1,6 +1,6 @@
 # Sprint 3
 
-### [Link to Sprint 3 Video](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/API_Documentation.md)
+### [Link to Sprint 3 Video]()
 
 ## Work Completed in Sprint 3:
 
