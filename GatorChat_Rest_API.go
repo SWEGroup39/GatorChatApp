@@ -391,7 +391,7 @@ func editName(w http.ResponseWriter, r *http.Request) {
 }
 
 func editPass(w http.ResponseWriter, r *http.Request) {
-	log.Println("Editing a Username (PUT)")
+	log.Println("Editing a Password (PUT)")
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
@@ -656,6 +656,28 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("Found user successfully.")
 }
 
+func getUserInternal(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting a User (POST)")
+	w.Header().Set("Content-Type", "application/json")
+
+	var user UserAccount
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result := userAccountsDb.Model(&UserAccount{}).Where("username = ? AND password = ?", user.Username, user.Password).First(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("Found User successfully.")
+}
+
 func addConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Adding an ID to a User's Conversation List (PUT)")
 	w.Header().Set("Content-Type", "application/json")
@@ -827,6 +849,7 @@ func main() {
 	// POST FUNCTIONS
 	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
 	r.HandleFunc("/api/users/User", getUser).Methods("POST")
+	r.HandleFunc("/api/users/UserInternal", getUserInternal).Methods("POST")
 
 	// PUT FUNCTION
 	r.HandleFunc("/api/users/updateN/{id}", editName).Methods("PUT")

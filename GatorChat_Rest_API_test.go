@@ -21,9 +21,6 @@ import (
 func TestCreateMessage(t *testing.T) {
 	// CREATE A NEW USERMESSAGE STRUCT THAT WILL BE USED TO TEST THE POST
 	message := UserMessage{
-		Model: gorm.Model{
-			ID: 9900,
-		},
 		Sender_ID:   "9998",
 		Receiver_ID: "9999",
 		Message:     "Specific hello",
@@ -69,7 +66,7 @@ func TestCreateMessage(t *testing.T) {
 		// THIS WAS DONE BECAUSE IT IS NOT POSSIBLE TO HARDCODE THE TIME (TOO SPECIFIC)
 		// THESE PARAMETERS ARE HANDLED BY GORM, SO IT CAN BE ASSUMED THAT THESE ARE ALWAYS VALID
 		Model: gorm.Model{
-			ID:        9900,
+			ID:        responseStruct.ID,
 			CreatedAt: responseStruct.CreatedAt,
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
@@ -87,7 +84,7 @@ func TestCreateMessage(t *testing.T) {
 
 	// REMOVE THAT MESSAGE ONCE TEST IS DONE
 	// PASS IN THE GORM ID
-	deleteTestMessage(9900)
+	deleteTestMessage(responseStruct.ID)
 }
 
 // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
@@ -643,6 +640,108 @@ func TestAddConversation(t *testing.T) {
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST EDITS THE USERNAME
+func TestEditName(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	newName := UserAccount{
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	requestBody, err := json.Marshal(newName)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateN/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	editName(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST EDITS THE PASSWORD
+func TestEditPass(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+
+	newName := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "newTestPass",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	requestBody, err := json.Marshal(newName)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateP/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	editPass(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "c8eef775bc0e26d0fd2479eb35fdf0e568e6fb7ad36abd9b58198a1be248fe99",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
 	if !reflect.DeepEqual(responseStruct, expectedResponse) {
 		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
 	}

@@ -360,6 +360,23 @@
                         }
                     ```
 
+    - **Third Option: Get a Specific User (Internal)**: 
+        - This **POST** function returns a singular user from the users database.
+        - It will find a user that matches the credentials.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/users/UserInternal```
+         - For get, the information passed in must be through the request **body**.
+            - The required input is the user's username and password.
+            
+                - **Example Syntax:**
+                    ```
+                        {
+                            "username": "user",
+                            "password": "pass"
+                        }
+                    ```
+        - **NOTE:** _This function is temporary and will be eventually removed. Therefore, there is no unit test for this function. It is here as a temporary solution for getting a user's conversation list as the second option currently cannot be used to extract the returned user's conversation list. The original getUser is called, and then the username and (hashed) password that was returned is then used to call this internal function._
+
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
 - The **Create User** function must have:
@@ -375,42 +392,48 @@
 
 ### ➜ Overview of  **PUT** Command for Users
 
-- The **PUT** command 
+- The **PUT** command takes in a user and updates their conversation list by adding in the passed-in user ID.
 
 ### Syntax
 
 - There are currently three **PUT** commands available:
 
-    - **First Option: Add Conversation**
-        - This **PUT** function takes in a user and updates their conversation list by adding in the passed-in user ID.
-        - **Example Syntax:** ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
+    - **First Option: Edit Current Conversation**:
+        - This **PUT** function adds an ID to a user's current conversation list.
+         - **Example Syntax:**
+        - ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
         - The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
-    - **Second Option: Edit Name**
-        - This **PUT** function takes in a user and changes their username based on an input
-        - **Example Syntax:** ```http://localhost:8080/api/users/updateN/[ID]```
-            - The required input is new username.
-            
+        - If all requirements are met, the updated user object will be returned along with a "ID added successfully." console log message.
+
+     - **Second Option: Edit Username**:
+        - This **PUT** function edits a user's username.
+         - **Example Syntax:**
+            - ```http://localhost:8080/api/users/updateN/[ID]```
+            - The required input is the user's new username.
                 - **Example Syntax:**
                     ```
                         {
-                            "username": "example",
-                        }
-                    ```
-    - **Third Option: Edit Password**
-        - This **PUT** funciton takes in a user, changes their password based on an input, and encrypts it again
-        - **Example Syntax:** ```http://localhost:8080/api/users/updateP/[ID]```
-            - The required input is new password.
-            
-                - **Example Syntax:**
-                    ```
-                        {
-                            "password": "pass",
+                            "username": "test"
                         }
                     ```
 
+      - **Third Option: Edit Password**:
+        - This **PUT** function edits a user's password.
+         - **Example Syntax:**
+            - ```http://localhost:8080/api/users/updateP/[ID]```
+            - The required input is the user's new password.
+                - **Example Syntax:**
+                    ```
+                        {
+                            "password": "pass"
+                        }
+                    ```
+            - **NOTE:** _In the future, this function will require the user's current password as well in order to verify that the user knows the current password before trying to change it._
+
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if it is unable to locate the passed-in user or if there are errors regarding the database connection.
-- If all requirements are met, the updated user object will be returned along with a "ID added successfully." console log message.
+    - This error will be thrown if the **Edit Username** or **Edit Password** functions are not able to locate the passed-in user.
+        - Otherwise, the username or password will be updated and will return the newly updated user object along with a successful console log message.
 ---
 
 <a id="GET_Users"></a>
