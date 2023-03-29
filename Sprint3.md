@@ -31,7 +31,7 @@
        - Added a function that will return **ALL** currently soft deleted messages in the messages database (Testing Function).
     - Fixed the **Search Message** function so it will only search for whole words instead of searching for words that match but are within a larger word.
     - Implemented a potential solution to making the **GetConversation** have long polling (to be incorporated into the actual application). This makes the messages appear in real-time.
-    - Implemented a WIP function that allows users to update their username (to be completed).
+    - Implemented a function that allows users to update their username.
     - Implemented a WIP function that allows users to update their password (to be completed).
  
  - **Updated the Structure of the Backend Unit Tests**
@@ -66,6 +66,8 @@
      - Undoing a delete.
      - Creating a user account.
      - Editing a user's conversation list by adding a new ID.
+     - Updating a user's username.
+     - Updating a user's password (WIP).
      - Retrieving a user (by passing in login credentials).
      - Retrieving a user (by passing in the user's unique ID).
      - Deleting a user.
