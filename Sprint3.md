@@ -42,7 +42,7 @@
    -Images were added to some parts of the application to make it more visually appealing. 
       - These were included in the About Us page and the Home page
    
-   
+<a id="Cypress"></a>
  ## Cypress Tests
     
  - **Test6LoginPost:** This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard      - component. This test is mainly to test the API and whether a user is authenticated or not.<br>
@@ -124,7 +124,7 @@
 
 ### Cypress Test Conducted for Frontend
 - All the front end test cases were created using Cypress
-- There are 5 tests in total:
+- There were five tests created in Sprint 2 (tests created in Sprint 3 are found [here](#Cypress):
    - Tests 1-4 deal with the chat message window and Test 5 deals with the Login Page
      - There are a mixture of only front-end functionality and API testing cases including:
      - **Test 1**: Checks if local host for the chat window can be accessed, types in the message "Hello! Cypress" and clicks the send button. This test case only checks the front-end functionality and not the API call. There are designated unit tests for the API.
