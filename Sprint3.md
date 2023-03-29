@@ -41,19 +41,7 @@
        - If clicked this will redirect them to the login page.
    -Images were added to some parts of the application to make it more visually appealing. 
       - These were included in the About Us page and the Home page
-   
-<a id="Cypress"></a>
- ## Cypress Tests
-    -NOTE: These cypress tests include the past test cases as well. They are an updated verson plus test for additional features. The old cypress tests test the old functionality when the application was not integrated.
- - **Test6LoginPost:** This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard      - component. This test is mainly to test the API and whether a user is authenticated or not.<br>
-  
- - **Test7Home:** This test visits the home page of the application and clicks on the about us button which routes the user to the about us page. This test is mainly to test routing.<br>
-  
- - **Test8GetStarted:** This test visits the home page and clicks on the Get Started button which gets routed to the sign up page. This test also tests the routing functionality.<br>
-  
- - **Test9SignUpPost:** This test creates a user with an email, username, and password and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test routing and the POST Api call. <br>
 
-<a href = "https://github.com/SWEGroup39/GatorChatApp/tree/Integrated-Front-End-Branch/Cypress%20Tests">Link to Cypress Tests <a>
 <hr>
 
  ### Backend:
@@ -125,18 +113,16 @@
   - **The Go Test file can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/GatorChat_Rest_API_test.go)**
    - _**Note:** This leads to the API folder in the "main" branch. To see the full commit history, visit the working [Back-End branch.](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch)_
 
-### Cypress Test Conducted for Frontend
-- All the front end test cases were created using Cypress
-- There were five tests created in Sprint 2 (tests created in Sprint 3 are found [here](#Cypress):
-   - Tests 1-4 deal with the chat message window and Test 5 deals with the Login Page
-     - There are a mixture of only front-end functionality and API testing cases including:
-     - **Test 1**: Checks if local host for the chat window can be accessed, types in the message "Hello! Cypress" and clicks the send button. This test case only checks the front-end functionality and not the API call. There are designated unit tests for the API.
-     - **Test 2**: Checks if local host for the chat window can be accessed, types in the search bar "Hello" and clicks the search button. This test case ony checks the front-end functionality. It does not account for the API call.
-     - **Test 3**: This is a unit test case for the search function where it sends a GET request and expects a response of status 200 (OK). This test case ensures that the API call of GET is properly functioning when the search function is running.
-     - **Test 4**: This is a unit test case for the send message function where it sends a message of How is the weather along with the message id, receiver id, and sender id.    -Sends a POST request and expects a response where the message is posted to the chat window.
-       - This test case ensures that the API call of POST is functioning when the send message function is called
-  - **Test 5**: Checks if local host for the login page can be accessed, types in a username: harry.k and password: harry and clicks the login button. This test case only checks the front-end functionality and not the API call because that has not been implemented yet.
-- In summary, Tests 1, 2, and 5 are check the front-end functionality and Tests 3,4 are unit tests for the chat window functions. 
-- All the tests cases ensure that both the front and back ends are correctly connected therefore checks if the app is correctly integrated. 
-- These test files can be found in the FRONT-END branch in the folder Cypress Tests
+ ### Cypress Tests
+ - **_NOTE: These cypress tests include the past test cases as well. They are an updated verson plus test for additional features. The old cypress tests test the old functionality when the application was not integrated._**
+
+ - **Test6LoginPost:** This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard      - component. This test is mainly to test the API and whether a user is authenticated or not.<br>
+  
+ - **Test7Home:** This test visits the home page of the application and clicks on the about us button which routes the user to the about us page. This test is mainly to test routing.<br>
+  
+ - **Test8GetStarted:** This test visits the home page and clicks on the Get Started button which gets routed to the sign up page. This test also tests the routing functionality.<br>
+  
+ - **Test9SignUpPost:** This test creates a user with an email, username, and password and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test routing and the POST Api call. <br>
+
+<a href = "https://github.com/SWEGroup39/GatorChatApp/tree/Integrated-Front-End-Branch/Cypress%20Tests">Link to Cypress Tests <a>
 
