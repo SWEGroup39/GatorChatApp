@@ -139,4 +139,4 @@
 - In summary, Tests 1, 2, and 5 are check the front-end functionality and Tests 3,4 are unit tests for the chat window functions. 
 - All the tests cases ensure that both the front and back ends are correctly connected therefore checks if the app is correctly integrated. 
 - These test files can be found in the FRONT-END branch in the folder Cypress Tests
-- **Link to Cypress Tests**: <a href="https://github.com/SWEGroup39/GatorChatApp/tree/Front-End-Branch/CypressTesting">Cypress Tests</a>
+
