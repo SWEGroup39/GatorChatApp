@@ -19,6 +19,7 @@
        -Settings
        -Conversations
        -Notifications
+   -Added router paramters to the components that needed it, all the information that is needed, depending on the component, is there (username, password,      id, email,other users ids, etc)
    - Additionally the login page and sign up page have form validation 
       - A red line appears underneath the textbox if the field is left empty
       - The login and signup button are both grayed out until all the fields are inputted
