@@ -19,7 +19,16 @@
        -Settings
        -Conversations
        -Notifications
-   -Added router paramters to the components that needed it, all the information that is needed, depending on the component, is there (username, password,      id, email,other users ids, etc)
+   - Added router paramters to the components that needed it, all the information that is needed, depending on the component, is there (username,                        password, id, email,other users ids, etc)
+   - Implemented chat-list component
+      - Displays all the conversations the current user is having in a list
+      - The conversations are displayed as the usernames of the other users (the friends)
+      - Clicking on the username works as a button that reroutes to the messages component withe the specific conversation
+   - Added cosmetic/practical chanegs to the messages component
+      - Changed color scheme to match more the rest of the app
+      - Added Date Separators to distinguish from what date the messages are -> only shows when new messages are from different date {Month, Day, Year}
+      - Added a toggle menu that appear when clicking a message and disappears when clicking close 
+        - It has option to delete a message (deletes from the chatMessages list and from the back end at the same time)
    - Additionally the login page and sign up page have form validation 
       - A red line appears underneath the textbox if the field is left empty
       - The login and signup button are both grayed out until all the fields are inputted
