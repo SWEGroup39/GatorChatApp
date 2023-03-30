@@ -5,6 +5,7 @@
 ## Work Completed in Sprint 3:
 
  ### Frontend:
+  - Customized user experience based on user credentials -> no longer need to hardcode to access different user conversations 
   - Changed the whole color scheme of the application to a gradient blue and orange.
   - Added routing for the entire application. 
     - Routed to the pages that include:
