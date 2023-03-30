@@ -1,6 +1,6 @@
 # Sprint 3
 
-### [Link to Sprint 3 Video](https://www.youtube.com/watch?v=QF5bCbxjtxU)
+### [Link to Sprint 3 Video](https://www.youtube.com/watch?v=uT1i3iMAUAQ)
 
 ## Work Completed in Sprint 3:
 
