@@ -1,0 +1,4 @@
+**Sprint 4 Progress By Ria**:
+ - Fixed the guard issue where if the page is refreshed and a user is logged in that page won't be redirected to the login page.
+  - As long as the user does not click the sign out button or close the browser tab that user session will continue and the user will have access to his or her dashboard. (4/2/23)
+  
