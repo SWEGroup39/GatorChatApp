@@ -392,8 +392,6 @@
 
 ### ➜ Overview of  **PUT** Command for Users
 
-- The **PUT** command takes in a user and updates their conversation list by adding in the passed-in user ID.
-
 ### Syntax
 
 - There are currently three **PUT** commands available:
