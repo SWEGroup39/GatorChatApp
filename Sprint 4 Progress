@@ -4,3 +4,4 @@
  - Added bootstrap template to profile page and filled out the user information mostly.
    - Need the backend to create functions so that the front can do API calls to retrieve this info.
     - The edit function is somewhat implemented. Needs to be able to store information even after page refresh. 
+- Fixed the routing from dashboard side tabs back to the dashboard for each specific user.
