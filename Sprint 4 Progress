@@ -1,4 +1,6 @@
 **Sprint 4 Progress By Ria**:
  - Fixed the guard issue where if the page is refreshed and a user is logged in that page won't be redirected to the login page.
   - As long as the user does not click the sign out button or close the browser tab that user session will continue and the user will have access to his or her dashboard. (4/2/23)
-  
+ - Added bootstrap template to profile page and filled out the user information mostly.
+   - Need the backend to create functions so that the front can do API calls to retrieve this info.
+    - The edit function is somewhat implemented. Needs to be able to store information even after page refresh. 
