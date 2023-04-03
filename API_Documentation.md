@@ -402,6 +402,7 @@
         - ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
         - The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
         - If all requirements are met, the updated user object will be returned along with a "ID added successfully." console log message.
+        
      - **Second Option: Edit Username**:
         - This **PUT** function edits a user's username.
          - **Example Syntax:**
