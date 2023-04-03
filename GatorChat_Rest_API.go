@@ -37,8 +37,6 @@ type UserMessage struct {
 	Sender_ID string `json:"sender_id"`
 	//USER ID OF WHOEVER RECEIVED THE MESSAGE
 	Receiver_ID string `json:"receiver_id"`
-
-	//MAYBE ADD A USERMESSAGE SLICE TO KEEP TRACK OF GROUP CHATS?
 }
 
 // USER STRUCT FOR EACH USER TABLE ENTRY
@@ -700,6 +698,14 @@ func addConversation(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	
+	// CHECK IF CONVERSATION ALREADY EXISTS
+	for _, v := range conversationSlice {
+		if v == params["id_2"] {
+			http.Error(w, "Conversation already exists.", http.StatusBadRequest)
+			return
+		}
 	}
 
 	// ADD THE NEW ID TO THE STRING SLICE
