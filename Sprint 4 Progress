@@ -6,3 +6,6 @@
     - The edit function is somewhat implemented. Needs to be able to store information even after page refresh. 
 - Fixed the routing from dashboard side tabs back to the dashboard for each specific user.
 - Added footer - needs more styling
+ - Fixed sign up page create user function where it integrates the back end user ID function
+  - Fixed the query params so that the url does not display sensitive user credentials
+  
