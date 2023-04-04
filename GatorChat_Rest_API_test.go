@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
@@ -874,56 +873,6 @@ func TestDeleteUser(t *testing.T) {
 	// THE USER SHOULD NOT BE IN THE DATABASE ANYMORE. IF IT CAN FIND IT, RETURN AN ERROR
 	if result.Error == nil {
 		t.Errorf("Expected user to be deleted, but it still exists.")
-		return
-	}
-}
-
-// SINCE THIS FUNCTION IS VALID IF IT RETURNS A FOUR DIGIT ID THAT DOES NOT EXIST IN THE DATABASE, THE UNIT TEST WILL BE TESTING THIS PROPERTY
-// IT IS DIFFICULT TO PREDICT THE EXPECTED ID SINCE THE DATABASE IS ALWAYS BEING UPDATED
-func TestGetNextUserID(t *testing.T) {
-
-	r, err := http.NewRequest("GET", "/users/nextID", nil)
-	if err != nil {
-		t.Fatalf("Failed to create request: %s", err)
-	}
-
-	w := httptest.NewRecorder()
-
-	r = mux.SetURLVars(r, nil)
-
-	getNextUserID(w, r)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-		return
-	}
-
-	// CHECK IF THIS ID IS NOT IN THE TABLE, FOUR DIGITS, AND LESS THAN 9996
-	var returnedID string
-
-	err = json.Unmarshal(w.Body.Bytes(), &returnedID)
-	if err != nil {
-		t.Fatalf("Failed to unmarshal response body: %s", err)
-	}
-
-	// SEE IF IT IS IN THE DATABASE
-	var user UserAccount
-	result := userAccountsDb.Where("user_id = ?", returnedID).First(&user)
-
-	if result.Error == nil {
-		t.Errorf("Expected user to not exist, but it does.")
-		return
-	}
-
-	_, err = strconv.Atoi(returnedID)
-
-	if err != nil {
-		t.Errorf("Returned ID is not numeric.")
-		return
-	}
-
-	if len(returnedID) != 4 {
-		t.Errorf("Returned ID is not four digits long.")
 		return
 	}
 }

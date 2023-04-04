@@ -327,7 +327,10 @@
 
         - For post, the information passed in must be through the request **body**.
         - The required inputs are a username, a password, a user ID, an email, and a list of current conversations that the user is in (typically left blank).
-        - **NOTE:** The ID value should be manually inserted and must be **a number between 0000 and 9995** (9996 to 9999 are being reserved for the unit tests).
+        - **NOTE:** 
+            - The ID value should be manually inserted and must be **a number between 0000 and 9995** (9996 to 9999 are being reserved for the unit tests).
+                - This function will handle finding a valid ID for the new user in the Backend by using an internal function called getNextUserID().
+                - Therefore, the User_ID field can be left blank.
         
             - **Example Syntax:**
                 ```
@@ -440,7 +443,7 @@
 - The **GET** command returns information about users that have been created with a **POST** request.
 
 ### Syntax
-- There are currently three **GET** function available:
+- There are currently two **GET** functions available:
 
     - **First Option: Get All Users**:
         - This **GET** function returns all users in the users database.
@@ -448,12 +451,7 @@
         ```http://localhost:8080/api/users```
         - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend._
 
-    - **Second Option: Get Next ID**:
-        - This **GET** function returns a valid ID that has not been used inserted yet in the users database.
-            - **Example Syntax:**
-        ```http://localhost:8080/api/users/nextID```
-
-    - **Third Option: Get User by ID**:
+    - **Second Option: Get User by ID**:
         - This **GET** function returns a user from the users database based on the user's unique ID.
             - **Example Syntax:**
         ```http://localhost:8080/api/users/[ID]```
@@ -461,7 +459,6 @@
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
 - The **"Get All Users"** function must have users that exists in the database, or else "Users not found." will be returned.
-- The **"Get Next ID"** function must still have available user IDs in the users database (0000 to 9995), or else "Max number of users reached!" will be returned.
 - The **"Get User by ID"** function must have the requested user exist in the users dataabse, or else a StatusBadRequest error will be returned.
 - If all requirements are met, the user(s) will be returned along with a successful console log message.
 ---

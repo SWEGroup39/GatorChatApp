@@ -78,32 +78,6 @@ func getConversation(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got Conversation successfully.")
 }
 
-// func getConversationLongPoll(w http.ResponseWriter, r *http.Request) {
-// 	log.Println("Getting Conversations (GET)")
-// 	w.Header().Set("Content-Type", "application/json")
-
-// 	params := mux.Vars(r)
-// 	var messages []UserMessage
-
-// 	for i := 0; i < 10; i++ {
-// 		result := userMessagesDb.Where("(sender_id = ? OR receiver_id = ?) AND (sender_id = ? OR receiver_id = ?)", params["id_1"], params["id_1"], params["id_2"], params["id_2"]).Find(&messages)
-
-// 		if result.Error != nil {
-// 			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		if len(messages) == 0 {
-// 			http.Error(w, "Conversation not found.", http.StatusNotFound)
-// 			return
-// 		}
-
-// 		time.Sleep(time.Second)
-// 	}
-// 	json.NewEncoder(w).Encode(messages)
-// 	log.Println("Got Conversation successfully.")
-// }
-
 func getConversationLP(w http.ResponseWriter, r *http.Request) {
 	log.Println("Getting Conversations (GET (LONG POLL))")
 
@@ -555,6 +529,14 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// GET THE NEXT VALID ID
+	idResponse, err := getNextUserID()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	userAccount.User_ID = idResponse
+
 	// CHECK IF THE USER_ID IS NUMERIC AND FOUR DIGITS
 	_, err = strconv.Atoi(userAccount.User_ID)
 
@@ -654,6 +636,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("Found user successfully.")
 }
 
+// TO DELETE EVENTUALLY
 func getUserInternal(w http.ResponseWriter, r *http.Request) {
 	log.Println("Getting a User (POST)")
 	w.Header().Set("Content-Type", "application/json")
@@ -699,7 +682,7 @@ func addConversation(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	// CHECK IF CONVERSATION ALREADY EXISTS
 	for _, v := range conversationSlice {
 		if v == params["id_2"] {
@@ -750,7 +733,7 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("User deleted successfully.")
 }
 
-func getNextUserID(w http.ResponseWriter, r *http.Request) {
+func getNextUserID() (string, error) {
 	log.Println("Getting Next Valid ID (GET)")
 	var currentID int = 1
 
@@ -765,16 +748,14 @@ func getNextUserID(w http.ResponseWriter, r *http.Request) {
 		userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", paddedID).Count(&count)
 		if count == 0 {
 			// IF IT WAS NOT FOUND, THEN RETURN IT
-			json.NewEncoder(w).Encode(paddedID)
-			return
+			return paddedID, nil
 		}
 
 		// OTHERWISE INCREMENT ID TO THE NEXT ONE
 		currentID++
 
 		if currentID == 9996 {
-			json.NewEncoder(w).Encode("Max number of users reached!")
-			return
+			return "ERROR!", fmt.Errorf("max number of users reached")
 		}
 	}
 }
@@ -864,7 +845,6 @@ func main() {
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
-	r.HandleFunc("/api/users/nextID", getNextUserID).Methods("GET")
 	r.HandleFunc("/api/users/{id}", getUserByID).Methods("GET")
 
 	//DELETE FUNCTION
