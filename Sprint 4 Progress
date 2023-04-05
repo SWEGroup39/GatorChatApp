@@ -8,4 +8,9 @@
 - Added footer - needs more styling
  - Fixed sign up page create user function where it integrates the back end user ID function
   - Fixed the query params so that the url does not display sensitive user credentials
-  
+  - Added the phone and full name fields to the sign up page 
+   - Dashboard now has welcome and the user's full name
+    - Profile page is done to where the profile pic is the initials of their full name in an orange background with blue text
+     - The profile page consists of the Username, Email, Phone number, and Full name fields
+      - Underneath the profile page is the the User's full name and a button that says message which will later be routed to the chat message list.
+      
