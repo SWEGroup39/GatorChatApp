@@ -13,4 +13,7 @@
     - Profile page is done to where the profile pic is the initials of their full name in an orange background with blue text
      - The profile page consists of the Username, Email, Phone number, and Full name fields
       - Underneath the profile page is the the User's full name and a button that says message which will later be routed to the chat message list.
-      
+      -Created the settings page with a form field a sub navigation bar where users can effectively navigate back to the dashboard. 
+       - Added a delete account option that successfully deletes the user account and redirects users back to the login page.
+       - changed the styling to the gradient colors
+       - Users can edit their profile information but a backend function should be created to update these changes. 
