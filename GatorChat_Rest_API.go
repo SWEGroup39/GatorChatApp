@@ -43,12 +43,22 @@ type UserMessage struct {
 type UserAccount struct {
 	// THE USER'S USERNAME
 	Username string `json:"username"`
+
 	// THE USER'S PASSWORD
 	Password string `json:"password"`
+
 	// THE USER'S ID
 	User_ID string `json:"user_id"`
+
 	// THE USER'S EMAIL ADDRESS
 	Email string `json:"email"`
+
+	// THE USER'S FULL NAME
+	Full_Name string `json:"full_name"`
+
+	// THE USER'S PHONE NUMBER
+	Phone_Number string `json:"phone_number"`
+
 	// A SLICE OF USER ID'S THAT REPRESENT THE PEOPLE THEY ARE IN A CURRENT CONVERSATION WITH
 	// JSON.RAWMESSAGE IS A TYPE THAT ALLOWS FOR ARRAYS OF STRINGS
 	Current_Conversations json.RawMessage `json:"current_conversations"`
@@ -535,7 +545,11 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	userAccount.User_ID = idResponse
+	
+	// ONLY PUT IDRESPONSE IF THE ID WAS LEFT BLANK
+	if userAccount.User_ID == "" {
+		userAccount.User_ID = idResponse
+	}
 
 	// CHECK IF THE USER_ID IS NUMERIC AND FOUR DIGITS
 	_, err = strconv.Atoi(userAccount.User_ID)
@@ -556,7 +570,7 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 	regex, err := regexp.Compile(emailPattern)
 
 	if err != nil {
-		http.Error(w, "Problem with compiling regex pattern.", http.StatusBadRequest)
+		http.Error(w, "Problem with compiling email regex pattern.", http.StatusBadRequest)
 		return
 	}
 
@@ -572,6 +586,21 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 
 	if dup.RowsAffected != 0 {
 		http.Error(w, "Email already exists.", http.StatusBadRequest)
+		return
+	}
+
+	// CHECK IF THE PHONE NUMBER MATCHES THE REGEX
+	phonePattern := `^\(\d{3}\)\s\d{3}-\d{4}$`
+
+	regex, err = regexp.Compile(phonePattern)
+
+	if err != nil {
+		http.Error(w, "Problem with compiling phone number regex pattern.", http.StatusBadRequest)
+		return
+	}
+
+	if !regex.MatchString(userAccount.Phone_Number) {
+		http.Error(w, "Invalid Phone Number: "+userAccount.Phone_Number+" is not a valid phone number format.", http.StatusBadRequest)
 		return
 	}
 

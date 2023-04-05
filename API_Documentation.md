@@ -331,16 +331,19 @@
             - The ID value should be manually inserted and must be **a number between 0000 and 9995** (9996 to 9999 are being reserved for the unit tests).
                 - This function will handle finding a valid ID for the new user in the Backend by using an internal function called getNextUserID().
                 - Therefore, the User_ID field can be left blank.
+                - If you wish to make a user have a specific ID, then you can fill out the User_ID field (it will work assuming that there currently is not a user with that ID).
         
             - **Example Syntax:**
                 ```
-                    {
-                        "username": "user",
-                        "password": "pass",
-                        "user_id": "1234",
-                        "email": "example@ufl.edu",
-                        "current_conversations": ["4321", "5678"]
-                    }
+                {
+                    "username": "student",
+                    "password": "pass",
+                    "user_id": "",
+                    "email": "student@ufl.edu",
+                    "full_name": "test user",
+                    "phone_number": "(123) 456-7890",
+                    "current_conversations": []
+                }
                 ```
         - **NOTES:** 
             - Have ```"current_conversations"``` be ```[]``` if you want a user to have no current conversations.
@@ -386,6 +389,7 @@
     - A **unique**, **four-digit ID** that is **less than 9996**.
     - The email must have a University of Florida **domain name** (i.e. it must end with "@ufl.edu").
         - The email must also be unique, in the sense that no other existing accounts currently have that email.
+    - The phone number must be in the form of **(###) ###-####** or else an error will be thrown.
     - Otherwise, a 400 Bad Request will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself (e.g. the requested user could not be found in the database).
 - If all requirements are met, a user object will be returned along with a successful console log message.
