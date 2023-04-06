@@ -545,7 +545,7 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	// ONLY PUT IDRESPONSE IF THE ID WAS LEFT BLANK
 	if userAccount.User_ID == "" {
 		userAccount.User_ID = idResponse
@@ -818,6 +818,83 @@ func hashPassword(rawPassword string) string {
 	return encodedPassword
 }
 
+func editFullName(w http.ResponseWriter, r *http.Request) {
+	log.Println("Editing a User's Full Name (PUT)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	var user UserAccount
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Full_Name", user.Full_Name)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		http.Error(w, "ERROR: Either the user was not found or the updated name is the same as before.", http.StatusNotFound)
+		return
+	}
+
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("User's full name edited successfully.")
+}
+
+func editPhoneNumber(w http.ResponseWriter, r *http.Request) {
+	log.Println("Editing a User's Phone Number (PUT)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	var user UserAccount
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// CHECK IF THE NEW PHONE NUMBER IS VALID
+	// IF NOT, RETURN AN ERROR
+	phonePattern := `^\(\d{3}\)\s\d{3}-\d{4}$`
+
+	regex, err := regexp.Compile(phonePattern)
+
+	if err != nil {
+		http.Error(w, "Problem with compiling phone number regex pattern.", http.StatusBadRequest)
+		return
+	}
+
+	if !regex.MatchString(user.Phone_Number) {
+		http.Error(w, "Invalid Phone Number: "+user.Phone_Number+" is not a valid phone number format.", http.StatusBadRequest)
+		return
+	}
+
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Phone_Number", user.Phone_Number)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		http.Error(w, "ERROR: Either the user was not found or the updated phone number is the same as before.", http.StatusNotFound)
+		return
+	}
+
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("User's phone number edited successfully.")
+}
+
 func main() {
 	log.Println("Connecting to API...")
 
@@ -870,6 +947,8 @@ func main() {
 	// PUT FUNCTION
 	r.HandleFunc("/api/users/updateN/{id}", editName).Methods("PUT")
 	r.HandleFunc("/api/users/updateP/{id}", editPass).Methods("PUT")
+	r.HandleFunc("/api/users/updateFN/{id}", editFullName).Methods("PUT")
+	r.HandleFunc("/api/users/updatePN/{id}", editPhoneNumber).Methods("PUT")
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
 
 	// GET FUNCTIONS

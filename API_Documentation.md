@@ -389,7 +389,7 @@
     - A **unique**, **four-digit ID** that is **less than 9996**.
     - The email must have a University of Florida **domain name** (i.e. it must end with "@ufl.edu").
         - The email must also be unique, in the sense that no other existing accounts currently have that email.
-    - The phone number must be in the form of **(###) ###-####** or else an error will be thrown.
+    - The phone number must be in the form of **(###) ###-####**.
     - Otherwise, a 400 Bad Request will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself (e.g. the requested user could not be found in the database).
 - If all requirements are met, a user object will be returned along with a successful console log message.
@@ -401,7 +401,7 @@
 
 ### Syntax
 
-- There are currently three **PUT** commands available:
+- There are currently five **PUT** commands available:
 
     - **First Option: Edit Current Conversation**:
         - This **PUT** function adds an ID to a user's current conversation list.
@@ -421,6 +421,7 @@
                             "username": "user"
                         }
                     ```
+
      - **Third Option: Edit Password**:
         - This **PUT** function edits a user's password.
          - **Example Syntax:**
@@ -434,10 +435,37 @@
                     ```
             - **NOTE:** _In the future, this function will require the user's current password as well in order to verify that the user knows the current password before trying to change it._
 
+    - **Fourth Option: Edit Full Name**:
+        - This **PUT** function edits a user's full name.
+         - **Example Syntax:**
+            - ```http://localhost:8080/api/users/updateFN/[ID```
+            - The required input is the user's new full name.
+                - **Example Syntax:**
+                    ```
+                        {
+                            "full_name": "Test User"
+                        }
+        - **NOTE:** If the updated name is the same as before, an error will be returned that specifies this as a possible reason.
+
+    - **Fifth Option: Edit Phone Number**:
+        - This **PUT** function edits a user's phone number.
+         - **Example Syntax:**
+            - ```http://localhost:8080/api/users/updatePN/[ID]```
+            - The required input is the user's new username.
+                - **Example Syntax:**
+                    ```
+                        {
+                            "phone_number": "(123)  456-7890"
+                        }
+                    ```
+        - **NOTE:** If the updated phone number is the same as before, an error will be returned that specifies this as a possible reason.
+
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if it is unable to locate the passed-in user or if there are errors regarding the database connection.
-    - This error will be thrown if the **Edit Username** or **Edit Password** functions are not able to locate the passed-in user.
-        - Otherwise, the username or password will be updated and will return the newly updated user object along with a successful console log message.
+    - This error will be thrown if the **Edit Username**, **Edit Password**, **Edit Full Name**, or **Edit Phone Number** functions are not able to locate the passed-in user.
+        - Otherwise, the username, password, full name, or phone number will be updated and will return the newly updated user object along with a successful console log message.
+- For the **Edit Phone Number** function, the phone number **STILL** must follow the format established in the create user function: (###) ###-####. Otherwise, a 400 Bad Request will be returned.
+
 ---
 
 <a id="GET_Users"></a>
