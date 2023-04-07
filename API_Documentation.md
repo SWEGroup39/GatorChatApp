@@ -366,23 +366,6 @@
                         }
                     ```
 
-    - **Third Option: Get a Specific User (Internal)**: 
-        - This **POST** function returns a singular user from the users database.
-        - It will find a user that matches the credentials.
-        - **Example Syntax:**
-        ```http://localhost:8080/api/users/UserInternal```
-         - For get, the information passed in must be through the request **body**.
-            - The required input is the user's username and password.
-            
-                - **Example Syntax:**
-                    ```
-                        {
-                            "username": "user",
-                            "password": "pass"
-                        }
-                    ```
-        - **NOTE:** _This function is temporary and will be eventually removed. Therefore, there is no unit test for this function. It is here as a temporary solution for getting a user's conversation list as the second option currently cannot be used to extract the returned user's conversation list. The original getUser is called, and then the username and (hashed) password that was returned is then used to call this internal function._
-
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
 - The **Create User** function must have:
