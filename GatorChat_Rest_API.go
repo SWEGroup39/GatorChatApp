@@ -64,6 +64,12 @@ type UserAccount struct {
 	Current_Conversations json.RawMessage `json:"current_conversations"`
 }
 
+type UserAccountConfirmPass struct {
+	UserAccount
+
+	OriginalPassword string `json:"original_pass"`
+}
+
 // RETRIEVES ALL MESSAGES BETWEEN TWO PEOPLE
 // REQUEST NEEDS TO PASS IN SENDER ID AND RECEIVER ID
 func getConversation(w http.ResponseWriter, r *http.Request) {
@@ -378,7 +384,7 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 
-	var user UserAccount
+	var user UserAccountConfirmPass
 	var temp UserAccount
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -387,7 +393,7 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], params["pw"]).First(&temp)
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], user.OriginalPassword).First(&temp)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -397,7 +403,7 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = hashPassword(user.Password)
 
-	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], params["pw"]).Update("Password", user.Password)
+	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], user.OriginalPassword).Update("Password", user.Password)
 
 	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&temp)
 	json.NewEncoder(w).Encode(temp)
@@ -968,7 +974,7 @@ func main() {
 
 	// PUT FUNCTION
 	r.HandleFunc("/api/users/updateN/{id}", editName).Methods("PUT")
-	r.HandleFunc("/api/users/updateP/{id}/{pw}", editPass).Methods("PUT")
+	r.HandleFunc("/api/users/updateP/{id}", editPass).Methods("PUT")
 	r.HandleFunc("/api/users/updateFN/{id}", editFullName).Methods("PUT")
 	r.HandleFunc("/api/users/updatePN/{id}", editPhoneNumber).Methods("PUT")
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
