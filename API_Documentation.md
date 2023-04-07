@@ -388,8 +388,9 @@
 - The **Create User** function must have:
     - A **unique**, **four-digit ID** that is **less than 9996**.
     - The email must have a University of Florida **domain name** (i.e. it must end with "@ufl.edu").
-        - The email must also be unique, in the sense that no other existing accounts currently have that email.
+        - The email must also be **unique**, in the sense that **no other existing accounts** should currently have that email.
     - The phone number must be in the form of **(###) ###-####**.
+    - The phone number must be **unique** in the sense that it **does not** already exist in the users database.
     - Otherwise, a 400 Bad Request will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself (e.g. the requested user could not be found in the database).
 - If all requirements are met, a user object will be returned along with a successful console log message.
@@ -438,7 +439,7 @@
     - **Fourth Option: Edit Full Name**:
         - This **PUT** function edits a user's full name.
          - **Example Syntax:**
-            - ```http://localhost:8080/api/users/updateFN/[ID```
+            - ```http://localhost:8080/api/users/updateFN/[ID]```
             - The required input is the user's new full name.
                 - **Example Syntax:**
                     ```
@@ -458,7 +459,9 @@
                             "phone_number": "(123)  456-7890"
                         }
                     ```
-        - **NOTE:** If the updated phone number is the same as before, an error will be returned that specifies this as a possible reason.
+        - **NOTE:** 
+            - If the updated phone number is the same as before, an error will be returned that specifies this as a possible reason.
+            - The updated phone number must be unique in the sense that it **does not** already exist in the database. Otherwise, a 400 Bad Request will be returned.
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if it is unable to locate the passed-in user or if there are errors regarding the database connection.

@@ -604,6 +604,14 @@ func createUserAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// SEARCHES IF THE USER PHONE NUMBER ALREADY EXISTS AND GIVES AN ERROR IF IT DOES
+	dup = userAccountsDb.Where("phone_number = ?", userAccount.Phone_Number).First(&dupAccount)
+
+	if dup.RowsAffected != 0 {
+		http.Error(w, "Phone number already exists.", http.StatusBadRequest)
+		return
+	}
+
 	// HASH THE PASSWORD
 	userAccount.Password = hashPassword(userAccount.Password)
 
@@ -874,6 +882,15 @@ func editPhoneNumber(w http.ResponseWriter, r *http.Request) {
 
 	if !regex.MatchString(user.Phone_Number) {
 		http.Error(w, "Invalid Phone Number: "+user.Phone_Number+" is not a valid phone number format.", http.StatusBadRequest)
+		return
+	}
+
+	// SEARCHES IF THE USER PHONE NUMBER ALREADY EXISTS AND GIVES AN ERROR IF IT DOES
+	var dupAccount UserAccount
+	dup := userAccountsDb.Where("phone_number = ?", user.Phone_Number).First(&dupAccount)
+
+	if dup.RowsAffected != 0 {
+		http.Error(w, "Phone number already exists.", http.StatusBadRequest)
 		return
 	}
 
