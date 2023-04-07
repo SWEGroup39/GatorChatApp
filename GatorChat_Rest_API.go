@@ -379,23 +379,28 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	var user UserAccount
+	var temp UserAccount
+
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	user.Password = hashPassword(user.Password)
-
-	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Password", user.Password)
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], params["pw"]).First(&temp)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		log.Println("Incorrect ID or Password")
 		return
 	}
 
-	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&user)
-	json.NewEncoder(w).Encode(user)
+	user.Password = hashPassword(user.Password)
+
+	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], params["pw"]).Update("Password", user.Password)
+
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&temp)
+	json.NewEncoder(w).Encode(temp)
 	log.Println("Password edited successfully")
 }
 
@@ -963,7 +968,7 @@ func main() {
 
 	// PUT FUNCTION
 	r.HandleFunc("/api/users/updateN/{id}", editName).Methods("PUT")
-	r.HandleFunc("/api/users/updateP/{id}", editPass).Methods("PUT")
+	r.HandleFunc("/api/users/updateP/{id}/{pw}", editPass).Methods("PUT")
 	r.HandleFunc("/api/users/updateFN/{id}", editFullName).Methods("PUT")
 	r.HandleFunc("/api/users/updatePN/{id}", editPhoneNumber).Methods("PUT")
 	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
