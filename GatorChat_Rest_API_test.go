@@ -523,8 +523,8 @@ func TestCreateUserAccount(t *testing.T) {
 		Password:              "unitTestPassword",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -558,8 +558,8 @@ func TestCreateUserAccount(t *testing.T) {
 		Password:              "b1b348465a1b06c150af3704f5a5f81466e77826f8351422db59b40c7a13f47e",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -584,8 +584,8 @@ func createTestUser(username string, password string, email string, ID string, f
 		Password:              encodedPassword,
 		Email:                 email,
 		User_ID:               ID,
-		Full_Name:              fullName,
-		Phone_Number:           phoneNumber,
+		Full_Name:             fullName,
+		Phone_Number:          phoneNumber,
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -608,7 +608,7 @@ func deleteTestUser(ID string) {
 
 // THIS TEST ADDS A NEW CONVERSATION
 func TestAddConversation(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	r, err := http.NewRequest("PUT", "/api/9999/0000", nil)
 	if err != nil {
@@ -641,8 +641,8 @@ func TestAddConversation(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`["0000"]`),
 	}
 
@@ -656,15 +656,15 @@ func TestAddConversation(t *testing.T) {
 
 // THIS TEST EDITS THE USERNAME
 func TestEditName(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	newName := UserAccount{
 		Username:              "uuunitTestUuuser",
 		Password:              "unitTestPass",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -697,8 +697,8 @@ func TestEditName(t *testing.T) {
 		Password:              "unitTestPass",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -711,19 +711,16 @@ func TestEditName(t *testing.T) {
 
 // THIS TEST EDITS THE PASSWORD
 func TestEditPass(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
-	newName := UserAccount{
-		Username:              "unitTestUser",
-		Password:              "newTestPass",
-		Email:                 "unitTest@ufl.edu",
-		User_ID:               "9999",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
-		Current_Conversations: json.RawMessage([]byte("[]")),
+	newPass := UserAccountConfirmPass{
+		UserAccount: UserAccount{
+			Password: "newTestPass",
+		},
+		OriginalPassword: "unitTestPass",
 	}
 
-	requestBody, err := json.Marshal(newName)
+	requestBody, err := json.Marshal(newPass)
 	if err != nil {
 		t.Fatalf("Failed to marshal message: %s", err)
 	}
@@ -732,8 +729,14 @@ func TestEditPass(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
-
+	
 	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
 
 	editPass(w, r)
 
@@ -752,8 +755,8 @@ func TestEditPass(t *testing.T) {
 		Password:              "c8eef775bc0e26d0fd2479eb35fdf0e568e6fb7ad36abd9b58198a1be248fe99",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -766,7 +769,7 @@ func TestEditPass(t *testing.T) {
 
 // THIS TEST RETURNS A USER (BASED ON EMAIL AND PASSWORD)
 func TestGetUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	user := UserAccount{
 		Email:    "unitTest@ufl.edu",
@@ -802,8 +805,8 @@ func TestGetUser(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -817,7 +820,7 @@ func TestGetUser(t *testing.T) {
 
 // THIS TEST RETURNS A USER (BASED ON ID)
 func TestGetUserByID(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	r, err := http.NewRequest("GET", "/users/9999", bytes.NewBuffer(nil))
 	if err != nil {
@@ -849,8 +852,8 @@ func TestGetUserByID(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
-		Full_Name:              "Test User",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -864,7 +867,7 @@ func TestGetUserByID(t *testing.T) {
 
 // THIS TEST DELETES A USER
 func TestDeleteUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	r, err := http.NewRequest("DELETE", "/users/9999", nil)
 	if err != nil {
@@ -898,7 +901,7 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestEditFullName(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	user := UserAccount{
 		Full_Name: "New Name",
@@ -939,8 +942,8 @@ func TestEditFullName(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
-		Full_Name:              "New Name",
-		Phone_Number:           "(123) 456-7890",
+		Full_Name:             "New Name",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -953,10 +956,10 @@ func TestEditFullName(t *testing.T) {
 }
 
 func TestEditPhoneNumber(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(123) 456-7890")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	user := UserAccount{
-		Phone_Number: "(234) 567-8901",
+		Phone_Number: "(000) 000-0001",
 	}
 
 	requestBody, err := json.Marshal(user)
@@ -994,8 +997,8 @@ func TestEditPhoneNumber(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
-		Full_Name:              "Test User",
-		Phone_Number:           "(234) 567-8901",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0001",
 		Current_Conversations: []byte(`[]`),
 	}
 

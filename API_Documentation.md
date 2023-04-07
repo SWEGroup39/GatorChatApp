@@ -328,10 +328,12 @@
         - For post, the information passed in must be through the request **body**.
         - The required inputs are a username, a password, a user ID, an email, and a list of current conversations that the user is in (typically left blank).
         - **NOTE:** 
-            - The ID value should be manually inserted and must be **a number between 0000 and 9995** (9996 to 9999 are being reserved for the unit tests).
+            - The ID value must be **a number between 0000 and 9995** (9996 to 9999 are being reserved for the unit tests).
                 - This function will handle finding a valid ID for the new user in the Backend by using an internal function called getNextUserID().
                 - Therefore, the User_ID field can be left blank.
                 - If you wish to make a user have a specific ID, then you can fill out the User_ID field (it will work assuming that there currently is not a user with that ID).
+            - The email should not be **unitTest@ufl.edu** as this has been reserved for unit tests.
+            - The phone number should not be **(000) 000-0000** or **(000) 000-0001** as these have been reserved for unit tests.
         
             - **Example Syntax:**
                 ```
@@ -374,6 +376,7 @@
         - The email must also be **unique**, in the sense that **no other existing accounts** should currently have that email.
     - The phone number must be in the form of **(###) ###-####**.
     - The phone number must be **unique** in the sense that it **does not** already exist in the users database.
+        - It should not be **(000) 000-0000** or **(000) 000-0001**.
     - Otherwise, a 400 Bad Request will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself (e.g. the requested user could not be found in the database).
 - If all requirements are met, a user object will be returned along with a successful console log message.
@@ -410,14 +413,15 @@
         - This **PUT** function edits a user's password.
          - **Example Syntax:**
             - ```http://localhost:8080/api/users/updateP/[ID]```
-            - The required input is the user's new password.
+            - The required input is the user's original password and new password.
                 - **Example Syntax:**
                     ```
-                        {
-                            "password": "pass"
+                       {
+                            "password": "newPass",
+                            "original_pass": "pass"
                         }
                     ```
-            - **NOTE:** _In the future, this function will require the user's current password as well in order to verify that the user knows the current password before trying to change it._
+            - **NOTE:** For this function, the struct used **must be UserAccountConfirmPass, not UserAccount**. This is because the "original_pass" field is not included in the original **UserAccount** struct.
 
     - **Fourth Option: Edit Full Name**:
         - This **PUT** function edits a user's full name.

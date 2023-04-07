@@ -65,8 +65,10 @@ type UserAccount struct {
 }
 
 type UserAccountConfirmPass struct {
+	// INCLUDE THE USERACCOUNT STRUCT
 	UserAccount
 
+	// ADD AN ADDITIONAL FIELD FOR THE OG PASSWORD (USED IN THE EDITPASS FUNCTION)
 	OriginalPassword string `json:"original_pass"`
 }
 
@@ -393,6 +395,9 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// HASH THE OG PASSWORD TO VERIFY THAT IT IS CORRECT
+	user.OriginalPassword = hashPassword(user.OriginalPassword)
+
 	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], user.OriginalPassword).First(&temp)
 
 	if result.Error != nil {
@@ -405,9 +410,14 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 
 	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], user.OriginalPassword).Update("Password", user.Password)
 
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).First(&temp)
 	json.NewEncoder(w).Encode(temp)
-	log.Println("Password edited successfully")
+	log.Println("Password edited successfully.")
 }
 
 // HARD DELETES ALL MESSAGES WITH THE MATCHING SENDER AND RECEIVER ID (EFFECTIVELY CLEARS AN ENTIRE CONVERSATION)
