@@ -1,0 +1,15 @@
+<app-header *ngIf="
+  !((router.url === '/dashboard' || (router.url.startsWith('/dashboard') && router.url.includes('id')))
+    || (router.url === '/chat-list' || (router.url.startsWith('/chat-list') && router.url.includes('id')))
+    || (router.url === '/messages' || (router.url.startsWith('/messages') && router.url.includes('id1')))
+    || router.url === '/contacts' 
+    || (router.url === '/profile' || (router.url.startsWith('/profile') && router.url.includes('id')) )
+    || router.url === '/settings' 
+    || router.url === '/notification' 
+    
+  )
+"></app-header>
+<router-outlet></router-outlet>
+<app-footer >
+  
+</app-footer>
