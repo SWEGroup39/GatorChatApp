@@ -18,3 +18,6 @@
        - changed the styling to the gradient colors
        - Users can edit their profile information but a backend function should be created to update these changes. 
 - Styled the footer page with Home and About us links
+ - Contacts page has some placeholder information
+  - Finished edit functionality of the settings page.
+     - edit username and password
