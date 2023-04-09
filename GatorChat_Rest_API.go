@@ -331,6 +331,13 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 
+	var count int64
+	userMessagesDb.Model(&UserMessage{}).Where("id = ?", params["id"]).Count(&count)
+	if count == 0 {
+		http.Error(w, "Message not found.", http.StatusNotFound)
+		return
+	}
+
 	var message UserMessage
 	err := json.NewDecoder(r.Body).Decode(&message)
 	if err != nil {
@@ -341,11 +348,6 @@ func editMessage(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		http.Error(w, "Message not found.", http.StatusNotFound)
 		return
 	}
 
@@ -361,6 +363,13 @@ func editName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
+
+	var count int64
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Count(&count)
+	if count == 0 {
+		http.Error(w, "User not found.", http.StatusNotFound)
+		return
+	}
 
 	var user UserAccount
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -386,6 +395,13 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 
+	var count int64
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Count(&count)
+	if count == 0 {
+		http.Error(w, "User not found.", http.StatusNotFound)
+		return
+	}
+
 	var user UserAccountConfirmPass
 	var temp UserAccount
 
@@ -396,9 +412,9 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// HASH THE OG PASSWORD TO VERIFY THAT IT IS CORRECT
-	user.OriginalPassword = hashPassword(user.OriginalPassword)
+	hashedOriginalPassword := hashPassword(user.OriginalPassword)
 
-	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], user.OriginalPassword).First(&temp)
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], hashedOriginalPassword).First(&temp)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -406,9 +422,16 @@ func editPass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Password = hashPassword(user.Password)
+	hashedNewPassword := hashPassword(user.Password)
 
-	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], user.OriginalPassword).Update("Password", user.Password)
+	// CHECK IF THE NEW PASSWORD IS THE SAME AS THE ORIGINAL
+	if user.Password == user.OriginalPassword {
+		http.Error(w, "New password cannot be the same as the old password.", http.StatusBadRequest)
+		log.Println("New password cannot be the same as the old password.")
+		return
+	}
+
+	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ? AND password = ?", params["id"], hashedOriginalPassword).Update("Password", hashedNewPassword)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -504,6 +527,7 @@ func undoDelete(w http.ResponseWriter, r *http.Request) {
 
 	var message UserMessage
 
+	// SINCE THIS FUNCTION WILL ONLY BE AVAILABLE ONCE SOMEONE DELETES A MESSAGE, IT IS ASSUMED THAT IT WILL FIND A MESSAGE HERE
 	result := userMessagesDb.Unscoped().Where("Sender_ID = ? AND Deleted_At IS NOT NULL", params["id"]).Find(&message)
 
 	var ID = message.ID
@@ -830,21 +854,24 @@ func editFullName(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 
+	var count int64
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Count(&count)
+	if count == 0 {
+		http.Error(w, "User not found.", http.StatusNotFound)
+		return
+	}
+
 	var user UserAccount
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Update("Full_Name", user.Full_Name)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		http.Error(w, "ERROR: Either the user was not found or the updated name is the same as before.", http.StatusNotFound)
 		return
 	}
 
@@ -859,6 +886,13 @@ func editPhoneNumber(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
+
+	var count int64
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id"]).Count(&count)
+	if count == 0 {
+		http.Error(w, "User not found.", http.StatusNotFound)
+		return
+	}
 
 	var user UserAccount
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -883,11 +917,20 @@ func editPhoneNumber(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// CHECK IF THE NEW PHONE NUMBER IS THE SAME AS THE CURRENT PHONE NUMBER
+	var currentUser UserAccount
+	userAccountsDb.Where("user_id = ?", params["id"]).First(&currentUser)
+
+	if user.Phone_Number == currentUser.Phone_Number {
+		json.NewEncoder(w).Encode(currentUser)
+		return
+	}
+
 	// SEARCHES IF THE USER PHONE NUMBER ALREADY EXISTS AND GIVES AN ERROR IF IT DOES
 	var dupAccount UserAccount
 	dup := userAccountsDb.Where("phone_number = ?", user.Phone_Number).First(&dupAccount)
 
-	if dup.RowsAffected != 0 {
+	if dup.RowsAffected != 0 && dupAccount.User_ID != currentUser.User_ID {
 		http.Error(w, "Phone number already exists.", http.StatusBadRequest)
 		return
 	}
@@ -896,11 +939,6 @@ func editPhoneNumber(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if result.RowsAffected == 0 {
-		http.Error(w, "ERROR: Either the user was not found or the updated phone number is the same as before.", http.StatusNotFound)
 		return
 	}
 

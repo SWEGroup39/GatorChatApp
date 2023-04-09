@@ -190,7 +190,7 @@
         - The required input is the unique GORM ID that is within a UserMessage struct.
 
         - The **new** message should be placed in the body of the PUT request.
-            - The logic is that, when a user edits a message, that message struct will already be known (through a GET function) and the unique GORM ID can be passed into this function. This ensures that the correct message is beind edited.
+            - The logic is that, when a user edits a message, that message struct will already be known (through a GET function) and the unique GORM ID can be passed into this function. This ensures that the correct message is being edited.
 
             - **Example Syntax:**
                 ```
@@ -421,7 +421,9 @@
                             "original_pass": "pass"
                         }
                     ```
-            - **NOTE:** For this function, the struct used **must be UserAccountConfirmPass, not UserAccount**. This is because the "original_pass" field is not included in the original **UserAccount** struct.
+            - **NOTE:** 
+                - For this function, the struct used **must be UserAccountConfirmPass, not UserAccount**. This is because the "original_pass" field is not included in the original **UserAccount** struct.
+                - The new password **CANNOT** the same as the original password.
 
     - **Fourth Option: Edit Full Name**:
         - This **PUT** function edits a user's full name.
@@ -433,7 +435,6 @@
                         {
                             "full_name": "Test User"
                         }
-        - **NOTE:** If the updated name is the same as before, an error will be returned that specifies this as a possible reason.
 
     - **Fifth Option: Edit Phone Number**:
         - This **PUT** function edits a user's phone number.
@@ -443,12 +444,11 @@
                 - **Example Syntax:**
                     ```
                         {
-                            "phone_number": "(123)  456-7890"
+                            "phone_number": "(123) 456-7890"
                         }
                     ```
         - **NOTE:** 
-            - If the updated phone number is the same as before, an error will be returned that specifies this as a possible reason.
-            - The updated phone number must be unique in the sense that it **does not** already exist in the database. Otherwise, a 400 Bad Request will be returned.
+            - The updated phone number must be unique in the sense that it **does not** already exist in the database. Otherwise, a 400 Bad Request will be returned. However, a user **CAN** update their phone number to their current phone number. 
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if it is unable to locate the passed-in user or if there are errors regarding the database connection.
