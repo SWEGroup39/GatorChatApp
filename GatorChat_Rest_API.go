@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -948,6 +949,52 @@ func editPhoneNumber(w http.ResponseWriter, r *http.Request) {
 	log.Println("User's phone number edited successfully.")
 }
 
+func searchForUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("Searching for a User (POST)")
+	w.Header().Set("Content-Type", "application/json")
+
+	// THE SEARCH PATTERN FOR A USER WILL BE STORED IN THE "USERNAME" FIELD
+	var user UserAccount
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// CHECK IF THE INPUT PATTERN IS VALID
+	// IF NOT, RETURN AN ERROR
+	searchPattern := `^[a-zA-Z\s]+#\d{4}$`
+
+	regex, err := regexp.Compile(searchPattern)
+
+	if err != nil {
+		http.Error(w, "Problem with compiling search regex pattern.", http.StatusBadRequest)
+		return
+	}
+
+	if !regex.MatchString(user.Username) {
+		http.Error(w, "Invalid Search Pattern: "+user.Username+" is not a valid search pattern.", http.StatusBadRequest)
+		return
+	}
+
+	// SPLIT USERNAME BY #
+	usernameSplit := strings.Split(user.Username, "#")
+	username := usernameSplit[0]
+	userID := usernameSplit[1]
+
+	// SEARCH FOR USER IN THE DATABASE
+	result := userAccountsDb.Model(&UserAccount{}).Where("username = ? AND user_id = ?", username, userID).First(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		log.Println("Unable to find a matching user.")
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("Found user successfully.")
+}
+
 func main() {
 	log.Println("Connecting to API...")
 
@@ -995,6 +1042,7 @@ func main() {
 	// POST FUNCTIONS
 	r.HandleFunc("/api/users", createUserAccount).Methods("POST")
 	r.HandleFunc("/api/users/User", getUser).Methods("POST")
+	r.HandleFunc("/api/users/search", searchForUser).Methods("POST")
 
 	// PUT FUNCTION
 	r.HandleFunc("/api/users/updateN/{id}", editName).Methods("PUT")

@@ -729,7 +729,7 @@ func TestEditPass(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
-	
+
 	w := httptest.NewRecorder()
 
 	vars := map[string]string{
@@ -999,6 +999,51 @@ func TestEditPhoneNumber(t *testing.T) {
 		User_ID:               "9999",
 		Full_Name:             "Test User",
 		Phone_Number:          "(000) 000-0001",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+func TestSearchUser(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
+
+	user := UserAccount{
+		Username: "unitTestUser#9999",
+	}
+
+	requestBody, err := json.Marshal(user)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("POST", "/users/search", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	searchForUser(w, r)
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`[]`),
 	}
 

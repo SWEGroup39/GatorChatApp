@@ -318,7 +318,7 @@
 
 ### Syntax
 
-- There are currently two POST commands available:
+- There are currently three POST commands available:
 
     - **First Option: Create a User:**
         - This **POST** function creates a user in the users database and returns the user object back to the requester.
@@ -365,6 +365,20 @@
                         {
                             "email": "example@ufl.edu",
                             "password": "pass"
+                        }
+                    ```
+
+    - **Third Option: Search for a Specific User**: 
+        - This **POST** function returns a singular user from the users database.
+        - It will find a user that matches the search pattern ```[USERNAME]#[ID]```
+        - **Example Syntax:**
+        ```http://localhost:8080/api/users/search```
+            - The required input is the search pattern, which will be placed in the **username** field.
+            
+                - **Example Syntax:**
+                    ```
+                        {
+                            "username": "student#1234"
                         }
                     ```
 
