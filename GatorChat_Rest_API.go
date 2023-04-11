@@ -2,15 +2,22 @@ package main
 
 //API IS INTERFACED/TESTED USING POSTMAN
 import (
+	"github.com/Azure/azure-storage-blob-go/azblob"
+
+	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -32,12 +39,14 @@ var userAccountsDb, accountErr = gorm.Open(mysql.Open(userAccountsDsn), &gorm.Co
 // MESSAGE STRUCT USED FOR EACH MESSAGE TABLE ENTRY
 type UserMessage struct {
 	gorm.Model
-	//THE ACTUAL MESSAGE CONTENT
+	// THE ACTUAL MESSAGE CONTENT
 	Message string `json:"message"`
-	//USER ID OF WHOEVER SENT THE MESSAGE
+	// USER ID OF WHOEVER SENT THE MESSAGE
 	Sender_ID string `json:"sender_id"`
-	//USER ID OF WHOEVER RECEIVED THE MESSAGE
+	// USER ID OF WHOEVER RECEIVED THE MESSAGE
 	Receiver_ID string `json:"receiver_id"`
+	// THE IMAGE AS A BYTE ARRAY
+	Image []byte `json:"image"`
 }
 
 // USER STRUCT FOR EACH USER TABLE ENTRY
@@ -312,6 +321,16 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	imageString := base64.StdEncoding.EncodeToString(message.Image)
+
+	imageData, err := base64.StdEncoding.DecodeString(imageString)
+	if err != nil {
+		http.Error(w, "Invalid image data: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	message.Image = imageData
+
 	//IF IT PASSES THE CHECKS, THEN IT CREATES
 	result := userMessagesDb.Create(&message)
 
@@ -322,6 +341,108 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(message)
 	log.Println("Message created successfully.")
+}
+
+// CREATE MESSAGE (WITH IMAGE)
+func createMessageImage(w http.ResponseWriter, r *http.Request) {
+	log.Println("Sending a Message (POST)")
+	w.Header().Set("Content-Type", "application/json")
+
+	var message UserMessage
+	message.Sender_ID = r.FormValue("sender_id")
+	message.Receiver_ID = r.FormValue("receiver_id")
+	message.Message = r.FormValue("message")
+
+	file, header, err := r.FormFile("image")
+
+	if err != nil {
+		http.Error(w, "Failed to retrieve image file: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	maxFileSize := 10 << 20
+	if header.Size > int64(maxFileSize) {
+		http.Error(w, "Image file is too large. Maximum size allowed is "+strconv.Itoa(maxFileSize)+" bytes", http.StatusBadRequest)
+		return
+	}
+
+	// CREATE AN AZURE BLOB SERVICE CLIENT
+	accountName := "gatorchatimages"
+	accountKey := "Bcm07S+0vAEG45zbvUBQ3a7ujiXB1s9RxaJVAqCcKKTtbeGuu+22aQWyH8Ux++PAGBVkqfnSptcs+AStLXHyzg=="
+	credential, err := azblob.NewSharedKeyCredential(accountName, accountKey)
+	if err != nil {
+		http.Error(w, "Failed to create shared key credential: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	p := azblob.NewPipeline(credential, azblob.PipelineOptions{})
+	containerName := "images"
+	blobURLParts := azblob.NewBlobURLParts(url.URL{
+		Scheme: "https",
+		Host:   accountName + ".blob.core.windows.net",
+	})
+	serviceURL := azblob.NewServiceURL(blobURLParts.URL(), p)
+	containerURL := serviceURL.NewContainerURL(containerName)
+
+	// UPLOAD THE IMAGE AS A BLOB
+	blobName := uuid.New().String() + filepath.Ext(header.Filename)
+	blobURL := containerURL.NewBlockBlobURL(blobName)
+	ctx := context.Background()
+	_, err = azblob.UploadStreamToBlockBlob(ctx, file, blobURL, azblob.UploadStreamToBlockBlobOptions{
+		BlobHTTPHeaders: azblob.BlobHTTPHeaders{
+			ContentType: header.Header.Get("Content-Type"),
+		},
+	})
+	if err != nil {
+		http.Error(w, "Failed to upload image file: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// SET THE MESSAGE IMAGE URL TO THE BLOB URL
+	message.Image = []byte(blobURL.String())
+
+	// VALIDATE THE INFORMATION
+	// CHECK IF THE ID'S ARE NUMERIC
+	_, err = strconv.Atoi(message.Sender_ID)
+
+	if err != nil {
+		http.Error(w, "Invalid Sender ID (NOT NUMERIC): "+message.Sender_ID+" is not a valid ID.", http.StatusBadRequest)
+		return
+	}
+
+	_, err = strconv.Atoi(message.Receiver_ID)
+
+	if err != nil {
+		http.Error(w, "Invalid Receiver ID (NOT NUMERIC): "+message.Receiver_ID+" is not a valid ID.", http.StatusBadRequest)
+		return
+	}
+
+	// CHECK IF THE ID LENGTH IS FOUR
+	if len(message.Sender_ID) != 4 {
+		http.Error(w, "Invalid Sender ID (NOT FOUR DIGITS): "+message.Sender_ID+" is not a valid ID.", http.StatusBadRequest)
+		return
+	}
+
+	if len(message.Receiver_ID) != 4 {
+		http.Error(w, "Invalid Receiver ID (NOT FOUR DIGITS): "+message.Receiver_ID+" is not a valid ID.", http.StatusBadRequest)
+		return
+	}
+
+	if len(message.Message) == 0 {
+		http.Error(w, "Invalid Message: Messages cannot be empty.", http.StatusBadRequest)
+		return
+	}
+
+	//IF IT PASSES THE CHECKS, THEN IT CREATES
+	result := userMessagesDb.Create(&message)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(message)
+	log.Println("Message with image created successfully.")
 }
 
 // UPDATES ONLY THE MESSAGE FIELD IN THE ENTRY
@@ -1020,6 +1141,7 @@ func main() {
 	r.HandleFunc("/api/messages", createMessage).Methods("POST")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/search", searchOneConversation).Methods("POST")
 	r.HandleFunc("/api/messages/searchAll", searchAllConversations).Methods("POST")
+	r.HandleFunc("/api/messages/image", createMessageImage).Methods("POST")
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/messages", getAllMessages).Methods("GET")
