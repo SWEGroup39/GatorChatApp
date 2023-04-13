@@ -108,7 +108,7 @@
 
 ### Syntax
 
-- There are currently three POST commands, available:
+- There are currently four POST commands, available:
 
      - **First Option: Create a Message**: 
         - This **POST** function creates a message object in the messages database and returns the object back to the requester.
@@ -127,27 +127,57 @@
                     "DeletedAt": null,
                     "message": "Message goes here.",
                     "sender_id": "1234",
-                    "receiver_id": "4321"
+                    "receiver_id": "4321",
+                    "image": null
                 }
             ```
     - Input **"null"** for the "CreatedAt", "UpdatedAt", and "DeletedAt" date inputs, these will be automatically filled in.
     - The message ID number cannot be reused unless the previous message with that number was hard-deleted.
-    
-    - **Second Option: Search for Message in All Conversations**: 
+    - No image should be passed in this function. If you want to create a message with an image, use the second option below.
+
+    - **Second Option: Create a Message (With an Image)**: 
+        - This **POST** function creates a message object in the messages database, with an image attachment stored as a BLOB (Binary Large Object), and returns the object back to the requester.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/messages/image ```
+
+        - The way of passing in data to this function is **different** for this function than all other functions.
+            - Instead of passing in a JSON body, the data must be passed using **form-data**. This involves making key-value pairs where the key is the name of the field and the value is the actual content.
+                - For example:
+                    ```
+                        key: sender_id
+                        value: 9999
+
+                        key: receiver_id
+                        value: 9998
+
+                        key: message
+                        value: Check out this photo:
+
+                        key: image
+                        value: image.PNG (File)
+                    ```
+                - **NOTE:** 
+                    - This is not actually the process of passing in through form-data, this is just an example showing what should be placed in the key and what should be placed in the value.
+                    - sender_id, receiver_id, and message have a value type of "Text" while image has a value type of "File".
+                    - The keys shown above **MUST** be the keys you use when passing with form-data.
+                    - All other requirements and errors associated with the original **Create Message** apply here too.
+                    - Once the message has been created, the image field will be given a URL that is associated with the BLOB. The URL can be converted into a SAS (Shared Access Signature) URL that allows you to access the image. A GET request can then be called to the SAS URL to retrieve the image (the response type should be BLOB).
+
+    - **Third Option: Search for Message in All Conversations**: 
         - This **POST** function returns the message object that matches the specified message, if it exists in the messages database.
         - This function looks for a message across **ALL** conversations.
         - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
         - **Example Syntax:**
         ```http://localhost:8080/api/messages/searchAll```
     
-    - **Third Option: Search for Message in One Conversation**: 
+    - **Fourth Option: Search for Message in One Conversation**: 
         - This **POST** function returns the message object that matches the specified message, if it exists in the messages database.
         - This function looks for a message across **ONE** conversation.
         - It will find messages that match it exactly or contain the search parameter somewhere within it. It is not case-sensitive.
         - **Example Syntax:**
         ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]/search```
 
-    - **NOTE:** For the **second** and **third** option, the search message should be placed in the body of the POST request:
+    - **NOTE:** For the **third** and **fourth** option, the search message should be placed in the body of the POST request:
 
         - **Example Syntax:**
             ```
@@ -167,6 +197,11 @@
 - If the **Sender ID** is not 4 digits long, the Invalid Sender ID (NOT FOUR DIGITS) message will be returned.
 - If the **Receiver ID** is not 4 digits long, the Invalid Receiver ID (NOT FOUR DIGITS) message will be returned.
 - If a message is posted with no actual text in the message the "Invalid Message: Messages cannot be empty." message will be returned.
+- For the **Create Message with Image** function, an appropriate error message will be returned if:
+    - The image cannot be retrieved.
+    - The image file is too large (the image size should be 10 megabytes or less).
+    - A shared key credential could not be made (used to connect to the Azure container).
+    - The image could not be uploaded.
 - The **"Search for Message in ALL/ONE Conversation(s)"** functions must have a valid message that exists in the database, or else "No messages found." will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
 - If all requirements are met, either a single user object or a slice of user objects will be returned along with a successful console log message.

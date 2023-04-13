@@ -2,6 +2,8 @@ package main
 
 //API IS INTERFACED/TESTED USING POSTMAN
 import (
+	"path"
+
 	"github.com/Azure/azure-storage-blob-go/azblob"
 
 	"context"
@@ -399,6 +401,7 @@ func createMessageImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// SET THE MESSAGE IMAGE URL TO THE BLOB URL
+	// BASE-64 ENCODED STRING
 	message.Image = []byte(blobURL.String())
 
 	// VALIDATE THE INFORMATION
@@ -443,6 +446,54 @@ func createMessageImage(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(message)
 	log.Println("Message with image created successfully.")
+}
+
+func getImageURL(w http.ResponseWriter, r *http.Request) {
+	log.Println("Retrieving Image URL (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	var message UserMessage
+	if err := userMessagesDb.Where("id = ?", params["id"]).First(&message).Error; err != nil {
+		http.Error(w, "Message not found.", http.StatusNotFound)
+		return
+	}
+
+	// ADD THE SAS TOKEN TO THE IMAGE URL
+	// LIST CREDENTIALS
+	accountName := "gatorchatimages"
+	accountKey := "Bcm07S+0vAEG45zbvUBQ3a7ujiXB1s9RxaJVAqCcKKTtbeGuu+22aQWyH8Ux++PAGBVkqfnSptcs+AStLXHyzg=="
+	containerName := "images"
+
+	blobURL, _ := url.Parse(string(message.Image))
+	blobName := path.Base(blobURL.Path)
+
+	// MAKE A BLOB SERVICE CLIENT
+	credential, err := azblob.NewSharedKeyCredential(accountName, accountKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// SET ACCESS POLICY FOR SAS TOKEN
+	sasQueryParams, err := azblob.BlobSASSignatureValues{
+		Protocol:      azblob.SASProtocolHTTPS,
+		ExpiryTime:    time.Now().Add(24 * time.Hour),
+		Permissions:   azblob.BlobSASPermissions{Read: true}.String(),
+		ContainerName: containerName,
+		BlobName:      blobName,
+	}.NewSASQueryParameters(credential)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sasURL := blobURL.Scheme + "://" + blobURL.Host + "/" + containerName + "/" + blobURL.Path[len("/images/"):] + "?" + sasQueryParams.Encode()
+
+	// Return the SAS URL in the response
+	json.NewEncoder(w).Encode(map[string]string{"sasUrl": sasURL})
 }
 
 // UPDATES ONLY THE MESSAGE FIELD IN THE ENTRY
@@ -1148,6 +1199,7 @@ func main() {
 	r.HandleFunc("/api/messages/deleted", getDeletedMessages).Methods("GET")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/longPoll", getConversationLP).Methods("GET")
+	r.HandleFunc("/api/messages/getImage/URL/{id}", getImageURL).Methods("GET")
 
 	// PUT FUNCTIONS
 	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")
