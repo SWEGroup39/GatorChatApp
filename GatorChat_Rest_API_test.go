@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
@@ -21,9 +20,6 @@ import (
 func TestCreateMessage(t *testing.T) {
 	// CREATE A NEW USERMESSAGE STRUCT THAT WILL BE USED TO TEST THE POST
 	message := UserMessage{
-		Model: gorm.Model{
-			ID: 9900,
-		},
 		Sender_ID:   "9998",
 		Receiver_ID: "9999",
 		Message:     "Specific hello",
@@ -69,7 +65,7 @@ func TestCreateMessage(t *testing.T) {
 		// THIS WAS DONE BECAUSE IT IS NOT POSSIBLE TO HARDCODE THE TIME (TOO SPECIFIC)
 		// THESE PARAMETERS ARE HANDLED BY GORM, SO IT CAN BE ASSUMED THAT THESE ARE ALWAYS VALID
 		Model: gorm.Model{
-			ID:        9900,
+			ID:        responseStruct.ID,
 			CreatedAt: responseStruct.CreatedAt,
 			UpdatedAt: responseStruct.UpdatedAt,
 			DeletedAt: responseStruct.DeletedAt,
@@ -87,15 +83,16 @@ func TestCreateMessage(t *testing.T) {
 
 	// REMOVE THAT MESSAGE ONCE TEST IS DONE
 	// PASS IN THE GORM ID
-	deleteTestMessage(9900)
+	deleteTestMessage(responseStruct.ID)
 }
 
 // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
-func createTestMessage(sender string, receiver string, mess string) (uint, error) {
+func createTestMessage(sender string, receiver string, mess string, image []byte) (uint, error) {
 	testMessage := UserMessage{
 		Sender_ID:   sender,
 		Receiver_ID: receiver,
 		Message:     mess,
+		Image:       image,
 	}
 
 	result := userMessagesDb.Create(&testMessage)
@@ -119,9 +116,10 @@ func deleteTestMessage(messageID uint) {
 
 // THIS TEST RETRIEVES ALL THE MESSAGES BETWEEN TWO PEOPLE
 func TestGetConversation(t *testing.T) {
-	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestGetConversation")
 
-	secondID, _ := createTestMessage("9999", "9998", "Specific other message for TestGetConversation")
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestGetConversation", []byte("test"))
+
+	secondID, _ := createTestMessage("9999", "9998", "Specific other message for TestGetConversation", []byte("otherTest"))
 
 	url := "/messages/" + "9998" + "/" + "9999"
 
@@ -162,6 +160,7 @@ func TestGetConversation(t *testing.T) {
 			Sender_ID:   "9998",
 			Receiver_ID: "9999",
 			Message:     "Specific message for TestGetConversation",
+			Image:       []byte("test"),
 		},
 		{
 			Model: gorm.Model{
@@ -173,6 +172,7 @@ func TestGetConversation(t *testing.T) {
 			Sender_ID:   "9999",
 			Receiver_ID: "9998",
 			Message:     "Specific other message for TestGetConversation",
+			Image:       []byte("otherTest"),
 		},
 	}
 
@@ -186,8 +186,8 @@ func TestGetConversation(t *testing.T) {
 
 // THIS TEST SEARCHES FOR A CREATED MESSAGE ACROSS ALL CONVERSATIONS
 func TestSearchMessageAll(t *testing.T) {
-	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessageAll")
-	secondID, _ := createTestMessage("9996", "9997", "Specific message for TestSearchMessageAll")
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessageAll", []byte("test"))
+	secondID, _ := createTestMessage("9996", "9997", "Specific message for TestSearchMessageAll", []byte("otherTest"))
 
 	searchMes := UserMessage{
 		Message: "Specific message for TestSearchMessageAll",
@@ -228,6 +228,7 @@ func TestSearchMessageAll(t *testing.T) {
 			Sender_ID:   "9998",
 			Receiver_ID: "9999",
 			Message:     "Specific message for TestSearchMessageAll",
+			Image:       []byte("test"),
 		},
 		{
 			Model: gorm.Model{
@@ -239,6 +240,7 @@ func TestSearchMessageAll(t *testing.T) {
 			Sender_ID:   "9996",
 			Receiver_ID: "9997",
 			Message:     "Specific message for TestSearchMessageAll",
+			Image:       []byte("otherTest"),
 		},
 	}
 
@@ -253,8 +255,8 @@ func TestSearchMessageAll(t *testing.T) {
 
 // THIS TEST SEARCHES FOR A SPECIFIC MESSAGE BETWEEN A SENDER AND USER
 func TestSearchMessage(t *testing.T) {
-	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessage")
-	secondID, _ := createTestMessage("9996", "9997", "Specific other message for TestSearchMessage")
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for TestSearchMessage", []byte("test"))
+	secondID, _ := createTestMessage("9996", "9997", "Specific other message for TestSearchMessage", []byte("otherTest"))
 
 	searchMes := UserMessage{
 		Message: "Specific message for TestSearchMessage",
@@ -304,6 +306,7 @@ func TestSearchMessage(t *testing.T) {
 			Sender_ID:   "9998",
 			Receiver_ID: "9999",
 			Message:     "Specific message for TestSearchMessage",
+			Image:       []byte("test"),
 		},
 	}
 
@@ -318,7 +321,7 @@ func TestSearchMessage(t *testing.T) {
 
 // THIS TEST EDITS A CREATED MESSAGE
 func TestEditMessage(t *testing.T) {
-	firstID, _ := createTestMessage("9998", "9999", "This is a specific message for firstID in TestEditMessage")
+	firstID, _ := createTestMessage("9998", "9999", "This is a specific message for firstID in TestEditMessage", []byte("test"))
 
 	newMes := UserMessage{
 		Message: "Specific updated message for TestEditMessge",
@@ -366,6 +369,7 @@ func TestEditMessage(t *testing.T) {
 		Sender_ID:   "9998",
 		Receiver_ID: "9999",
 		Message:     "Specific updated message for TestEditMessge",
+		Image:       []byte("test"),
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -378,7 +382,7 @@ func TestEditMessage(t *testing.T) {
 
 // THIS TEST DELETES A CREATED MESSAGE
 func TestDeleteSpecificMessage(t *testing.T) {
-	firstID, _ := createTestMessage("9998", "9999", "This is a very specific message that can't possibly be accidentally replicated outside of this test")
+	firstID, _ := createTestMessage("9998", "9999", "This is a very specific message that can't possibly be accidentally replicated outside of this test", []byte("test"))
 
 	url := "/messages/" + fmt.Sprint(firstID)
 	r, err := http.NewRequest("DELETE", url, nil)
@@ -416,8 +420,8 @@ func TestDeleteSpecificMessage(t *testing.T) {
 
 // THIS TEST DELETES AN ENTIRE CONVERSATION BETWEEN TWO PEOPLE
 func TestDeleteConversation(t *testing.T) {
-	firstID, _ := createTestMessage("9998", "9999", "Specific message for firstID")
-	secondID, _ := createTestMessage("9999", "9998", "Specific message for secondID")
+	firstID, _ := createTestMessage("9998", "9999", "Specific message for firstID", []byte("test"))
+	secondID, _ := createTestMessage("9999", "9998", "Specific message for secondID", []byte("otherTest"))
 
 	url := "/messages/" + fmt.Sprint(firstID) + "/" + fmt.Sprint(secondID)
 	r, err := http.NewRequest("DELETE", url, nil)
@@ -457,7 +461,7 @@ func TestDeleteConversation(t *testing.T) {
 // THIS TEST DELETES A MESSAGE BETWEEN TWO PEOPLE THEN UNDOES THE DELETE
 func TestUndoDelete(t *testing.T) {
 	// CREATE A MESSAGE
-	firstID, _ := createTestMessage("9998", "9999", "Specific undo message for firstID")
+	firstID, _ := createTestMessage("9998", "9999", "Specific undo message for firstID", []byte("test"))
 
 	// DELETE IT
 	var userMessage UserMessage
@@ -509,6 +513,7 @@ func TestUndoDelete(t *testing.T) {
 		Sender_ID:   "9998",
 		Receiver_ID: "9999",
 		Message:     "Specific undo message for firstID",
+		Image:       []byte("test"),
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
@@ -520,106 +525,6 @@ func TestUndoDelete(t *testing.T) {
 	deleteTestMessage(firstID)
 }
 
-func TestEditName(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
-
-	newName := UserAccount{
-		Username:              "uuunitTestUuuser",
-		Password:              "unitTestPass",
-		Email:                 "unitTest@ufl.edu",
-		User_ID:               "9999",
-		Current_Conversations: json.RawMessage([]byte("[]")),
-	}
-
-	requestBody, err := json.Marshal(newName)
-	if err != nil {
-		t.Fatalf("Failed to marshal message: %s", err)
-	}
-
-	r, err := http.NewRequest("PUT", "/api/users/updateN/9999", bytes.NewBuffer(requestBody))
-	if err != nil {
-		t.Fatalf("Failed to create request: %s", err)
-	}
-
-	w := httptest.NewRecorder()
-
-	editName(w, r)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-	}
-
-	var responseStruct UserAccount
-	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
-	if err != nil {
-		t.Fatalf("Failed to unmarshal response body: %s", err)
-	}
-
-	expectedResponse := UserAccount{
-		Username:              "uuunitTestUuuser",
-		Password:              "unitTestPass",
-		User_ID:               "9999",
-		Email:                 "unitTest@ufl.edu",
-		Current_Conversations: json.RawMessage([]byte("[]")),
-	}
-
-	if !reflect.DeepEqual(responseStruct, expectedResponse) {
-		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
-	}
-
-	deleteTestUser("9999")
-}
-
-func TestEditPass(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
-
-	newName := UserAccount{
-		Username:              "unitTestUser",
-		Password:              "newTestPass",
-		Email:                 "unitTest@ufl.edu",
-		User_ID:               "9999",
-		Current_Conversations: json.RawMessage([]byte("[]")),
-	}
-
-	requestBody, err := json.Marshal(newName)
-	if err != nil {
-		t.Fatalf("Failed to marshal message: %s", err)
-	}
-
-	r, err := http.NewRequest("PUT", "/api/users/updateP/9999", bytes.NewBuffer(requestBody))
-	if err != nil {
-		t.Fatalf("Failed to create request: %s", err)
-	}
-
-	w := httptest.NewRecorder()
-
-	editPass(w, r)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-	}
-
-	var responseStruct UserAccount
-	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
-	if err != nil {
-		t.Fatalf("Failed to unmarshal response body: %s", err)
-	}
-
-	expectedResponse := UserAccount{
-		Username:              "unitTestUser",
-		Password:              "c8eef775bc0e26d0fd2479eb35fdf0e568e6fb7ad36abd9b58198a1be248fe99",
-		User_ID:               "9999",
-		Email:                 "unitTest@ufl.edu",
-		Current_Conversations: json.RawMessage([]byte("[]")),
-	}
-
-	if !reflect.DeepEqual(responseStruct, expectedResponse) {
-		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
-	}
-
-	deleteTestUser("9999")
-}
-
 // THIS TEST CREATES A NEW USER ACCOUNT
 func TestCreateUserAccount(t *testing.T) {
 	user := UserAccount{
@@ -627,6 +532,8 @@ func TestCreateUserAccount(t *testing.T) {
 		Password:              "unitTestPassword",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -660,6 +567,8 @@ func TestCreateUserAccount(t *testing.T) {
 		Password:              "b1b348465a1b06c150af3704f5a5f81466e77826f8351422db59b40c7a13f47e",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
@@ -671,7 +580,7 @@ func TestCreateUserAccount(t *testing.T) {
 }
 
 // GENERATES TEST DATA (THIS FUNCTION IS SIMPLY CALLING A GORM COMMAND, SO IT IS ASSUMED TO ALWAYS WORK)
-func createTestUser(username string, password string, email string, ID string) {
+func createTestUser(username string, password string, email string, ID string, fullName string, phoneNumber string) {
 
 	//HASH THE PASSWORD
 	hashedPassword := sha256.Sum256([]byte(password))
@@ -684,6 +593,8 @@ func createTestUser(username string, password string, email string, ID string) {
 		Password:              encodedPassword,
 		Email:                 email,
 		User_ID:               ID,
+		Full_Name:             fullName,
+		Phone_Number:          phoneNumber,
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -706,7 +617,7 @@ func deleteTestUser(ID string) {
 
 // THIS TEST ADDS A NEW CONVERSATION
 func TestAddConversation(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	r, err := http.NewRequest("PUT", "/api/9999/0000", nil)
 	if err != nil {
@@ -739,6 +650,8 @@ func TestAddConversation(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`["0000"]`),
 	}
 
@@ -750,9 +663,122 @@ func TestAddConversation(t *testing.T) {
 	deleteTestUser("9999")
 }
 
+// THIS TEST EDITS THE USERNAME
+func TestEditName(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
+
+	newName := UserAccount{
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	requestBody, err := json.Marshal(newName)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateN/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	editName(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "uuunitTestUuuser",
+		Password:              "unitTestPass",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+// THIS TEST EDITS THE PASSWORD
+func TestEditPass(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
+
+	newPass := UserAccountConfirmPass{
+		UserAccount: UserAccount{
+			Password: "newTestPass",
+		},
+		OriginalPassword: "unitTestPass",
+	}
+
+	requestBody, err := json.Marshal(newPass)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/api/users/updateP/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	editPass(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "c8eef775bc0e26d0fd2479eb35fdf0e568e6fb7ad36abd9b58198a1be248fe99",
+		User_ID:               "9999",
+		Email:                 "unitTest@ufl.edu",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
+		Current_Conversations: json.RawMessage([]byte("[]")),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
 // THIS TEST RETURNS A USER (BASED ON EMAIL AND PASSWORD)
 func TestGetUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	user := UserAccount{
 		Email:    "unitTest@ufl.edu",
@@ -788,6 +814,8 @@ func TestGetUser(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -801,7 +829,7 @@ func TestGetUser(t *testing.T) {
 
 // THIS TEST RETURNS A USER (BASED ON ID)
 func TestGetUserByID(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	r, err := http.NewRequest("GET", "/users/9999", bytes.NewBuffer(nil))
 	if err != nil {
@@ -833,6 +861,8 @@ func TestGetUserByID(t *testing.T) {
 		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		Email:                 "unitTest@ufl.edu",
 		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
 		Current_Conversations: []byte(`[]`),
 	}
 
@@ -846,7 +876,7 @@ func TestGetUserByID(t *testing.T) {
 
 // THIS TEST DELETES A USER
 func TestDeleteUser(t *testing.T) {
-	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999")
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
 	r, err := http.NewRequest("DELETE", "/users/9999", nil)
 	if err != nil {
@@ -879,52 +909,157 @@ func TestDeleteUser(t *testing.T) {
 	}
 }
 
-// SINCE THIS FUNCTION IS VALID IF IT RETURNS A FOUR DIGIT ID THAT DOES NOT EXIST IN THE DATABASE, THE UNIT TEST WILL BE TESTING THIS PROPERTY
-// IT IS DIFFICULT TO PREDICT THE EXPECTED ID SINCE THE DATABASE IS ALWAYS BEING UPDATED
-func TestGetNextUserID(t *testing.T) {
+func TestEditFullName(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
-	r, err := http.NewRequest("GET", "/users/nextID", nil)
+	user := UserAccount{
+		Full_Name: "New Name",
+	}
+
+	requestBody, err := json.Marshal(user)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("PUT", "/users/updateFN/9999", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
 
 	w := httptest.NewRecorder()
 
-	r = mux.SetURLVars(r, nil)
+	vars := map[string]string{
+		"id": "9999",
+	}
 
-	getNextUserID(w, r)
+	r = mux.SetURLVars(r, vars)
+
+	editFullName(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-		return
 	}
 
-	// CHECK IF THIS ID IS NOT IN THE TABLE, FOUR DIGITS, AND LESS THAN 9996
-	var returnedID string
-
-	err = json.Unmarshal(w.Body.Bytes(), &returnedID)
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal response body: %s", err)
 	}
 
-	// SEE IF IT IS IN THE DATABASE
-	var user UserAccount
-	result := userAccountsDb.Where("user_id = ?", returnedID).First(&user)
-
-	if result.Error == nil {
-		t.Errorf("Expected user to not exist, but it does.")
-		return
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Full_Name:             "New Name",
+		Phone_Number:          "(000) 000-0000",
+		Current_Conversations: []byte(`[]`),
 	}
 
-	_, err = strconv.Atoi(returnedID)
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
 
+	deleteTestUser("9999")
+}
+
+func TestEditPhoneNumber(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
+
+	user := UserAccount{
+		Phone_Number: "(000) 000-0001",
+	}
+
+	requestBody, err := json.Marshal(user)
 	if err != nil {
-		t.Errorf("Returned ID is not numeric.")
-		return
+		t.Fatalf("Failed to marshal message: %s", err)
 	}
 
-	if len(returnedID) != 4 {
-		t.Errorf("Returned ID is not four digits long.")
-		return
+	r, err := http.NewRequest("PUT", "/users/updatePN/9999", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
 	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	editPhoneNumber(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0001",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
+func TestSearchUser(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
+
+	user := UserAccount{
+		Username: "unitTestUser#9999",
+	}
+
+	requestBody, err := json.Marshal(user)
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %s", err)
+	}
+
+	r, err := http.NewRequest("POST", "/users/search", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	searchForUser(w, r)
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
 }
