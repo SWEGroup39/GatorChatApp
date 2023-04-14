@@ -21,3 +21,7 @@
  - Contacts page has some placeholder information
   - Finished edit functionality of the settings page.
      - edit username and password
+ - Fixed the guard issue when routing from the messages to the signing out. 
+  - Fixed the edit functionalities by adding an edit and save button for editing the username, phone number, and full name
+   - The update password section was created where users can change or edit their password.
+ - Added a search bar for searching a username in the contact page in order to add a contact. 
