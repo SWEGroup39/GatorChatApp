@@ -28,12 +28,21 @@
           [ngClass]="{'right': item?.userId?.toString() == currentUser.id, 'left': item?.userId?.toString() != currentUser.id}">
           <p id="message-body" (click)="showToggleMenu($event, item)">{{item?.message}}</p>
           <span id="time-details">{{item?.created_at | date: 'shortTime'}}</span>
-          <div class="toggle-menu" *ngIf="item === currentMessage">
+          <!-- <div class="toggle-menu" *ngIf="item === currentMessage">
             <ul>
               <p (click)="editMessage()">Edit</p>
               <p (click)="delete(currentMessage.messageId)">Delete</p>
               <p (click)="closeToggle()">Close</p>
             </ul>
+          </div> -->
+          <div class="toggle-menu" *ngIf="item === currentMessage">
+            <ul>
+              <li *ngIf="!editMode" (click)="edit()">Edit</li>
+              <li (click)="delete(currentMessage.messageId)">Delete</li>
+              <li (click)="closeToggle()">Close</li>
+            </ul>
+            <textarea *ngIf="editMode" [(ngModel)]="editedMessage">{{ currentMessage.message }}</textarea>
+            <button *ngIf="editMode" (click)="saveMessage()">Save</button>
           </div>
         </div>
       </ng-container>    

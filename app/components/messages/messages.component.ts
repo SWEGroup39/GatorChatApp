@@ -1,9 +1,9 @@
 import { HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Component, ElementRef, ViewChild, OnInit, ChangeDetectorRef } from '@angular/core';
-import { EMPTY, Observable, of, throwError, interval } from 'rxjs';
+import { EMPTY, Observable, of, throwError, interval, timer, BehaviorSubject } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 //import {interval} from "rxjs/internal/observable/interval";
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, delay, delayWhen} from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
@@ -21,10 +21,12 @@ export class MessagesComponent implements OnInit{
   // variables 
   showMenu: boolean = false;
   editMode: boolean = false;
+  delayed: boolean = false;
   currentMessage: any;
   editedMessage: string = "";
   chatInputMessage: string = "";
   searchInputMessage: string = "";
+  longPollingInterval = 1000; 
 
   // Messages List
   chatMessages: {
@@ -49,15 +51,83 @@ export class MessagesComponent implements OnInit{
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location, private cd: ChangeDetectorRef) { }
 
+  
+
+  // ngOnInit() {
+  //   this.route.queryParams.subscribe(params => {
+  //     // this.currentUser.id  = params['id1'] ?? '0000';
+  //     this.user1.id = params['id2'] ?? '0000';
+  //     this.currentUser.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
+
+  //     // set up long polling with RxJS
+  //     interval(this.longPollingInterval).pipe(
+  //       // delayWhen(() => this.showMenu ? timer(5000) : EMPTY),
+  //       tap(() => {
+  //         if (this.showMenu) { 
+  //           this.longPollingInterval = 50000; // increase interval to 5000ms
+  //           console.log(this.longPollingInterval);
+  //         } else {
+  //           console.log(this.longPollingInterval);
+  //         }
+  //       }),
+  //       switchMap(() => this.getMessagesLong(this.currentUser.id, this.user1.id)),
+  //       map(result => result.chatMessages)
+  //     ).subscribe(messages => {
+  //       // update the chatMessages array with the new messages
+  //       this.chatMessages = messages;
+  //     });
+
+  //     // call getMessages() initially to load existing messages
+  //     this.getMessagesLong(this.currentUser.id, this.user1.id).subscribe(result => {
+  //       this.chatMessages = result.chatMessages;
+  //     });
+  //   });
+  // }
+
+
+  // ngOnInit() {
+  //   this.route.queryParams.subscribe(params => {
+  //     // this.currentUser.id  = params['id1'] ?? '0000';
+  //     this.user1.id = params['id2'] ?? '0000';
+  //     this.currentUser.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
+  
+  //     const intervalSubject = new BehaviorSubject(this.longPollingInterval); // create BehaviorSubject with initial interval time
+  
+  //     intervalSubject.pipe(
+  //       delayWhen(() => this.showMenu ? EMPTY : timer(5000)), // pause long polling if showMenu is true
+  //       switchMap(intervalTime => interval(intervalTime)), // switch to new interval observable with updated interval time
+  //       switchMap(() => this.getMessagesLong(this.currentUser.id, this.user1.id)),
+  //       map(result => result.chatMessages)
+  //     ).subscribe(messages => {
+  //       // update the chatMessages array with the new messages
+  //       this.chatMessages = messages;
+  //     });
+  
+  //     // call getMessages() initially to load existing messages
+  //     this.getMessagesLong(this.currentUser.id, this.user1.id).subscribe(result => {
+  //       this.chatMessages = result.chatMessages;
+  //     });
+  //   });
+  // }
+
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       // this.currentUser.id  = params['id1'] ?? '0000';
       this.user1.id = params['id2'] ?? '0000';
       this.currentUser.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
-
-      // set up long polling with RxJS
-      interval(1000).pipe(
-        switchMap(() => this.getMessagesLong(this.currentUser.id, this.user1.id)),
+  
+      const intervalSubject = new BehaviorSubject(this.longPollingInterval); // create BehaviorSubject with initial interval time
+  
+      intervalSubject.pipe(
+        delayWhen(() => this.showMenu ? EMPTY : timer(5000)), // pause long polling if showMenu is true
+        switchMap(intervalTime => interval(intervalTime)), // switch to new interval observable with updated interval time
+        switchMap(() => {
+          if (this.showMenu) {
+            return EMPTY; // don't make API call if showMenu is true
+          } else {
+            return this.getMessagesLong(this.currentUser.id, this.user1.id); // make API call if showMenu is false
+          }
+        }),
         map(result => result.chatMessages)
       ).subscribe(messages => {
         // update the chatMessages array with the new messages
@@ -71,14 +141,15 @@ export class MessagesComponent implements OnInit{
     });
   }
 
+
+
+
   @ViewChild('chatList', { static: true }) chatList!: ElementRef;
 
   public getMessagesLong(Id1: string, Id2: string): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
     const url = `${this.APIurl}/${Id1}/${Id2}/longPoll`;
-    return interval(1000).pipe(
-      switchMap(() => this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url)),
+    return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url).pipe(
       map((response: any[]) => {
-       // console.log('Response:', response);
         const chatMessages = response.map(item => ({
           userId: item.sender_id,
           recieverId: item.RecieverId,
@@ -96,32 +167,8 @@ export class MessagesComponent implements OnInit{
       })
     );
   }
-
-  // public getMessagesStart(Id1: string, Id2: string ): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
-  //   const url = `${this.APIurl}/${Id1}/${Id2}`;
-  //   return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url)
-  //     .pipe(
-  //       map((response: any[]) => {
-  //         console.log('Response:', response);
-  //          const chatMessages = response.map(item => ({
-  //           userId: item.sender_id,
-  //           recieverId: item.RecieverId,
-  //           messageId: item.ID,
-  //           message: item.message,
-  //           created_at: new Date(item.CreatedAt).getTime(),
-  //           updated_at: new Date(item.UpdatedAt).getTime(),
-  //           deleted_at: new Date(item.DeletedAt).getTime(),
-  //           day: new Date(item.CreatedAt)
-  //         }));
-  //         return { chatMessages };
-  //       }),
-  //       tap((response: any) => {
-  //         console.log('body: ' + response.body);
-  //       })
-  //     );
-  // }
-
   
+
   goBack() {
     this.location.back();
   }
@@ -158,13 +205,23 @@ isSameDate(time1: number, time2: number) {
 
   closeToggle() {
     this.currentMessage = null;
+    this.showMenu = false;
+    console.log('Toggle Menu clossed->long polling resumes')
   }
 
 
-  showToggleMenu(event: MouseEvent, item: any) {
-    event.preventDefault();
-    this.currentMessage = item;
+  // showToggleMenu(event: MouseEvent, item: any) {
+  //   event.preventDefault();
+  //   this.currentMessage = item;
+  //   this.showMenu = true;
+  //   console.log('Toggle Menu oppened ->long polling paused')
     
+  // }
+
+  showToggleMenu(event: any, message: any) {
+    this.currentMessage = message;
+    this.showMenu = true;
+    console.log('Toggle Menu oppened ->long polling paused')
   }
 
   convertTimestampToDay(timestamp: number): Date {
@@ -173,15 +230,29 @@ isSameDate(time1: number, time2: number) {
     return date;
   }
 
-  editMessage() {
-    // event.stopPropagation(); 
-    // console.log("Editing message:", this.currentMessage); // prevent event from bubbling up
-    // this.currentMessage = message;
-    // this.editMode = true;
-    // this.editedMessage = message.message;
+  // editMessage() {
+  //   // event.stopPropagation(); 
+  //   // console.log("Editing message:", this.currentMessage); // prevent event from bubbling up
+  //   // this.currentMessage = message;
+  //   // this.editMode = true;
+  //   // this.editedMessage = message.message;
+  // }
+
+  edit() {
+    this.editedMessage = this.currentMessage.message;
+    this.editMode = true;
+    console.log("Trying to edit message")
   }
 
-
+  saveMessage() {
+    const body = { message: this.editedMessage };
+    const url = `${this.APIurl}/${this.currentMessage.messageId}`;
+    this.http.put(url, body).subscribe(() => {
+      this.editMode = false;
+      this.currentMessage.message = this.editedMessage;
+    });
+    console.log("saved message");
+  }
 
   delete(id: number) {
     console.log("Deleting message:", this.currentMessage);
