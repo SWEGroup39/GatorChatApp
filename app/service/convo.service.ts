@@ -21,10 +21,9 @@ export class ConvoService {
       username: username,
       password: password
     };
-    return this.http.post<{ current_conversations: string[] }>(`${this.url}/User`, requestBody)
+    return this.http.post<{ current_conversations: string[] }>(`${this.url}/UserInternal`, requestBody)
       .pipe(map(response => response.current_conversations));
   }
-
 
   getConvoUserName(id: string): Observable<{ username: string }> {
     return this.http.get<{ username: string }>(

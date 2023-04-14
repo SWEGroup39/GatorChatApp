@@ -45,6 +45,10 @@ export class AppComponent {
               'dashboard',
                 this.domSanitizer.bypassSecurityTrustResourceUrl("../assets/dashboard-svgrepo-com.svg")
               );
+              this.matIconRegistry.addSvgIcon(
+                'pencil',
+                this.domSanitizer.bypassSecurityTrustResourceUrl("../assets/pencil-edit-button-svgrepo-com.svg")
+              );
 }
   
 }

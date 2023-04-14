@@ -17,12 +17,12 @@ import { Router } from '@angular/router';
 })
 
 export class LoginComponent implements OnInit {
-  @Input() username: string =``;
+  @Input() email: string =``;
   @Input() password: string = ``;
   
   submitSuccess:boolean=false;
   user: User = {
-    username :this.username,
+    email : this.email,
     password: this.password,
   
   }
@@ -41,14 +41,21 @@ export class LoginComponent implements OnInit {
 
   onGetUser():void{
 
-    this.userService.getUser(this.user.password, this.user.username).subscribe(
+    this.userService.getUser(this.user.password, this.user.email).subscribe(
       (response) => {
         this.resetForm()
         this.submitSuccess = true;
         this.isloggedIn(this.submitSuccess);
-       const { user_id, username, password } = response;
-       console.log(`/dashboard/${username}/${password}`);
-       this.router.navigate(['/dashboard'], { queryParams: { username: username, password: password, id: user_id }});
+        console.log('Logged In')
+       const { user_id, username, password,email,current_conversations,phone_number,full_name } = response;
+       localStorage.setItem(`currentUserU`, username)
+       localStorage.setItem(`currentUserP`,password)
+       localStorage.setItem(`currentUserE`,email)
+       localStorage.setItem(`currentUserI`, user_id)
+       localStorage.setItem(`currentUserPh`,phone_number)
+       localStorage.setItem('currentUserF',full_name)
+       localStorage.setItem('currentUserC',JSON.stringify(current_conversations))
+       this.router.navigate(['/dashboard']);
 
       },
       (error:any) => {alert(`Username or Password is incorrect! Please try again`)
@@ -60,25 +67,16 @@ export class LoginComponent implements OnInit {
 
    isloggedIn(isLogged:boolean){
     this.userService.isLoggedIn = isLogged;
+    sessionStorage.setItem('userLoggedIn','true');
+    
   }
   get loggedIn():boolean{
     return this.userService.isLoggedIn;
   }
 
-  // onCreateUser():void{
-  //   this.userService.createUser(this.user).subscribe(
-  //     (response) => console.log(response),
-  //     (error: any) => console.log(error),
-  //     () => console.log('Done creating user')
-  //   );
-  // }
 
- 
   ngOnInit():void{
-    //this.onGetUsers();
-   //this.onCreateUser();
-    //this.onGetUser();
-    
+ 
 
   }
 
@@ -86,30 +84,12 @@ export class LoginComponent implements OnInit {
     if(form != null)
     form.reset();
     this.user = {
-      username: '',
+      email: '',
       password: ''
 
     }
   }
 
-  /*getUser(username: string, password: string): Observable<any> {
-    const url = `http://localhost:8080/api/user/User/${username}/${password}`;
-      
-    return this.http.get<any>(url).pipe(
-       map(response => {
-     const user = {
-          username: response.username,
-           password: response.password,
-            userId: response.userId,
-         };
-          return user;
-        }),
-        tap(response => {
-        console.log('User found:', response);
-         })
-      );
-    }
-    */
 
  
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component ,OnInit} from '@angular/core';
 import { Location } from '@angular/common';
 
 @Component({
@@ -9,7 +9,11 @@ import { Location } from '@angular/common';
 export class ContactsComponent {
 
   constructor( private location: Location) {}
+  currentConvo = localStorage.getItem('currentUserC');
 
+  ngOnInit(){
+
+  }
 
   goBack() {
     this.location.back();

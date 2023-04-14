@@ -21,18 +21,18 @@ const appRoutes = [
   {path: 'login', component: LoginComponent},
   {path: 'signup', component: SignUpComponent},
   {path: 'about', component: AboutComponent},
-  {path:'dashboard',component:DashboardComponent, canActivate:[AuthGuardGuard]},
-  {path:'dashboard/:username/:password',component:DashboardComponent, canActivate:[AuthGuardGuard]},
-  {path: 'messages', component:MessagesComponent, canActivate:[AuthGuardGuard]},
-  {path:'contacts', component: ContactsComponent, canActivate:[AuthGuardGuard]},
-  {path:'profile', component: ProfileComponent, canActivate:[AuthGuardGuard]},
-  {path:'settings', component: SettingsComponent, canActivate:[AuthGuardGuard]},
-  {path:'notification', component: NotificationComponent, canActivate:[AuthGuardGuard]},
-  {path: 'chat-list', component: ChatListComponent, canActivate:[AuthGuardGuard]},
+  {path:'dashboard',component:DashboardComponent},
+  {path:'dashboard/:username/:password',component:DashboardComponent},
+  {path: 'messages', component:MessagesComponent},
+  {path:'contacts', component: ContactsComponent},
+  {path:'profile', component: ProfileComponent},
+  {path:'settings', component: SettingsComponent},
+  {path:'notification', component: NotificationComponent},
+  {path: 'chat-list', component: ChatListComponent},
   {path: '**', redirectTo:'/home'}
 
 ];
-
+// canActivate:[AuthGuardGuard]
 @NgModule({
   
   imports: [

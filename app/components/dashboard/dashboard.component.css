@@ -1,3 +1,18 @@
 .col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse{
   position: fixed;
 }
+
+.container-fluid
+{
+ position: relative;
+}
+
+.corner-image {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+   margin-bottom: 30px;
+  margin-right: 0px; 
+  width: 400px;
+  height: 400px;
+}

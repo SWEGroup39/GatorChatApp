@@ -1,7 +1,9 @@
 export interface User {
-  username: string
+  username?: string
   password: string
-  email?: string
+  email: string
   user_id?: string
-  current_conversations?:[]
+  full_name?:string
+  phone_number?:string
+  current_conversations?:any[]
 }

@@ -1,0 +1,7 @@
+.text-body-secondary, .link-body-emphasis {
+    color: white;
+  }
+  
+  .mat-icon svg {
+    fill: white;
+  }

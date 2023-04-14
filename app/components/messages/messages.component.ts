@@ -1,10 +1,12 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
-import { EMPTY, Observable, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
+import { Component, ElementRef, ViewChild, OnInit, ChangeDetectorRef } from '@angular/core';
+import { EMPTY, Observable, of, throwError, interval } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+//import {interval} from "rxjs/internal/observable/interval";
 import { tap, catchError } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+
 
 
 @Component({
@@ -13,12 +15,18 @@ import { Location } from '@angular/common';
   styleUrls: ['./messages.component.scss']
 })
 export class MessagesComponent implements OnInit{
-  // currId: string ='';
-  // otherId: string = ''
+  title = 'chat-app';
+  time = of(0);
 
+  // variables 
+  showMenu: boolean = false;
+  editMode: boolean = false;
+  currentMessage: any;
+  editedMessage: string = "";
   chatInputMessage: string = "";
   searchInputMessage: string = "";
 
+  // Messages List
   chatMessages: {
     userId: number,
     recieverId: number,
@@ -29,41 +37,91 @@ export class MessagesComponent implements OnInit{
 
   APIurl: string = `http://localhost:8080/api/messages`;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location) { }
-  
+  currentUser = {
+    name: 'null',
+    id: 'null',
+  }
+
+  user1= {
+    name: 'null',
+    id: 'null',
+  }
+
+  constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location, private cd: ChangeDetectorRef) { }
+
   ngOnInit() {
-
     this.route.queryParams.subscribe(params => {
-    this.currentUser.id  = params['id1'] ?? '0000';
-    this.user1.id = params['id2'] ?? '0000';
+      // this.currentUser.id  = params['id1'] ?? '0000';
+      this.user1.id = params['id2'] ?? '0000';
+      this.currentUser.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
 
-    this.getMessages( this.currentUser.id , this.user1.id  ).subscribe((result) => {
-    this.chatMessages = result.chatMessages;
-
-
-    });
-
+      // set up long polling with RxJS
+      interval(1000).pipe(
+        switchMap(() => this.getMessagesLong(this.currentUser.id, this.user1.id)),
+        map(result => result.chatMessages)
+      ).subscribe(messages => {
+        // update the chatMessages array with the new messages
+        this.chatMessages = messages;
+      });
+  
+      // call getMessages() initially to load existing messages
+      this.getMessagesLong(this.currentUser.id, this.user1.id).subscribe(result => {
+        this.chatMessages = result.chatMessages;
+      });
     });
   }
 
   @ViewChild('chatList', { static: true }) chatList!: ElementRef;
 
-  currentUser = {
-    name: 'moe ',
-    id: '0001',
-    profileImageUrl:
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKQmFYe2KZvQcnKEfGNICxM4I4udEh_-uG90chKLlXMx2HDGPr_ODubOdkpUFdJVGSKs0&usqp=CAU',
-
+  public getMessagesLong(Id1: string, Id2: string): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
+    const url = `${this.APIurl}/${Id1}/${Id2}/longPoll`;
+    return interval(1000).pipe(
+      switchMap(() => this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url)),
+      map((response: any[]) => {
+       // console.log('Response:', response);
+        const chatMessages = response.map(item => ({
+          userId: item.sender_id,
+          recieverId: item.RecieverId,
+          messageId: item.ID,
+          message: item.message,
+          created_at: new Date(item.CreatedAt).getTime(),
+          updated_at: new Date(item.UpdatedAt).getTime(),
+          deleted_at: new Date(item.DeletedAt).getTime(),
+          day: new Date(item.CreatedAt)
+        }));
+        return { chatMessages };
+      }),
+      tap((response: any) => {
+        //console.log('body: ' + response.body);
+      })
+    );
   }
 
-  user1= {
-    name: 'Jane ',
-    id: '0002',
-    profileImageUrl:
-    'https://ps.w.org/user-avatar-reloaded/assets/icon-256x256.png?rev=2540745',
+  // public getMessagesStart(Id1: string, Id2: string ): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
+  //   const url = `${this.APIurl}/${Id1}/${Id2}`;
+  //   return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url)
+  //     .pipe(
+  //       map((response: any[]) => {
+  //         console.log('Response:', response);
+  //          const chatMessages = response.map(item => ({
+  //           userId: item.sender_id,
+  //           recieverId: item.RecieverId,
+  //           messageId: item.ID,
+  //           message: item.message,
+  //           created_at: new Date(item.CreatedAt).getTime(),
+  //           updated_at: new Date(item.UpdatedAt).getTime(),
+  //           deleted_at: new Date(item.DeletedAt).getTime(),
+  //           day: new Date(item.CreatedAt)
+  //         }));
+  //         return { chatMessages };
+  //       }),
+  //       tap((response: any) => {
+  //         console.log('body: ' + response.body);
+  //       })
+  //     );
+  // }
 
-  }
-
+  
   goBack() {
     this.location.back();
   }
@@ -72,70 +130,76 @@ export class MessagesComponent implements OnInit{
     this.location.back();
     this.location.back();
   }
-   public getMessages(Id1: string, Id2: string ): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
-    const url = `${this.APIurl}/${Id1}/${Id2}`;
-    return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url)
-      .pipe(
-        map((response: any[]) => {
-          console.log('Response:', response);
-           const chatMessages = response.map(item => ({
-            userId: item.sender_id,
-            recieverId: item.RecieverId,
-            messageId: item.ID,
-            message: item.message,
-            created_at: new Date(item.CreatedAt).getTime(),
-            updated_at: new Date(item.UpdatedAt).getTime(),
-            deleted_at: new Date(item.DeletedAt).getTime(),
-          }));
-          return { chatMessages };
-        }),
-        tap((response: any) => {
-          console.log('body: ' + response.body);
-        })
-      );
-  }
+
+  showDate(item: any, index: number): boolean {
+    if (index === 0) {
+      // always show the date for the first item
+      return true;
+    }
+    const prevItem = this.chatMessages[index - 1];
+    const prevDate = new Date(prevItem.created_at);
+    const currDate = new Date(item.created_at);
   
-
-  searchMessages(content: string): Observable<{ Messages: { messageId: number }[] }> {
-    const url = `http://localhost:8080/api/messages/${content}`;
-    return this.http.get<{ ID: number }[]>(url)
-      .pipe(
-        map((response: { ID: number }[]) => {
-          console.log('Messages found:', response);
-          const Messages = response.map(item => ({ messageId: item.ID }));
-          return { Messages };
-        }),
-        tap((response: any) => {
-          console.log('body:', response.body);
-        })
-      );
-  }
-
-  
-
-  sendMessage(Ids: any): Observable<any> {
-    const url = 'http://localhost:8080/api/messages';
-    console.log('Send Message');
-    console.log(Ids);
-
-    return this.http.post(url, {
-      sender_id: Ids.userId.toString(),
-      receiver_id: Ids.recieverId.toString(),
-      message: Ids.message,
-    }).pipe(
-      tap(response => {
-        console.log('Message sent:', response);
-        this.chatMessages.push(Ids);
-      }),
-      catchError(error => {
-        console.error(error);
-        return throwError(error);
-      })
-    ); 
+    // show the date if it's different from the previous message's date
+    return prevDate.toDateString() !== currDate.toDateString();
   }
 
 
-  title = 'chat-app';
+isSameDate(time1: number, time2: number) {
+    return this.convertTimestampToDay(time1).getTime() === this.convertTimestampToDay(time2).getTime();
+}
+
+ clickMenu(event: MouseEvent)
+  {
+    if (event.detail === 1 && event.button === 0) {
+      console.log('clicked');
+    }
+  }
+
+  closeToggle() {
+    this.currentMessage = null;
+  }
+
+
+  showToggleMenu(event: MouseEvent, item: any) {
+    event.preventDefault();
+    this.currentMessage = item;
+    
+  }
+
+  convertTimestampToDay(timestamp: number): Date {
+    const date = new Date(timestamp);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  editMessage() {
+    // event.stopPropagation(); 
+    // console.log("Editing message:", this.currentMessage); // prevent event from bubbling up
+    // this.currentMessage = message;
+    // this.editMode = true;
+    // this.editedMessage = message.message;
+  }
+
+
+
+  delete(id: number) {
+    console.log("Deleting message:", this.currentMessage);
+    this.deleteMessage(id).subscribe(
+      (result) => {
+          this.getMessagesLong( this.currentUser.id , this.user1.id  ).subscribe((result) => {
+            this.chatMessages = result.chatMessages;
+        
+              });
+        }
+      
+    )
+
+    console.log(this.chatMessages);
+    this.cd.detectChanges();
+
+  }
+
 
   send() {
     const newMessage = {
@@ -150,7 +214,7 @@ export class MessagesComponent implements OnInit{
         // Check if post was successful
         if (result.success) {
           // If post was successful, push newMessage to the chatMessages list
-          this.chatMessages.push(result);
+         //this.chatMessages.push(result);
         } else {
           // If post was not successful, log the error
           console.error(result.message);
@@ -175,7 +239,7 @@ search(message: string) {
   Ids.forEach(id => console.log('Id found:' + id.messageId))
 
   const messageIndex = this.chatMessages.findIndex(ms => ms.messageId == Ids[0].messageId);
-  console.log(messageIndex)
+  console.log("Index:" + messageIndex)
    
     console.log(this.chatList.nativeElement.children[messageIndex]);
 
@@ -189,4 +253,68 @@ search(message: string) {
 
     });
   }
+
+
+  // API functions (Request)
+
+  searchMessages(content: string): Observable<{ Messages: { messageId: number }[] }> {
+    const url = `http://localhost:8080/api/messages/${this.currentUser.id}/${this.user1.id}/search`;
+    const requestBody = { message: content };
+    console.log("Content: " + content);
+    return this.http.post<{ ID: number }[]>(url, requestBody)
+      .pipe(
+        map((response: { ID: number }[]) => {
+          console.log('Messages found:', response);
+          const Messages = response.map(item => ({ messageId: item.ID }));
+          return { Messages };
+        }),
+        tap((response: any) => {
+          console.log('body:', response.body);
+        })
+      );
+  }
+  
+
+  sendMessage(Ids: any): Observable<any> {
+    const url = 'http://localhost:8080/api/messages';
+    console.log('Send Message');
+    console.log(Ids);
+
+    return this.http.post(url, {
+      sender_id: Ids.userId.toString(),
+      receiver_id: Ids.recieverId.toString(),
+      message: Ids.message,
+    }).pipe(
+      tap(response => {
+        console.log('Message sent:', response);
+        this.chatMessages.push(Ids);
+      }),
+      catchError(error => {
+        console.error(error);
+        return throwError(error);
+      })
+    ); 
+  }
+
+
+  deleteMessage(id: number): Observable<any> {
+    const url = `http://localhost:8080/api/messages/${id}`;
+    console.log('Deleting Message: ' + id);
+  
+    return this.http.delete(url).pipe(
+      map((response: any) => {
+        console.log('Deleted sucessfully')
+        return response;
+      }),
+      catchError((error: any) => {
+        console.log('Delete failed')
+        return throwError(error);
+      })
+    );
+  }
+
+
 }
+
+
+

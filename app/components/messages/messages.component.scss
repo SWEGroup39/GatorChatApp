@@ -5,7 +5,7 @@ $message-color: white;
 $message-font: 'San Francisco', sans-serif;
 
 
-.contianer{
+.container{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -46,6 +46,18 @@ $message-font: 'San Francisco', sans-serif;
         color: $message-color;
         font-family: $message-font;
     }
+
+    .toggle-menu {
+      display: inline-block;
+      position: relative;
+      top: 0;
+      border: 1px solid rgb(186, 170, 170);
+      padding: 5px;
+      z-index: 1;
+      border-radius: 15px;
+      background-color: grey;
+  }
+
 
     #avatar{
         height: 36px;
@@ -89,6 +101,12 @@ $message-font: 'San Francisco', sans-serif;
     }    
 
     }
+}
+
+.date-divider
+{
+  color: grey;
+  text-align: center;
 }
 
 .chat-footer
@@ -150,3 +168,4 @@ $message-font: 'San Francisco', sans-serif;
 
   }
 }
+

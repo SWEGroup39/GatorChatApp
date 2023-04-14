@@ -9,8 +9,7 @@ import { Location } from '@angular/common';
   templateUrl: './chat-list.component.html',
   styleUrls: ['./chat-list.component.css']
 })
-export class ChatListComponent {
-
+export class ChatListComponent{
   convos: {
     id: string,
     username: string,
@@ -20,32 +19,32 @@ export class ChatListComponent {
   id: string = '';
   username: string ='';
   password: string = '';
-
+ 
   constructor(private convoService: ConvoService, private route: ActivatedRoute, private location: Location) {}
+
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      this.id = params['id'] ?? 'failed';
-      this.username = params['username'] ?? 'failed';
-      this.password = params['password'] ?? 'failed';
-  
-      this.convoService.getConvoUserIds(this.username, this.password).subscribe(conversations => {
-        this.convos = conversations.map(user => ({
-          id: user,
-          username: ``
-        }));
-        
-        for (const convo of this.convos) {
-          this.convoService.getConvoUserName(convo.id).subscribe(item=> {
-            convo.username = item.username;
-            console.log(convo.username)
-          })
+      this.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
+      this.username = JSON.stringify(localStorage.getItem('currentUserU')).replace(/['"]/g, '');
+      this.password = JSON.stringify(localStorage.getItem('currentUserP')).replace(/['"]/g, '');
+      let currentConvString = localStorage.getItem('currentUserC');
+      
+      //debug purposes 
+      console.log(currentConvString)
+      console.log(this.id);
+      console.log(this.username);
+      console.log(this.password);
+
+     
+        for (const friendId of JSON.parse(currentConvString?? '' )) {
+          console.log(friendId)
+          this.convoService.getConvoUserName(friendId).subscribe(item => {
+            this.convos.push({id: friendId, username: item.username})
+          });
         }
-        console.log(this.convos)
-
+        console.log(this.convos);
       });
-
-    });
   }
 
   goBack() {
