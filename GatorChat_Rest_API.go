@@ -720,9 +720,12 @@ func checkRecentlyDeleted(gormID string, w http.ResponseWriter, r *http.Request)
 
 	// IF THEY DO, THEN HARD DELETE IT AS ONE USER CAN ONLY UNDO THEIR MOST RECENTLY DELETED MESSAGE
 	if result.RowsAffected != 0 {
-		// REMOVE THE IMAGE FROM THE BLOB CONTAINER
-		deleteImage(string(deletedMessage.Image))
 
+		if deletedMessage.Image != nil || string(deletedMessage.Image) != "" {
+			// REMOVE THE IMAGE FROM THE BLOB CONTAINER
+			deleteImage(string(deletedMessage.Image))
+		}
+		
 		result = userMessagesDb.Unscoped().Delete(&deletedMessage)
 		if result.Error != nil {
 			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
