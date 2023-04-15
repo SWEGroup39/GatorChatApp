@@ -492,8 +492,45 @@ func getImageURL(w http.ResponseWriter, r *http.Request) {
 
 	sasURL := blobURL.Scheme + "://" + blobURL.Host + "/" + containerName + "/" + blobURL.Path[len("/images/"):] + "?" + sasQueryParams.Encode()
 
-	// Return the SAS URL in the response
+	// RETURN SAS URL
 	json.NewEncoder(w).Encode(map[string]string{"sasUrl": sasURL})
+}
+
+func deleteImage(image string) error {
+	// DECODE THE IMAGE STRING TO A URL
+	blobURL, err := url.Parse(string(image))
+	if err != nil {
+		return err
+	}
+
+	// PARSE THE IMAGE URL TO GET THE BLOB NAME
+	blobName := path.Base(blobURL.Path)
+
+	// CREATE A BLOB SERVICE CLIENT
+	accountName := "gatorchatimages"
+	accountKey := "Bcm07S+0vAEG45zbvUBQ3a7ujiXB1s9RxaJVAqCcKKTtbeGuu+22aQWyH8Ux++PAGBVkqfnSptcs+AStLXHyzg=="
+	credential, err := azblob.NewSharedKeyCredential(accountName, accountKey)
+	if err != nil {
+		return err
+	}
+	p := azblob.NewPipeline(credential, azblob.PipelineOptions{})
+	containerName := "images"
+	blobURLParts := azblob.NewBlobURLParts(url.URL{
+		Scheme: "https",
+		Host:   accountName + ".blob.core.windows.net",
+	})
+	serviceURL := azblob.NewServiceURL(blobURLParts.URL(), p)
+	containerURL := serviceURL.NewContainerURL(containerName)
+
+	// DELETE THE BLOB
+	newblobURL := containerURL.NewBlobURL(blobName)
+	ctx := context.Background()
+	_, err = newblobURL.Delete(ctx, azblob.DeleteSnapshotsOptionInclude, azblob.BlobAccessConditions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // UPDATES ONLY THE MESSAGE FIELD IN THE ENTRY
@@ -683,6 +720,9 @@ func checkRecentlyDeleted(gormID string, w http.ResponseWriter, r *http.Request)
 
 	// IF THEY DO, THEN HARD DELETE IT AS ONE USER CAN ONLY UNDO THEIR MOST RECENTLY DELETED MESSAGE
 	if result.RowsAffected != 0 {
+		// REMOVE THE IMAGE FROM THE BLOB CONTAINER
+		deleteImage(string(deletedMessage.Image))
+
 		result = userMessagesDb.Unscoped().Delete(&deletedMessage)
 		if result.Error != nil {
 			http.Error(w, result.Error.Error(), http.StatusInternalServerError)

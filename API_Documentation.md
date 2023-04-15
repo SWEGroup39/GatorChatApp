@@ -161,7 +161,7 @@
                     - sender_id, receiver_id, and message have a value type of "Text" while image has a value type of "File".
                     - The keys shown above **MUST** be the keys you use when passing with form-data.
                     - All other requirements and errors associated with the original **Create Message** apply here too.
-                    - Once the message has been created, the image field will be given a URL that is associated with the BLOB. The URL can be converted into a SAS (Shared Access Signature) URL that allows you to access the image. A GET request can then be called to the SAS URL to retrieve the image (the response type should be BLOB).
+                    - Once the message has been created, the image field will be given a URL that is associated with the BLOB. The URL can be converted into a SAS (Shared Access Signature) URL that allows you to access the image. A GET request can then be called to the SAS URL to retrieve the image (the response type should be BLOB). The function to turn it into an SAS URL can be found [here](#SAS).
 
     - **Third Option: Search for Message in All Conversations**: 
         - This **POST** function returns the message object that matches the specified message, if it exists in the messages database.
@@ -260,7 +260,7 @@
 - The **GET** command returns messages that have been created with the **POST** request.
 
 ### Syntax
-- There are currently three different **GET** functions available:
+- There are currently four different **GET** functions available:
 
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
@@ -277,14 +277,23 @@
      - **Third Option: Get ALL Deleted Messages**: 
         - This **GET** function returns every soft deleted message in the messages database.
         - **Example Syntax:**
-        ```http://localhost:8080/api/deleted ```
+        ```http://localhost:8080/api/messages/deleted ```
         - **NOTE:** _This is considered a testing function and not for Frontend purposes._
+
+    <a id="SAS"></a>
+    - **Fourth Option: Get SAS URL**: 
+        - This **GET** function takes in the GORM ID of a message and converts the string in the "image" field from a BLOB URL to a SAS URL.
+        - **Example Syntax:**
+        ```http://localhost:8080/api/messages/getImage/URL/{id}```
+        - An **SAS URL** will be returned in the form of a map (key/value pair). The key is "sasUrl" and is a string literal. The value of "sasURL" is a string variable that contains the SAS URL. A GET request can then be made to this SAS URL to retrieve the image (the response type should be BLOB).
 
 ### Requirements and Error Messages
 - The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
 - If the **"Get ALL Messages/Get ALL Deleted Messages"** function cannot locate any messages, then a message describing how no messages were found will be returned.
+- For the **Get SAS URL** function, the message with the passed-in GORM ID must exist or an error message saying "Message not found." will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- If all requirements are met, the message(s) will be returned along with a successful console log message.
+    - If the **SAS query parameters** could not be established correctly, then an **Internal Server Error** will be returned.
+- If all requirements are met, the message(s) or URL will be returned along with a successful console log message.
 ---
 
 <a id="DELETE_Messages"></a>
