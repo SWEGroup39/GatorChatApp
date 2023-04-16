@@ -24,18 +24,20 @@ export class SettingsComponent{
   @Input() password:string=''
   errorMessage:string=''
   editing:boolean =false;
+  localID:string=''
   goBack() {
     this.location.back();
   }
 
   ngOnInit() {
-    this.fullName = JSON.stringify(localStorage.getItem('currentUserF')).slice(1,-1);
+    this.localID = sessionStorage.getItem('idLog')??''
+    this.fullName = JSON.stringify(sessionStorage.getItem('currentUserF'+this.localID)).slice(1,-1);
     this.firstN = this.fullName.substring(0,this.fullName.indexOf(' '))
     this.lastN = this.fullName.substring(this.fullName.indexOf(' ') + 1)
-    this.phone = JSON.stringify(localStorage.getItem('currentUserPh')).slice(1,-1);
-    this.email = JSON.stringify(localStorage.getItem('currentUserE')).slice(1,-1);
-    this.userID = JSON.stringify(localStorage.getItem('currentUserI')).slice(1,-1);
-    this.username = JSON.stringify(localStorage.getItem('currentUserU')).slice(1,-1);
+    this.phone = JSON.stringify(sessionStorage.getItem('currentUserPh'+this.localID)).slice(1,-1);
+    this.email = JSON.stringify(sessionStorage.getItem('currentUserE'+this.localID)).slice(1,-1);
+    this.userID = JSON.stringify(sessionStorage.getItem('currentUserI'+this.localID)).slice(1,-1);
+    this.username = JSON.stringify(sessionStorage.getItem('currentUserU'+this.localID)).slice(1,-1);
     // this.password = JSON.stringify(localStorage.getItem('currentUserP')).slice(1,-1);
     
   }
@@ -51,7 +53,7 @@ export class SettingsComponent{
   }
   saveFieldFN(){
     this.updateFullName()
-    localStorage.setItem('currentUserF',this.fullName);
+    sessionStorage.setItem('currentUserF'+this.localID,this.fullName);
   }
   editFieldPN(element:any){
     this.editing = true;
@@ -63,7 +65,7 @@ export class SettingsComponent{
   }
   saveFieldPN(){
     this.updatePhoneNum()
-    localStorage.setItem('currentUserPh',this.phone);
+    sessionStorage.setItem('currentUserPh'+this.localID,this.phone);
   }
 
   editFieldU(element:any){
@@ -77,7 +79,7 @@ export class SettingsComponent{
   }
   saveFieldU(){
     this.updateUsername()
-    localStorage.setItem('currentUserU',this.username);
+    sessionStorage.setItem('currentUserU'+this.localID,this.username);
   }
 
   deleteUser():void{
@@ -148,7 +150,7 @@ export class SettingsComponent{
   }
   saveAs():void{
     this.updatePassword();
-    localStorage.setItem('currentUserP',this.password);
+    sessionStorage.setItem('currentUserP'+this.localID,this.password);
     window.location.reload()
   }
 

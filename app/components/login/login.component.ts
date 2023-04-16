@@ -1,7 +1,6 @@
+import { UserService } from 'src/app/service/user.service';
 import { DashboardComponent } from './../dashboard/dashboard.component';
 
-
-import { UserService } from './../../service/user.service';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, Input, ViewChild, Injectable } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
@@ -26,7 +25,7 @@ export class LoginComponent implements OnInit {
     password: this.password,
   
   }
-
+  idLog:string=''
   constructor(private userService: UserService, private router: Router){}
 
   onGetUsers():void{
@@ -47,14 +46,15 @@ export class LoginComponent implements OnInit {
         this.submitSuccess = true;
         this.isloggedIn(this.submitSuccess);
         console.log('Logged In')
+        this.idLog = sessionStorage.getItem('idLog')??''
        const { user_id, username, password,email,current_conversations,phone_number,full_name } = response;
-       localStorage.setItem(`currentUserU`, username)
-       localStorage.setItem(`currentUserP`,password)
-       localStorage.setItem(`currentUserE`,email)
-       localStorage.setItem(`currentUserI`, user_id)
-       localStorage.setItem(`currentUserPh`,phone_number)
-       localStorage.setItem('currentUserF',full_name)
-       localStorage.setItem('currentUserC',JSON.stringify(current_conversations))
+       sessionStorage.setItem(`currentUserU`+this.idLog, username)
+       sessionStorage.setItem(`currentUserP`+this.idLog, password)
+       sessionStorage.setItem(`currentUserE`+this.idLog,email)
+       sessionStorage.setItem(`currentUserI`+this.idLog, user_id)
+       sessionStorage.setItem(`currentUserPh`+this.idLog,phone_number)
+       sessionStorage.setItem('currentUserF'+this.idLog,full_name)
+       sessionStorage.setItem('currentUserC'+this.idLog,JSON.stringify(current_conversations))
        this.router.navigate(['/dashboard']);
 
       },
@@ -67,7 +67,9 @@ export class LoginComponent implements OnInit {
 
    isloggedIn(isLogged:boolean){
     this.userService.isLoggedIn = isLogged;
+    
     sessionStorage.setItem('userLoggedIn','true');
+    sessionStorage.setItem('idLog',this.userService.loggedInUser)
     
   }
   get loggedIn():boolean{

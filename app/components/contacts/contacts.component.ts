@@ -10,21 +10,21 @@ import { UserService } from 'src/app/service/user.service';
 export class ContactsComponent {
 
   constructor( private location: Location, private userService:UserService) {}
-  currentConvo = localStorage.getItem('currentUserC');
+  // currentConvo = localStorage.getItem('currentUserC');
   contactList: any[] = [];
   @Input() searchValue:string=``;
   size!: number;
   id:string=``
   username:string=``
   currentID:string=''
-  
+  localID:string=''
   ngOnInit(){
     // for(let i = 0; i < this.contactList.length; i++){
     //   console.log(this.contactList.at(i))
     // }
     // this.contactList = JSON.parse(localStorage.getItem("this.username")??'')
-    
-    this.currentID = localStorage.getItem('currentUserI')??''
+    this.localID = sessionStorage.getItem('idLog')??''
+    this.currentID = sessionStorage.getItem('currentUserI'+this.localID)??''
     this.contactList = JSON.parse(sessionStorage.getItem("contact"+this.currentID)??'[]')
     console.log(this.contactList.length)
   }
@@ -63,7 +63,7 @@ export class ContactsComponent {
   }
 
   deleteContact():void{
-    localStorage.removeItem("contact"+this.currentID)
+    sessionStorage.removeItem("contact"+this.currentID)
   }
 
   addConversationID():void{

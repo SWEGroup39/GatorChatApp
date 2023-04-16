@@ -6,6 +6,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { tap, catchError } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { UserService } from 'src/app/service/user.service';
 
 
 
@@ -25,7 +26,7 @@ export class MessagesComponent implements OnInit{
   editedMessage: string = "";
   chatInputMessage: string = "";
   searchInputMessage: string = "";
-
+  localID:string=''
   // Messages List
   chatMessages: {
     userId: number,
@@ -47,13 +48,14 @@ export class MessagesComponent implements OnInit{
     id: 'null',
   }
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location, private cd: ChangeDetectorRef) { }
+  constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location, private cd: ChangeDetectorRef,private user:UserService) { }
 
   ngOnInit() {
+    this.localID = sessionStorage.getItem('idLog')??''
     this.route.queryParams.subscribe(params => {
       // this.currentUser.id  = params['id1'] ?? '0000';
       this.user1.id = params['id2'] ?? '0000';
-      this.currentUser.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
+      this.currentUser.id = JSON.stringify(sessionStorage.getItem('currentUserI'+this.localID)).replace(/['"]/g, '');
 
       // set up long polling with RxJS
       interval(1000).pipe(

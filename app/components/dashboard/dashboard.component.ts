@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { UserService } from 'src/app/service/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,7 +13,8 @@ export class DashboardComponent implements OnInit{
   id: string = ''
   email:string=''
   fullname:string=''
-  constructor(private route: ActivatedRoute) {}
+  localID:string=''
+  constructor(private route: ActivatedRoute, private userService:UserService) {}
 
   ngOnInit(): void {
     // this.route.queryParams.subscribe(params => {
@@ -22,12 +24,13 @@ export class DashboardComponent implements OnInit{
     //   this.email = params['email']??'failed';
     //   console.log(this.username+ ' ' + this.password + ' ' + this.id + ' ' + this.email)
     // });
-    this.username = JSON.stringify(localStorage.getItem('currentUser')).replace(/['"]/g, '');
-    this.password = JSON.stringify(localStorage.getItem('currentUserP')).replace(/['"]/g, '');
-    this.email = JSON.stringify(localStorage.getItem('currentUserE')).replace(/['"]/g, '');
-    this.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
-    this.fullname = JSON.stringify(localStorage.getItem('currentUserF')).replace(/['"]/g, '');
-    console.log(JSON.stringify(localStorage));
+    this.localID = sessionStorage.getItem('idLog')??''
+    this.username = JSON.stringify(sessionStorage.getItem(`currentUserU`+this.localID)).replace(/['"]/g, '');
+    this.password = JSON.stringify(sessionStorage.getItem('currentUserP'+this.localID)).replace(/['"]/g, '');
+    this.email = JSON.stringify(sessionStorage.getItem('currentUserE'+this.localID)).replace(/['"]/g, '');
+    this.id = JSON.stringify(sessionStorage.getItem('currentUserI'+this.localID)).replace(/['"]/g, '');
+    this.fullname = JSON.stringify(sessionStorage.getItem('currentUserF'+this.localID)).replace(/['"]/g, '');
+    console.log(JSON.stringify(sessionStorage));
     // localStorage.setItem('currentUserU'+this.id,this.username)
     // localStorage.setItem('currentUserP'+this.id,this.password)
     // localStorage.setItem('currentUserE'+this.id,this.email)

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ConvoService } from 'src/app/service/convo.service';
 import { Location } from '@angular/common';
+import { UserService } from 'src/app/service/user.service';
 @Component({
   selector: 'app-chat-list-component',
   templateUrl: './chat-list-component.component.html',
@@ -17,8 +18,8 @@ export class ChatListComponentComponent {
   id: string = '';
   username: string ='';
   password: string = '';
- 
-  constructor(private convoService: ConvoService, private route: ActivatedRoute, private location: Location) {}
+ localID:string=''
+  constructor(private convoService: ConvoService, private route: ActivatedRoute, private location: Location, private user:UserService) {}
 
   // ngOnInit() {
   //   this.route.queryParams.subscribe(params => {
@@ -57,11 +58,12 @@ export class ChatListComponentComponent {
   //   });
   // }
   ngOnInit() {
+    this.localID = sessionStorage.getItem('idLog')??''
     this.route.queryParams.subscribe(params => {
-      this.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
-      this.username = JSON.stringify(localStorage.getItem('currentUserU')).replace(/['"]/g, '');
-      this.password = JSON.stringify(localStorage.getItem('currentUserP')).replace(/['"]/g, '');
-      let currentConvString = localStorage.getItem('currentUserC');
+      this.id = JSON.stringify(sessionStorage.getItem('currentUserI'+this.localID)).replace(/['"]/g, '');
+      this.username = JSON.stringify(sessionStorage.getItem('currentUserU'+this.localID)).replace(/['"]/g, '');
+      this.password = JSON.stringify(sessionStorage.getItem('currentUserP'+this.localID)).replace(/['"]/g, '');
+      let currentConvString = sessionStorage.getItem('currentUserC'+this.localID);
       console.log(currentConvString)
       console.log(this.id);
       console.log(this.username);

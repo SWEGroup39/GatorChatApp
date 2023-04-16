@@ -8,7 +8,7 @@ import { User } from '../interface/user';
 export class UserService {
   isLoggedIn: boolean = false;
   emailAddress: string = ``;
-
+  loggedInUser:string=''
   constructor(private http: HttpClient) {
     
   }
@@ -25,6 +25,7 @@ export class UserService {
       email: username,
       password: password
     };
+    this.loggedInUser = username;
     
     return this.http.post<any>('http://localhost:8080/api/users/User',requestBody);
   }

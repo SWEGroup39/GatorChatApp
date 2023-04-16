@@ -25,7 +25,7 @@ export class ProfileComponent {
   fullname:string ='';
   editing: boolean = false;
 
-
+  localID:string=''
   constructor(private route: ActivatedRoute, private location: Location, private userService:UserService) {}
   
   ngOnInit() {
@@ -39,11 +39,12 @@ export class ProfileComponent {
     //   console.log(this.id + ' ' + this.username + ' ' + this.password);
   
     // });
-    this.id = JSON.stringify(localStorage.getItem('currentUserI')).replace(/['"]/g, '');
-    this.username = JSON.stringify(localStorage.getItem('currentUserU')).replace(/['"]/g, '');
-    this.email = JSON.stringify(localStorage.getItem('currentUserE')).replace(/['"]/g, '');
-    this.phone = JSON.stringify(localStorage.getItem('currentUserPh')).replace(/['"]/g, '');
-    this.fullname = JSON.stringify(localStorage.getItem('currentUserF')).replace(/['"]/g, '');
+    this.localID=sessionStorage.getItem('idLog')??''
+    this.id = JSON.stringify(sessionStorage.getItem('currentUserI'+this.localID)).replace(/['"]/g, '');
+    this.username = JSON.stringify(sessionStorage.getItem('currentUserU'+this.localID)).replace(/['"]/g, '');
+    this.email = JSON.stringify(sessionStorage.getItem('currentUserE'+this.localID)).replace(/['"]/g, '');
+    this.phone = JSON.stringify(sessionStorage.getItem('currentUserPh'+this.localID)).replace(/['"]/g, '');
+    this.fullname = JSON.stringify(sessionStorage.getItem('currentUserF'+this.localID)).replace(/['"]/g, '');
   }
 
   goBack() {
