@@ -1,0 +1,124 @@
+<mat-toolbar style="background:linear-gradient(90deg, rgba(50, 50, 190, 1) 0%, rgba(153, 81, 38, 1) 100%);" class="mat-elevation-z8">
+  <span style="font-family: montserrat; color: white; font-style: italic;font-weight: bolder; font-size: 25px; display: contents; cursor: pointer;"><mat-icon svgIcon="gator" style=" width: 45px !important;
+    height: 45px !important;display: inline-flex;align-self: center;" routerLink = "/dashboard"></mat-icon>&nbsp;GatorChat</span>
+   <div class="space"></div>
+   
+   <a mat-raised-button  style="color: white; background-color: rgb(74, 74, 218); font-size: 15px; position:absolute; right:0; margin-right: 10px;" class="navBarButtons" routerLink="/login" (click)="logOut()">Sign Out</a>
+ 
+ </mat-toolbar>
+ 
+<div class="container-fluid" style="max-height: max-content; background:white">
+  <div class="row">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="height: 100vh;">
+      <div class="position-sticky pt-3 sidebar-sticky">
+        <ul class="nav flex-column">
+          <!-- <li class="nav-item" >
+            <a class="nav-link active" aria-current="page" href="#" style="padding: 35px; align-items: center; display: flex; " routerLink="/dashboard">
+              <mat-icon svgIcon="dashboard" style=" width: 25px !important;
+              height: 25px !important;display: flexbox; align-self: center;"></mat-icon>
+              &nbsp; &nbsp; Dashboard 
+            </a>
+          </li> -->
+          <li class="nav-item">
+            <!-- <a class="nav-link" href="#" style="padding: 35px; align-items: center; display: flex;" routerLink="/messages"> -->
+              <!-- <a class="nav-link" href="#" style="padding: 35px; align-items: center; display: flex;" routerLink="/chat-list">  -->
+                <a class="nav-link" href="#" style="padding: 35px; align-items: center; display: flex;" routerLink = "/chat-list">
+                  <router-outlet ></router-outlet>
+                  <mat-icon svgIcon="message" style="width: 25px; height: 25px; display: flexbox; align-self: center;"></mat-icon>
+                  <span style="margin-left: 10px;">Conversations</span>
+                </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" style="padding: 35px; align-items: center; display: flex;" routerLink="/contacts">
+              <mat-icon svgIcon="contacts" style=" width: 25px !important;
+              height: 25px !important;display: flexbox; align-self: center;"></mat-icon>
+              &nbsp; &nbsp; Contacts
+            </a>
+          </li>
+          <li class="nav-item" >
+            <a class="nav-link" href="#" style="padding: 35px; align-items: center; display: flex;" routerLink="/profile" >
+              <mat-icon svgIcon="profile" style=" width: 25px !important;
+              height: 25px !important;display: flexbox; align-self: center;"></mat-icon>
+              &nbsp; &nbsp; Profile
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" style="padding: 35px; align-items: center; display: flex;" routerLink="/settings">
+              <mat-icon svgIcon="settings"  style=" width: 25px !important;
+              height: 25px !important;display: flexbox; align-self: center;"></mat-icon>
+              &nbsp; &nbsp; Settings
+            </a>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" href="#" style="padding: 35px; padding-bottom: 130px; align-items: center; display: flex; " routerLink="/notification">
+              <mat-icon svgIcon="notification" style=" width: 25px !important;
+              height: 25px !important;display: flexbox; align-self: center;"></mat-icon>
+              &nbsp; &nbsp; Notifications
+            </a>
+          </li> -->
+        </ul>
+
+       
+      </div>
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <!-- <h1 class="h2"> Dashboard</h1> -->
+        <h2>  Welcome back {{this.fullname}}!</h2>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- <canvas class="my-4 w-100 chartjs-render-monitor" id="myChart" width="728" height="307" style="display: block; height: 246px; width: 583px;">
+        
+      </canvas> -->
+      <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true" style="background-color: rgb(72, 107, 235); border-radius: 15px; padding: 10px; color: white; margin-bottom: 5px;">
+        <mat-icon svgIcon="notification"></mat-icon>
+        <div class="d-flex gap-2 w-100 justify-content-between">
+          <div>
+            <h3 class="mb-0">PICK UP WHERE YOU LEFT OFF</h3>
+            <p class="mb-0 opacity-75">Click here to continue your recent conversation</p>
+          </div>
+          <small class="opacity-100 text-nowrap" style="color: white;">now</small>
+        </div>
+      </a>
+      <a routerLink="/contacts" class="list-group-item list-group-item-action d-flex gap-3 py-3" style="background-color: rgb(244, 160, 76); border-radius: 15px; padding: 10px; color: black; margin-bottom: 5px;" aria-current="true" >
+        <mat-icon svgIcon="notification"></mat-icon>
+        <div class="d-flex gap-2 w-100 justify-content-between">
+          <div>
+            <h3 class="mb-0">WANT TO ADD MORE CONTACTS?</h3>
+            <p class="mb-0 opacity-75">Click here to add a new contact</p>
+          </div>
+          <small class="opacity-90 text-nowrap">now</small>
+        </div>
+      </a>
+      <a routerLink="/profile" class="list-group-item list-group-item-action d-flex gap-3 py-3"  aria-current="true" style="background-color: rgb(72, 107, 235); border-radius: 15px; padding: 10px; color: white; margin-bottom: 5px;">
+        <mat-icon svgIcon="notification"></mat-icon>
+        <div class="d-flex gap-2 w-100 justify-content-between">
+          <div>
+            <h3 class="mb-0">CUSTOMIZE YOUR PROFILE?</h3>
+            <p class="mb-0 opacity-75">Click here to customize your profile</p>
+          </div>
+          <small class="opacity-100 text-nowrap" style="color: white;">now</small>
+        </div>
+      </a>
+      <a routerLink="/settings" class="list-group-item list-group-item-action d-flex gap-3 py-3" style="background-color: rgb(244, 160, 76); border-radius: 15px; padding: 10px; color: black; margin-bottom: 5px;" aria-current="true" >
+        <mat-icon svgIcon="notification"></mat-icon>
+        <div class="d-flex gap-2 w-100 justify-content-between">
+          <div>
+            <h3 class="mb-0">CHANGE YOUR SETTINGS?</h3>
+            <p class="mb-0 opacity-75">Click here to modify your settings</p>
+          </div>
+          <small class="opacity-90 text-nowrap" >now</small>
+        </div>
+      </a>
+      <div  style="border-bottom: 50px;"></div>
+
+    
+    </main>
+  </div>
+</div>
