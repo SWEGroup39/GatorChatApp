@@ -14,7 +14,6 @@ $message-font: 'San Francisco', sans-serif;
     background:linear-gradient(90deg, rgb(137, 137, 238) 0%, rgba(153, 81, 38, 1) 100%);
 
 }
-
 #undo-button
 {
   position: absolute;
@@ -37,6 +36,7 @@ $message-font: 'San Francisco', sans-serif;
    }
 
 }
+
 
 .card{
     background: $background;
@@ -167,7 +167,7 @@ $message-font: 'San Francisco', sans-serif;
     background-color: $right-bubble-background;
     color: $message-color;
     font-family: $message-font;
-    margin: 0 6px;
+    margin: 0 5px;
     border: 1px solid white;
     border-radius: 5px;
     filter: drop-shadow(-5px 0px 8px grey);
@@ -179,11 +179,23 @@ $message-font: 'San Francisco', sans-serif;
     img
     {
         object-fit: cover;
-        height: 32px;
-        width: 30px;
+        height: 35px;
+        width: 35px;
     }
 
   }
+
+ #image-button
+ {
+   margin: 0 6px;
+   background-color: $right-bubble-background;
+   img
+    {
+        object-fit: cover;
+        height: 32px;
+        width: 30px;
+    }
+ }
 }
 .search-footer
 {
