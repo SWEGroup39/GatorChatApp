@@ -725,7 +725,7 @@ func checkRecentlyDeleted(gormID string, w http.ResponseWriter, r *http.Request)
 			// REMOVE THE IMAGE FROM THE BLOB CONTAINER
 			deleteImage(string(deletedMessage.Image))
 		}
-		
+
 		result = userMessagesDb.Unscoped().Delete(&deletedMessage)
 		if result.Error != nil {
 			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -932,6 +932,55 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(user)
 	log.Println("Found user successfully.")
+}
+
+func deleteContact(w http.ResponseWriter, r *http.Request) {
+	log.Println("Deleting Contact (DELETE)")
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	var user UserAccount
+
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).First(&user)
+
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var conversationSlice []string
+	err := json.Unmarshal([]byte(user.Current_Conversations), &conversationSlice)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var found bool
+	for i, v := range conversationSlice {
+		if v == params["id_2"] {
+			found = true
+			conversationSlice = append(conversationSlice[:i], conversationSlice[i+1:]...)
+		}
+	}
+
+	if found == false {
+		http.Error(w, "Contact not found.", http.StatusBadRequest)
+		return
+	}
+
+	conversationJSON, _ := json.Marshal(conversationSlice)
+
+	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).Update("Current_Conversations", string(conversationJSON))
+
+	if result.Error != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).First(&user)
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("Contact removed successfully.")
 }
 
 func addConversation(w http.ResponseWriter, r *http.Request) {
@@ -1221,9 +1270,9 @@ func getMostRecentConvo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User has not sent any messages.", http.StatusNotFound)
 		return
 	}
-	
+
 	var lastSentMessage UserMessage
-	
+
 	result := userMessagesDb.Order("created_at DESC").Where("sender_id = ?", params["id"]).First(&lastSentMessage)
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -1288,6 +1337,7 @@ func main() {
 	r.HandleFunc("/api/messages/deleteTable", deleteTable).Methods("DELETE")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", deleteConversation).Methods("DELETE")
 	r.HandleFunc("/api/messages/{id}", deleteSpecificMessage).Methods("DELETE")
+	r.HandleFunc("/api/users/removeC/{id_1}/{id_2}", deleteContact).Methods("DELETE")
 
 	// API FUNCTIONS FOR THE USERS DATABASE
 
