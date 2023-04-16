@@ -25,3 +25,5 @@
   - Fixed the edit functionalities by adding an edit and save button for editing the username, phone number, and full name
    - The update password section was created where users can change or edit their password.
  - Added a search bar for searching a username in the contact page in order to add a contact. 
+- Finished the contacts page where a user can search and add contacts
+- Added some routing/ easy access headings to the dashboard page
