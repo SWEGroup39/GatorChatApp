@@ -27,3 +27,5 @@
  - Added a search bar for searching a username in the contact page in order to add a contact. 
 - Finished the contacts page where a user can search and add contacts
 - Added some routing/ easy access headings to the dashboard page
+- Fixed the issue of local storage overriding the contents when another tab is opened.
+  -Changed from local to session storage
