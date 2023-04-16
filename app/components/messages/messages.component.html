@@ -26,7 +26,10 @@
         </div>
         <div class="chat-item" 
           [ngClass]="{'right': item?.userId?.toString() == currentUser.id, 'left': item?.userId?.toString() != currentUser.id}">
-          <p id="message-body" (click)="showToggleMenu($event, item)">{{item?.message}}</p>
+          <p id="message-body" (click)="showToggleMenu($event, item)">
+            {{item?.message}}
+            <img *ngIf="item?.image" [src]="item?.image" style="max-width:30%; max-height: 30%;">
+          </p>
           <span id="time-details">{{item?.created_at | date: 'shortTime'}}</span>
           <div class="toggle-menu" *ngIf="item === currentMessage">
             <ul>
@@ -45,10 +48,10 @@
     </button>
     <div class="chat-footer">
       <textarea id="chat-textarea" [(ngModel)]="chatInputMessage"></textarea>
-      <button id="image-button" (click)="fileInput.click()">
+      <button id="image-button" (click)="fileInput.click()" [class.image_uploaded]="this.isImageUploaded">
         <img src="https://static.thenounproject.com/png/1156518-200.png">
       </button>
-      <input type="file" #fileInput style="display:none"/>
+      <input type="file" #fileInput style="display:none" (change)="onImageSelect($event)"/>
       <button id="send-button" (click)="send()" [disabled]="chatInputMessage?.length == 0">
         <img src="https://img.icons8.com/ios11/600/000000/filled-sent.png">
       </button>

@@ -9,6 +9,7 @@ import { Location } from '@angular/common';
 
 
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './messages.component.html',
@@ -22,12 +23,15 @@ export class MessagesComponent implements OnInit{
   showMenu: boolean = false;
   editMode: boolean = false;
   showUndoButton: boolean = false;
+  isImageUploaded: boolean = false;
   currentMessage: any;
   editedMessage: string = "";
   chatInputMessage: string = "";
   searchInputMessage: string = "";
+  image: string = "";
   lastDeletedMessage: number = 0;
   longPollingInterval = 1000; 
+
 
   // Messages List
   chatMessages: {
@@ -36,6 +40,7 @@ export class MessagesComponent implements OnInit{
     message: string,
     created_at: number,
     messageId: number,
+    image: File,
   }[] =[]
 
   APIurl: string = `http://localhost:8080/api/messages`;
@@ -85,10 +90,21 @@ export class MessagesComponent implements OnInit{
     });
   }
 
+  onImageSelect(event: any) {
+     this.image = event.target.files[0];
+     this.isImageUploaded = true;
+     console.log("Image uploaded: " + this.image);
+    // const reader = new FileReader();
+    // reader.readAsDataURL(file);
+    // reader.onload = () => {
+    //  this.image = reader.result?.toString().split(',')[1] ?? '';
+    
+    // };
+  }
 
-  public getMessagesLong(Id1: string, Id2: string): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number}[] }> {
+  public getMessagesLong(Id1: string, Id2: string): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number, image: File}[] }> {
     const url = `${this.APIurl}/${Id1}/${Id2}/longPoll`;
-    return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number }[]>(url).pipe(
+    return this.http.get<{ ID: number, CreatedAt: number, UpdatedAt: number, DeletedAt: number, message: string, SenderId: number, RecieverId: number, messageId: number, image: File }[]>(url).pipe(
       map((response: any[]) => {
         const chatMessages = response.map(item => ({
           userId: item.sender_id,
@@ -98,6 +114,7 @@ export class MessagesComponent implements OnInit{
           created_at: new Date(item.CreatedAt).getTime(),
           updated_at: new Date(item.UpdatedAt).getTime(),
           deleted_at: new Date(item.DeletedAt).getTime(),
+          image: item.image ? atob(item.image) : null,
           day: new Date(item.CreatedAt)
         }));
         return { chatMessages };
@@ -207,7 +224,40 @@ isSameDate(time1: number, time2: number) {
     this.showUndoButton = false;
   }
 
-  send() {
+
+  send()
+  {
+    if(this.isImageUploaded)
+      this.sendImageMessage();
+    
+    else
+      this.sendOnlyMessage();
+
+  }
+
+  sendImageMessage()
+  {
+    // Create a new FormData object
+    let formData = new FormData();
+    formData.append('sender_id', this.currentUser.id);
+    formData.append('receiver_id', this.user1.id);
+    formData.append('message', this.chatInputMessage);
+    formData.append('image', this.image);
+
+    // Send the POST request
+    fetch(`${this.APIurl}/image`, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
+
+    this.isImageUploaded = false;
+    this.chatInputMessage = "";
+  }
+
+  sendOnlyMessage() {
     const newMessage = {
       message: this.chatInputMessage,
       userId: this.currentUser.id,
@@ -315,7 +365,6 @@ search(message: string) {
       })
     );
   }
-
 
 }
 

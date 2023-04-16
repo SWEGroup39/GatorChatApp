@@ -126,6 +126,8 @@ $message-font: 'San Francisco', sans-serif;
     margin-right: auto;
     margin-left: 8px;
     #message-body{
+        display: flex;
+        flex-direction: column;
         margin-left: -15px;
         margin-top: 10px;
         background: rgb(209, 122, 41);
@@ -138,10 +140,12 @@ $message-font: 'San Francisco', sans-serif;
     margin-left: auto;
     flex-direction: row-reverse;
     #message-body{
+        display: flex;
+        flex-direction: column;
         margin-right: -15px;
         margin-top: 10px;
         background: $right-bubble-background;
-
+       // padding-left: 700px;
     }    
 
     }
@@ -183,6 +187,11 @@ $message-font: 'San Francisco', sans-serif;
         width: 35px;
     }
 
+  }
+
+  #image-button.image_uploaded
+  {
+    background-color: $left-bubble-background;
   }
 
  #image-button
