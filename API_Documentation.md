@@ -53,6 +53,8 @@
     - Gorilla Mux is needed for the "github.com/gorilla/mux" package.
   - **CORS**
     - CORS is needed for the ""github.com/rs/cors" package.
+  - **azblob**
+    - azblob is a package used for handling images by storing them in a container on the Microsoft Azure account. It is for the "github.com/Azure/azure-storage-blob-go/azblob" package.
 
 - **Quick Reference**: Use ```go get -u <package>``` in your command line to install a certain package.
 
@@ -240,6 +242,7 @@
         ```http://localhost:8080/api/messages/undo/[ID] ```
 
         - The required input is the user's Sender ID that is within a UserMessage struct.
+        - **NOTE:** In order for this function call to work as a **PUT**, a request body must be passed in. In this case, you can simply pass in an empty request body.
 
 ### Requirements and Error Messages
 - For the **Edit Message** function:
@@ -260,24 +263,27 @@
 - The **GET** command returns messages that have been created with the **POST** request.
 
 ### Syntax
-- There are currently four different **GET** functions available:
+- There are currently five different **GET** functions available:
 
     - **First Option: Get Conversation**:
         - This **GET** function returns all messages between the specified sender and receiver IDs.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
+
         - This returns all the messages, in a slice/array, where the first ID was either the sender/receiver and the second ID was either the sender/receiver.
 
      - **Second Option: Get ALL Messages**: 
         - This **GET** function returns every message in the messages database.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages ```
+
         - **NOTE:** _This is more of a testing function rather than a function that would be frequently/practically used._
 
      - **Third Option: Get ALL Deleted Messages**: 
         - This **GET** function returns every soft deleted message in the messages database.
         - **Example Syntax:**
         ```http://localhost:8080/api/messages/deleted ```
+
         - **NOTE:** _This is considered a testing function and not for Frontend purposes._
 
     <a id="SAS"></a>
@@ -285,15 +291,23 @@
         - This **GET** function takes in the GORM ID of a message and converts the string in the "image" field from a BLOB URL to a SAS URL.
         - **Example Syntax:**
         ```http://localhost:8080/api/messages/getImage/URL/{id}```
+
         - An **SAS URL** will be returned in the form of a map (key/value pair). The key is "sasUrl" and is a string literal. The value of "sasURL" is a string variable that contains the SAS URL. A GET request can then be made to this SAS URL to retrieve the image (the response type should be BLOB).
+
+    - **Fifth Option: Get Most Recent Conversation**: 
+        - This **GET** function returns the user object of whoever the passed-in user talked to last.
+         - **Example Syntax:**
+        ```http://localhost:8080/api/messages/getRecent/user/{id} ```
+
+        - This will take in the id in the url and search for the last message they sent. It will then return the user object of the receiver_id (i.e. the last person they talked to).
 
 ### Requirements and Error Messages
 - The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
-- If the **"Get ALL Messages/Get ALL Deleted Messages"** function cannot locate any messages, then a message describing how no messages were found will be returned.
+- If the **"Get ALL Messages, Get ALL Deleted Messages, and Get Most Recent Conversation"** functions cannot locate any messages, then a message describing how no messages were found will be returned.
 - For the **Get SAS URL** function, the message with the passed-in GORM ID must exist or an error message saying "Message not found." will be returned.
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
     - If the **SAS query parameters** could not be established correctly, then an **Internal Server Error** will be returned.
-- If all requirements are met, the message(s) or URL will be returned along with a successful console log message.
+- If all requirements are met, the message(s), URL, or user will be returned along with a successful console log message.
 ---
 
 <a id="DELETE_Messages"></a>
@@ -309,6 +323,7 @@
         - This **DELETE** function deletes a specified messaged between a sender and receiver, if it exists in the messages database.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/[ID]```
+
         - This function takes in the unique GORM ID in a UserMessage struct.
         - **NOTE:** This function soft deletes a message. In other words, the message still exists, but there is a timestamp in its "DeletedAt" property. It will not appear in the normal GET functions or search functions.
             - If a specific user deletes a message (e.g. message A), and then deletes another message (e.g. message B), then message A will be hard deleted and unable to be brought back. This is because **a user is only able to bring back their most recently deleted message.**
@@ -318,6 +333,7 @@
         - This **DELETE** function deletes all messages between a sender and receiver, if they have a current conversation.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/[FIRST ID]/[SECOND ID]```
+
         - This function takes in the two IDs of the people whose conversation you want deleted.
         - **NOTE:** This function "hard" deletes the conversation. In other words, this action cannot be reversed and the conversation will be permanently deleted.
 
@@ -325,12 +341,14 @@
         - This **DELETE** function deletes the entire database of messages.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/deleteTable```
+
         - **NOTE:** _This function is used for testing purposes and is most likely not going to be an implemented function in the Frontend._
 
     - **Fourth Option: Delete All Deleted Messages**:
         - This **DELETE** function deletes all messages that are currently **soft deleted**.
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/deleteDeleted```
+
         - **NOTE:** _This function is used for testing purposes and is not considered a Frontend feature._
 
 ### Requirements and Error Messages
@@ -400,6 +418,7 @@
         - It will find a user that matches the credentials.
         - **Example Syntax:**
         ```http://localhost:8080/api/users/User```
+
          - **NOTE:** User in this case is the word "User". In cases where the syntax involves filling in a parameter, brackets ([]) will surround the word.
          - For get, the information passed in must be through the request **body**.
             - The required input is the user's email and password.
@@ -417,6 +436,7 @@
         - It will find a user that matches the search pattern ```[USERNAME]#[ID]```
         - **Example Syntax:**
         ```http://localhost:8080/api/users/search```
+
             - The required input is the search pattern, which will be placed in the **username** field.
             
                 - **Example Syntax:**
@@ -446,19 +466,13 @@
 
 ### Syntax
 
-- There are currently five **PUT** commands available:
-
-    - **First Option: Edit Current Conversation**:
-        - This **PUT** function adds an ID to a user's current conversation list.
-         - **Example Syntax:**
-        - ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
-        - The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
-        - If all requirements are met, the updated user object will be returned along with a "ID added successfully." console log message.
+- There are currently four **PUT** commands available:
         
-     - **Second Option: Edit Username**:
+     - **First Option: Edit Username**:
         - This **PUT** function edits a user's username.
          - **Example Syntax:**
             - ```http://localhost:8080/api/users/updateN/[ID]```
+
             - The required input is the user's new username.
                 - **Example Syntax:**
                     ```
@@ -467,10 +481,11 @@
                         }
                     ```
 
-     - **Third Option: Edit Password**:
+     - **Second Option: Edit Password**:
         - This **PUT** function edits a user's password.
          - **Example Syntax:**
             - ```http://localhost:8080/api/users/updateP/[ID]```
+
             - The required input is the user's original password and new password.
                 - **Example Syntax:**
                     ```
@@ -483,10 +498,11 @@
                 - For this function, the struct used **must be UserAccountConfirmPass, not UserAccount**. This is because the "original_pass" field is not included in the original **UserAccount** struct.
                 - The new password **CANNOT** the same as the original password.
 
-    - **Fourth Option: Edit Full Name**:
+    - **Third Option: Edit Full Name**:
         - This **PUT** function edits a user's full name.
          - **Example Syntax:**
             - ```http://localhost:8080/api/users/updateFN/[ID]```
+
             - The required input is the user's new full name.
                 - **Example Syntax:**
                     ```
@@ -494,10 +510,11 @@
                             "full_name": "Test User"
                         }
 
-    - **Fifth Option: Edit Phone Number**:
+    - **Fourth Option: Edit Phone Number**:
         - This **PUT** function edits a user's phone number.
          - **Example Syntax:**
             - ```http://localhost:8080/api/users/updatePN/[ID]```
+
             - The required input is the user's new username.
                 - **Example Syntax:**
                     ```
@@ -513,7 +530,6 @@
     - This error will be thrown if the **Edit Username**, **Edit Password**, **Edit Full Name**, or **Edit Phone Number** functions are not able to locate the passed-in user.
         - Otherwise, the username, password, full name, or phone number will be updated and will return the newly updated user object along with a successful console log message.
 - For the **Edit Phone Number** function, the phone number **STILL** must follow the format established in the create user function: (###) ###-####. Otherwise, a 400 Bad Request will be returned.
-
 ---
 
 <a id="GET_Users"></a>
@@ -523,15 +539,25 @@
 - The **GET** command returns information about users that have been created with a **POST** request.
 
 ### Syntax
-- There are currently two **GET** functions available:
+- There are currently three **GET** functions available:
 
-    - **First Option: Get All Users**:
+    - **First Option: Edit Current Conversation**:
+        - This **PUT** function adds an ID to a user's current conversation list.
+         - **Example Syntax:**
+        - ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
+
+        - The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
+        - If all requirements are met, the updated user object will be returned along with a "ID added successfully." console log message.
+        - **NOTE:** This function is called as a **GET** rather than a **PUT** because it does not involve passing anything into the body. Frameworks such as Angular must have a body for a **PUT**.
+
+    - **Second Option: Get All Users**:
         - This **GET** function returns all users in the users database.
          - **Example Syntax:**
         ```http://localhost:8080/api/users```
+
         - **NOTE:** _It is expected that this function is merely a testing function and will not be implemented in the Frontend._
 
-    - **Second Option: Get User by ID**:
+    - **Third Option: Get User by ID**:
         - This **GET** function returns a user from the users database based on the user's unique ID.
             - **Example Syntax:**
         ```http://localhost:8080/api/users/[ID]```

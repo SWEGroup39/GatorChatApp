@@ -935,7 +935,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func addConversation(w http.ResponseWriter, r *http.Request) {
-	log.Println("Adding an ID to a User's Conversation List (PUT)")
+	log.Println("Adding an ID to a User's Conversation List (GET)")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	var user UserAccount
@@ -1210,6 +1210,40 @@ func searchForUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("Found user successfully.")
 }
 
+func getMostRecentConvo(w http.ResponseWriter, r *http.Request) {
+	log.Println("Retrieving Last User This Person Talked To (GET)")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	var message UserMessage
+	if err := userMessagesDb.Where("sender_id = ?", params["id"]).First(&message).Error; err != nil {
+		http.Error(w, "User has not sent any messages.", http.StatusNotFound)
+		return
+	}
+	
+	var lastSentMessage UserMessage
+	
+	result := userMessagesDb.Order("created_at DESC").Where("sender_id = ?", params["id"]).First(&lastSentMessage)
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		log.Println("Unable to find someone that this person sent a message to.")
+		return
+	}
+
+	// FIND THE USER THAT THEY LAST TALKED TO
+	var user UserAccount
+	result = userAccountsDb.Where("user_id = ?", lastSentMessage.Receiver_ID).First(&user)
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		log.Println("Found a user, but could not locate them in the users database.")
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+	log.Println("Found user successfully.")
+}
+
 func main() {
 	log.Println("Connecting to API...")
 
@@ -1243,6 +1277,7 @@ func main() {
 	r.HandleFunc("/api/messages/{id_1}/{id_2}", getConversation).Methods("GET")
 	r.HandleFunc("/api/messages/{id_1}/{id_2}/longPoll", getConversationLP).Methods("GET")
 	r.HandleFunc("/api/messages/getImage/URL/{id}", getImageURL).Methods("GET")
+	r.HandleFunc("/api/messages/getRecent/user/{id}", getMostRecentConvo).Methods("GET")
 
 	// PUT FUNCTIONS
 	r.HandleFunc("/api/messages/{id}", editMessage).Methods("PUT")
@@ -1266,11 +1301,11 @@ func main() {
 	r.HandleFunc("/api/users/updateP/{id}", editPass).Methods("PUT")
 	r.HandleFunc("/api/users/updateFN/{id}", editFullName).Methods("PUT")
 	r.HandleFunc("/api/users/updatePN/{id}", editPhoneNumber).Methods("PUT")
-	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("PUT")
 
 	// GET FUNCTIONS
 	r.HandleFunc("/api/users", getAllUsers).Methods("GET")
 	r.HandleFunc("/api/users/{id}", getUserByID).Methods("GET")
+	r.HandleFunc("/api/users/{id_1}/{id_2}", addConversation).Methods("GET")
 
 	//DELETE FUNCTION
 	r.HandleFunc("/api/users/{id}", deleteUser).Methods("DELETE")
