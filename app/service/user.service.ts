@@ -80,6 +80,10 @@ export class UserService {
     
     return this.http.get<string>(`http://localhost:8080/api/users/${sender_id}/${receiver_id}`)
   }
+
+  mostRecentConvo(userID:string):Observable<any>{
+    return this.http.get<any>(`http://localhost:8080/api/messages/getRecent/user/${userID}`)
+  }
 }
 
 

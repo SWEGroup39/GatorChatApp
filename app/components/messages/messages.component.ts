@@ -27,6 +27,7 @@ export class MessagesComponent implements OnInit{
   chatInputMessage: string = "";
   searchInputMessage: string = "";
   localID:string=''
+  currentUsername:string=''
   // Messages List
   chatMessages: {
     userId: number,
@@ -56,6 +57,7 @@ export class MessagesComponent implements OnInit{
       // this.currentUser.id  = params['id1'] ?? '0000';
       this.user1.id = params['id2'] ?? '0000';
       this.currentUser.id = JSON.stringify(sessionStorage.getItem('currentUserI'+this.localID)).replace(/['"]/g, '');
+      this.currentUsername = JSON.stringify(sessionStorage.getItem('currentUserU'+this.localID)).replace(/['"]/g, '');
 
       // set up long polling with RxJS
       interval(1000).pipe(

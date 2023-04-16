@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from 'src/app/service/user.service';
 
 @Component({
@@ -14,7 +14,8 @@ export class DashboardComponent implements OnInit{
   email:string=''
   fullname:string=''
   localID:string=''
-  constructor(private route: ActivatedRoute, private userService:UserService) {}
+  recentID:string=''
+  constructor(private route: ActivatedRoute, private userService:UserService, private router:Router) {}
 
   ngOnInit(): void {
     // this.route.queryParams.subscribe(params => {
@@ -39,6 +40,22 @@ export class DashboardComponent implements OnInit{
   }
   logOut():void{
     sessionStorage.setItem('userLoggedIn','false')
+  }
+
+  mostRecentConversation():void{
+    this.userService.mostRecentConvo(this.id).subscribe(
+      (response)=>{
+        console.log(response)
+        const{user_id}=response
+        
+        this.recentID = user_id
+        console.log(this.recentID)
+        this.router.navigateByUrl(`/messages?id1=${this.id}&id2=${this.recentID}`)
+      },
+      (error)=>{
+        console.log(error)
+      }
+    );
   }
 
 }

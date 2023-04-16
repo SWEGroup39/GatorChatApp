@@ -76,12 +76,12 @@
       <!-- <canvas class="my-4 w-100 chartjs-render-monitor" id="myChart" width="728" height="307" style="display: block; height: 246px; width: 583px;">
         
       </canvas> -->
-      <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true" style="background-color: rgb(72, 107, 235); border-radius: 15px; padding: 10px; color: white; margin-bottom: 5px;">
+      <a class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true" style="background-color: rgb(72, 107, 235); border-radius: 15px; padding: 10px; color: white; margin-bottom: 5px;">
         <mat-icon svgIcon="notification"></mat-icon>
         <div class="d-flex gap-2 w-100 justify-content-between">
           <div>
             <h3 class="mb-0">PICK UP WHERE YOU LEFT OFF</h3>
-            <p class="mb-0 opacity-75">Click here to continue your recent conversation</p>
+            <p class="mb-0 opacity-75" (click)="mostRecentConversation()" style="cursor: pointer;">Click here to continue your recent conversation</p>
           </div>
           <small class="opacity-100 text-nowrap" style="color: white;">now</small>
         </div>
