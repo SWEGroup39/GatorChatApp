@@ -1,5 +1,6 @@
 $right-bubble-background: rgb(0, 122, 255);
 $left-bubble-background: rgb(209, 122, 41);
+$toggle-menu-background:rgb(186, 170, 170);
 $background: white;
 $message-color: white;
 $message-font: 'San Francisco', sans-serif;
@@ -10,7 +11,30 @@ $message-font: 'San Francisco', sans-serif;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background:linear-gradient(90deg, rgb(137, 137, 238) 0%, rgba(153, 81, 38, 1) 100%);;
+    background:linear-gradient(90deg, rgb(137, 137, 238) 0%, rgba(153, 81, 38, 1) 100%);
+
+}
+
+#undo-button
+{
+  position: absolute;
+  bottom: calc(10%);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  height: 30px;
+  width: 30px;
+  border-radius: 30px;
+  background-color: $toggle-menu-background;
+
+  img
+   {
+      object-fit: cover;
+      height: 20px;
+      width: 20px;
+      left: 50%;
+      transform: translateX(-10%);
+   }
 
 }
 
@@ -55,9 +79,29 @@ $message-font: 'San Francisco', sans-serif;
       padding: 5px;
       z-index: 1;
       border-radius: 15px;
-      background-color: grey;
+      background-color: rgb(195, 181, 181);
+      font-family: $message-font;
+      cursor: pointer;
+      color: rgb(65, 19, 3);
+      font-weight: bold;
+      
   }
 
+  #edit-text-area
+  {
+    background: rgb(253, 242, 242);
+    color: black;
+    font-family: $message-font;
+  }
+
+  #save-button
+  {
+    background:  rgb(195, 181, 181);
+    cursor: pointer;
+    border: none;
+    color: rgb(65, 19, 3);
+    font-weight: bold;  
+  }
 
     #avatar{
         height: 36px;
@@ -113,7 +157,8 @@ $message-font: 'San Francisco', sans-serif;
 {
     display: flex;
     flex-direction: row;
-    padding: 16px;
+    padding: 10px;
+    background-color: transparent;
 
 
   #chat-textarea
@@ -159,6 +204,7 @@ $message-font: 'San Francisco', sans-serif;
   {
     background: $right-bubble-background;
     flex: 0;
+    cursor: pointer;
     img
     {
         object-fit: cover;

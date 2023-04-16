@@ -22,31 +22,27 @@
       <ng-container *ngFor="let item of chatMessages; let i=index;">
         <!-- Debugging statements -->
         <div *ngIf="i === 0 || !this.isSameDate(item.created_at, chatMessages[i - 1].created_at)" class="date-divider">
-          {{item.created_at | date: 'MMMM d, y'}}
+          {{ item.created_at | date: 'MMMM d, y'}}
         </div>
         <div class="chat-item" 
           [ngClass]="{'right': item?.userId?.toString() == currentUser.id, 'left': item?.userId?.toString() != currentUser.id}">
           <p id="message-body" (click)="showToggleMenu($event, item)">{{item?.message}}</p>
           <span id="time-details">{{item?.created_at | date: 'shortTime'}}</span>
-          <!-- <div class="toggle-menu" *ngIf="item === currentMessage">
-            <ul>
-              <p (click)="editMessage()">Edit</p>
-              <p (click)="delete(currentMessage.messageId)">Delete</p>
-              <p (click)="closeToggle()">Close</p>
-            </ul>
-          </div> -->
           <div class="toggle-menu" *ngIf="item === currentMessage">
             <ul>
-              <li *ngIf="!editMode" (click)="edit()">Edit</li>
-              <li (click)="delete(currentMessage.messageId)">Delete</li>
-              <li (click)="closeToggle()">Close</li>
+              <p *ngIf="!editMode" (click)="editMesssage()">Edit</p>
+              <p (click)="delete(currentMessage.messageId);">Delete</p>
+              <p (click)="closeToggle()">Close</p>
             </ul>
-            <textarea *ngIf="editMode" [(ngModel)]="editedMessage">{{ currentMessage.message }}</textarea>
-            <button *ngIf="editMode" (click)="saveMessage()">Save</button>
+            <textarea id="edit-text-area" *ngIf="editMode" [(ngModel)]="editedMessage">{{ currentMessage.message}}</textarea>
+            <button id="save-button" *ngIf="editMode" (click)="saveEditedMessage()">Save</button>
           </div>
         </div>
       </ng-container>    
     </div>
+    <button id="undo-button" *ngIf="showUndoButton"(click)="undo()">
+      <img src="https://cdn-icons-png.flaticon.com/512/1/1702.png">
+    </button>
     <div class="chat-footer">
       <textarea id="chat-textarea" [(ngModel)]="chatInputMessage"></textarea>
       <button id="send-button" (click)="send()" [disabled]="chatInputMessage?.length == 0">
