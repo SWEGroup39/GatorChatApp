@@ -7,7 +7,6 @@ import (
 	"github.com/Azure/azure-storage-blob-go/azblob"
 
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -322,16 +321,6 @@ func createMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid Message: Messages cannot be empty.", http.StatusBadRequest)
 		return
 	}
-
-	imageString := base64.StdEncoding.EncodeToString(message.Image)
-
-	imageData, err := base64.StdEncoding.DecodeString(imageString)
-	if err != nil {
-		http.Error(w, "Invalid image data: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	message.Image = imageData
 
 	//IF IT PASSES THE CHECKS, THEN IT CREATES
 	result := userMessagesDb.Create(&message)
@@ -963,7 +952,7 @@ func deleteContact(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if found == false {
+	if !found {
 		http.Error(w, "Contact not found.", http.StatusBadRequest)
 		return
 	}

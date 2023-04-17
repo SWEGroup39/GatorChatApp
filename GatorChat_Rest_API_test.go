@@ -23,6 +23,7 @@ func TestCreateMessage(t *testing.T) {
 		Sender_ID:   "9998",
 		Receiver_ID: "9999",
 		Message:     "Specific hello",
+
 	}
 
 	// TURN THE STRUCT INTO A JSON
@@ -736,12 +737,6 @@ func TestEditName(t *testing.T) {
 
 	newName := UserAccount{
 		Username:              "uuunitTestUuuser",
-		Password:              "unitTestPass",
-		Email:                 "unitTest@ufl.edu",
-		User_ID:               "9999",
-		Full_Name:             "Test User",
-		Phone_Number:          "(000) 000-0000",
-		Current_Conversations: json.RawMessage([]byte("[]")),
 	}
 
 	requestBody, err := json.Marshal(newName)
@@ -755,6 +750,12 @@ func TestEditName(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
 
 	editName(w, r)
 
@@ -770,7 +771,7 @@ func TestEditName(t *testing.T) {
 
 	expectedResponse := UserAccount{
 		Username:              "uuunitTestUuuser",
-		Password:              "unitTestPass",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
 		User_ID:               "9999",
 		Email:                 "unitTest@ufl.edu",
 		Full_Name:             "Test User",
@@ -1129,4 +1130,52 @@ func TestSearchUser(t *testing.T) {
 	}
 
 	deleteTestUser("9999")
+}
+
+func TestGetRecentConvo(t *testing.T) {
+	// SIMULATE A MESSAGE THAT WAS SENT FROM USER 9999 TO USER 9998
+	firstID, _ := createTestMessage("9999", "9998", "Specific message for TestGetRecentConvo", []byte("test"))
+
+	// THIS IS USER 9998
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9998", "Test User", "(000) 000-0000")
+
+	// SEARCH FOR THE LAST PERSON 9999 TALKED TO (9998)
+	r, err := http.NewRequest("GET", "/messages/getRecent/user/9999", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id": "9999",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	getMostRecentConvo(w, r)
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9998",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestMessage(firstID)
+	deleteTestUser("9998")
 }
