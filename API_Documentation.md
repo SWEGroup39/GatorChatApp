@@ -572,16 +572,25 @@
 
 ### ➜ Overview of  **DELETE** Command for Users
 
-- The **DELETE** command takes in a user and deletes them from the user database.
+- The **DELETE** command takes in a user and deletes some aspect of thier information.
 
 ### Syntax
-- There is currently only one DELETE command, and the syntax is as follows:
+- There are currently two DELETE functions available:
 
-- ```http://localhost:8080/users/[USER_ID] ```
+    - **First Option: Delete a Contact**:
+        - This **DELETE** function removes an ID from a user's Current Conversations list.
+        - **Example Syntax:**
+       ```http://localhost:8080/api/users/removeC/9998/9999
+       
+    - **Second Option: Delete a User**:
+        - This **DELETE** function takes in a user and deletes them from the user database.
+        - **Example Syntax:**
+       ```http://localhost:8080/users/[USER_ID] ```
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- If all requirements are met, the user will be removed from the database along with a "User deleted successfully." console log message.
+- If all requirements are met for deleteContact, the contact will be removed from the user's Current Conversation's list along with a "Contact removed successfully"     console log. 
+- If all requirements are met for deleteUser, the user will be removed from the database along with a "User deleted successfully." console log message.
 ---
 
 [Back to top](#TOC)
