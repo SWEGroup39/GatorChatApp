@@ -589,7 +589,7 @@
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- If all requirements are met for deleteContact, the contact will be removed from the user's Current Conversation's list along with a "Contact removed successfully"     console log. 
+- If all requirements are met for deleteContact, the contact will be removed from the user's Current Conversation's list along with a "Contact removed successfully."     console log message. 
 - If all requirements are met for deleteUser, the user will be removed from the database along with a "User deleted successfully." console log message.
 ---
 
