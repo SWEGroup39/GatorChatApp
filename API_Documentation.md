@@ -580,7 +580,7 @@
     - **First Option: Delete a Contact**:
         - This **DELETE** function removes an ID from a user's Current Conversations list.
         - **Example Syntax:**
-       ```http://localhost:8080/api/users/removeC/9998/9999
+       ```http://localhost:8080/api/users/removeC/9998/9999```
        
     - **Second Option: Delete a User**:
         - This **DELETE** function takes in a user and deletes them from the user database.
