@@ -18,14 +18,17 @@ export class ContactsComponent {
   username:string=``
   currentID:string=''
   localID:string=''
+  currentUserUsername:string=''
   ngOnInit(){
     // for(let i = 0; i < this.contactList.length; i++){
     //   console.log(this.contactList.at(i))
     // }
     // this.contactList = JSON.parse(localStorage.getItem("this.username")??'')
+
     this.localID = sessionStorage.getItem('idLog')??''
     this.currentID = sessionStorage.getItem('currentUserI'+this.localID)??''
-    this.contactList = JSON.parse(sessionStorage.getItem("contact"+this.currentID)??'[]')
+    this.currentUserUsername = sessionStorage.getItem('currentUserU'+this.localID)??''
+    this.contactList = JSON.parse(localStorage.getItem("contact"+this.currentID)??'[]')
     console.log(this.contactList.length)
   }
 
@@ -48,9 +51,9 @@ export class ContactsComponent {
         this.username = this.searchValue.substring(0, this.searchValue.indexOf('#')).toString()
         this.id = this.searchValue.substring(this.searchValue.indexOf('#')+1).toString()
         this.contactList.push({username: this.username, id:this.id})
-        sessionStorage.setItem("contact"+this.currentID,JSON.stringify(this.contactList))
+        localStorage.setItem("contact"+this.currentID,JSON.stringify(this.contactList))
         console.log(sessionStorage)
-        // this.addConversationID()
+        this.addConversationID()
       },
       (error)=>{
         console.log(error)
@@ -62,8 +65,14 @@ export class ContactsComponent {
     );
   }
 
-  deleteContact():void{
-    sessionStorage.removeItem("contact"+this.currentID)
+  deleteContact(deleteID:string, deleteUsername:string):void{
+    
+    let newContactList = this.contactList.filter(function(item){
+      return item.id != deleteID && item.username != deleteUsername
+    })
+    this.contactList = newContactList
+    localStorage.setItem("contact"+this.currentID,JSON.stringify(newContactList))
+    this.deleteContactsID(deleteID)
   }
 
   addConversationID():void{
@@ -75,6 +84,17 @@ export class ContactsComponent {
         console.log(error)
       }
       
+    );
+  }
+
+  deleteContactsID(deleteID:string):void{
+    this.userService.deleteIDCovo(this.currentID, deleteID).subscribe(
+      (response)=>{
+        console.log(response)
+      },
+      (error)=>{
+        console.log(error)
+      }
     );
   }
 

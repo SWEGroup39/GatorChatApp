@@ -39,7 +39,7 @@
           
           <div class="col-md-6">
               <div class="mb-3">
-                  <h2 class="card-title">Contact List </h2>
+                  <h2 class="card-title">Contact List for {{this.currentUserUsername}}</h2>
               </div>
               <nav class="navbar navbar-light bg-light" style="display: inline;">
                   <div class="form-inline">
@@ -107,7 +107,7 @@
                                   <th scope="col">ID</th>
                                   <!-- <th scope="col">Phone</th> -->
                                   <!-- <th scope="col">Projects</th> -->
-                                  <th scope="col" style="width: 200px;">Action</th>
+                                  <th scope="col" style="width: 190px;">Action</th>
                               </tr>
                           </thead>
                           <tbody>
@@ -121,18 +121,16 @@
                                 <!-- <td>SimonRyles@minible.com</td> -->
                                 <td>
                                     <ul class="list-inline mb-0">
+                                        
                                         <li class="list-inline-item">
-                                            <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit" class="px-2 text-primary"><i class="bx bx-pencil font-size-18"></i></a>
+                                            <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete" class="px-2 text-danger" (click)="deleteContact(contact.id,contact.username)"><i class="bx bx-trash-alt font-size-18"></i></a>
                                         </li>
-                                        <li class="list-inline-item">
-                                            <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete" class="px-2 text-danger" (click)="deleteContact()"><i class="bx bx-trash-alt font-size-18"></i></a>
-                                        </li>
-                                        <li class="list-inline-item dropdown">
+                                        <!-- <li class="list-inline-item dropdown">
                                             <a class="text-muted dropdown-toggle font-size-18 px-2" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"><i class="bx bx-dots-vertical-rounded"></i></a>
                                             <div class="dropdown-menu dropdown-menu-end">
                                                 <a class="dropdown-item" href="#">Action</a><a class="dropdown-item" href="#">Another action</a><a class="dropdown-item" href="#">Something else here</a>
                                             </div>
-                                        </li>
+                                        </li> -->
                                     </ul>
                                 </td>
                             </tr>

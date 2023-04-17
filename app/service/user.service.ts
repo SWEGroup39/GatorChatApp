@@ -84,6 +84,9 @@ export class UserService {
   mostRecentConvo(userID:string):Observable<any>{
     return this.http.get<any>(`http://localhost:8080/api/messages/getRecent/user/${userID}`)
   }
+  deleteIDCovo(senderID:string, receiverID:string):Observable<string>{
+    return this.http.delete<string>(`http://localhost:8080/api/users/removeC/${senderID}/${receiverID}`)
+  }
 }
 
 
