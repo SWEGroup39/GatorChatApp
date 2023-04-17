@@ -7,9 +7,9 @@
    (click)="goBack()">Back to Conversations</a>
    <a mat-raised-button  style="color: white; background-color: rgb(74, 74, 218); font-size: 15px; position:absolute; right:0; margin-right: 10px;" class="navBarButtons" 
    routerLink="/login">Sign Out</a>
- 
  </mat-toolbar>
 
+ <div class="background-image"></div>
  <div class="container">
   <div class="card">
     <div class="search-footer">
@@ -20,17 +20,16 @@
     </div>
     <div #chatList class="chat-list">
       <ng-container *ngFor="let item of chatMessages; let i=index;">
-        <!-- Debugging statements -->
         <div *ngIf="i === 0 || !this.isSameDate(item.created_at, chatMessages[i - 1].created_at)" class="date-divider">
           {{ item.created_at | date: 'MMMM d, y'}}
         </div>
-        <div class="chat-item" 
-          [ngClass]="{'right': item?.userId?.toString() == currentUser.id, 'left': item?.userId?.toString() != currentUser.id}">
-          <p id="message-body" (click)="showToggleMenu($event, item)">
-            {{item?.message}}
-            <img *ngIf="item?.image" [src]="item?.image" style="max-width:30%; max-height: 30%;">
-          </p>
-          <span id="time-details">{{item?.created_at | date: 'shortTime'}}</span>
+        <div class="chat-item" [ngClass]="{'right': item?.userId?.toString() == currentUser.id, 'left': item?.userId?.toString() != currentUser.id}">
+          <div class="message-container">
+            <p id="message-body" (click)="showToggleMenu($event, item)">
+              {{item?.message}}
+            </p>
+            <img *ngIf="item?.image" [src]="item?.image" style="max-width:400px; max-height: 400px;" >
+          </div>
           <div class="toggle-menu" *ngIf="item === currentMessage">
             <ul>
               <p *ngIf="!editMode" (click)="editMesssage()">Edit</p>
@@ -40,6 +39,7 @@
             <textarea id="edit-text-area" *ngIf="editMode" [(ngModel)]="editedMessage">{{ currentMessage.message}}</textarea>
             <button id="save-button" *ngIf="editMode" (click)="saveEditedMessage()">Save</button>
           </div>
+          <span id="time-details">{{item?.created_at | date: 'shortTime'}}</span>
         </div>
       </ng-container>    
     </div>
@@ -55,7 +55,6 @@
       <button id="send-button" (click)="send()" [disabled]="chatInputMessage?.length == 0">
         <img src="https://img.icons8.com/ios11/600/000000/filled-sent.png">
       </button>
-      <!-- <input type="file" /><br/> -->
     </div>
   </div>
 </div>
