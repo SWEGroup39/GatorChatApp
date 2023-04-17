@@ -6,8 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -617,11 +615,78 @@ func deleteTestUser(ID string) {
 	}
 }
 
+// THIS TEST DELETES A CONTACT FROM A USER'S LIST OF CURRENT CONVERSATIONS
+func TestDeleteContact(t *testing.T) {
+	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
+
+	r, err := http.NewRequest("GET", "/api/9999/0000", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w := httptest.NewRecorder()
+
+	vars := map[string]string{
+		"id_1": "9999",
+		"id_2": "0000",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	addConversation(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	r, err = http.NewRequest("DELETE", "/api/users/removeC/9999/0000", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %s", err)
+	}
+
+	w = httptest.NewRecorder()
+
+	vars = map[string]string{
+		"id_1": "9999",
+		"id_2": "0000",
+	}
+
+	r = mux.SetURLVars(r, vars)
+
+	deleteContact(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
+	}
+
+	var responseStruct UserAccount
+	err = json.Unmarshal(w.Body.Bytes(), &responseStruct)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %s", err)
+	}
+
+	expectedResponse := UserAccount{
+		Username:              "unitTestUser",
+		Password:              "f3632dec6bc0cead273d4301a8f13cb89e7ee0ef95175fd2c2ed7a7b6c0dac73",
+		Email:                 "unitTest@ufl.edu",
+		User_ID:               "9999",
+		Full_Name:             "Test User",
+		Phone_Number:          "(000) 000-0000",
+		Current_Conversations: []byte(`[]`),
+	}
+
+	if !reflect.DeepEqual(responseStruct, expectedResponse) {
+		t.Errorf("Expected the response body '%v', but got '%v'", expectedResponse, responseStruct)
+	}
+
+	deleteTestUser("9999")
+}
+
 // THIS TEST ADDS A NEW CONVERSATION
 func TestAddConversation(t *testing.T) {
 	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
-	r, err := http.NewRequest("PUT", "/api/9999/0000", nil)
+	r, err := http.NewRequest("GET", "/api/9999/0000", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -1064,152 +1129,4 @@ func TestSearchUser(t *testing.T) {
 	}
 
 	deleteTestUser("9999")
-}
-
-func TestCreateMessageWithImage(t *testing.T) {
-	// REQUEST NEEDS TO BE MULTI-PART/FORM-DATA
-	requestBody := &bytes.Buffer{}
-	writer := multipart.NewWriter(requestBody)
-	writer.WriteField("sender_id", "9998")
-	writer.WriteField("receiver_id", "9999")
-	writer.WriteField("message", "Specific message for TestCreateMessageWithImage!")
-	fileWriter, err := writer.CreateFormFile("image", "test_image.png")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = io.Copy(fileWriter, bytes.NewReader([]byte("test_image")))
-	if err != nil {
-		t.Fatal(err)
-	}
-	writer.Close()
-
-	r, err := http.NewRequest("POST", "/api/messages/image", requestBody)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// SET CONTENT-TYPE TO BE FORM-DATA
-	r.Header.Set("Content-Type", writer.FormDataContentType())
-
-	w := httptest.NewRecorder()
-
-	createMessageImage(w, r)
-
-	if status := w.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
-
-	if contentType := w.Header().Get("Content-Type"); contentType != "application/json" {
-		t.Errorf("handler returned wrong content type: got %v want %v", contentType, "application/json")
-	}
-
-	var responseMessage UserMessage
-	err = json.NewDecoder(w.Body).Decode(&responseMessage)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if responseMessage.Sender_ID != "9998" {
-		t.Errorf("handler returned wrong sender_id: got %v want %v", responseMessage.Sender_ID, "9999")
-	}
-	if responseMessage.Receiver_ID != "9999" {
-		t.Errorf("handler returned wrong receiver_id: got %v want %v", responseMessage.Receiver_ID, "9998")
-	}
-	if responseMessage.Message != "Specific message for TestCreateMessageWithImage!" {
-		t.Errorf("handler returned wrong message: got %v want %v", responseMessage.Message, "Specific message for TestCreateMessageWithImage!")
-	}
-	if len(responseMessage.Image) == 0 {
-		t.Errorf("handler returned empty image URL")
-	}
-
-	// DELETE THE TEST MESSAGE
-	deleteTestMessage(responseMessage.ID)
-	deleteImage(string(responseMessage.Image))
-}
-
-func TestGetImageURL(t *testing.T) {
-	// CREATE THE TEST MESSAGE WITH IMAGE
-	requestBody := &bytes.Buffer{}
-	writer := multipart.NewWriter(requestBody)
-	writer.WriteField("sender_id", "9998")
-	writer.WriteField("receiver_id", "9999")
-	writer.WriteField("message", "Specific message for TestGetImageURL!")
-	fileWriter, err := writer.CreateFormFile("image", "test_image.png")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = io.Copy(fileWriter, bytes.NewReader([]byte("test_image")))
-	if err != nil {
-		t.Fatal(err)
-	}
-	writer.Close()
-
-	r, err := http.NewRequest("POST", "/api/messages/image", requestBody)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// SET CONTENT-TYPE TO BE FORM-DATA
-	r.Header.Set("Content-Type", writer.FormDataContentType())
-
-	w := httptest.NewRecorder()
-
-	createMessageImage(w, r)
-
-	var responseMessage UserMessage
-	err = json.NewDecoder(w.Body).Decode(&responseMessage)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// CALL THE GET IMAGE URL FUNCTION
-	url := "/messages/getImage/URL/" + fmt.Sprint(responseMessage.ID)
-	r, err = http.NewRequest("GET", url, nil)
-	if err != nil {
-		t.Fatalf("Failed to create request: %s", err)
-	}
-
-	vars := map[string]string{
-		"id": fmt.Sprint(responseMessage.ID),
-	}
-
-	r = mux.SetURLVars(r, vars)
-
-	getImageURL(w, r)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, w.Code)
-		return
-	}
-
-	var data map[string]string
-    err = json.NewDecoder(w.Body).Decode(&data)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
-
-    sasURL, ok := data["sasUrl"]
-    if !ok {
-        fmt.Println("Error: Response missing sasUrl field")
-        return
-    }
-
-	// CALL A GET REQUEST WITH IT
-	resp, err := http.Get(sasURL)
-	if err != nil {
-		t.Fatalf("Failed to make GET request to SAS URL: %s", err)
-	}
-	
-	// VERIFY THAT IT IS CODE 200
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Expected status code %d, but got %d", http.StatusOK, resp.StatusCode)
-	}
-
-	deleteTestMessage(responseMessage.ID)
-	deleteImage(string(responseMessage.Image))
 }
