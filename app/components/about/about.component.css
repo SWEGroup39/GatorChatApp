@@ -1,6 +1,14 @@
-.bg-image {
-    /* background-image: url("https://media-cdn.tripadvisor.com/media/photo-s/05/dc/bb/de/university-of-florida.jpg");
-    background-repeat: no-repeat;
-    background-size: cover; */
-   /* background-color: green; */
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background-image: url("https://images2.minutemediacdn.com/image/fetch/c_fill,g_auto,f_auto,h_2107,w_3000/https%3A%2F%2Ffansided.com%2Fwp-content%2Fuploads%2Fgetty-images%2F2017%2F05%2F625326288-south-carolina-v-florida.jpg.jpg");
+    background-size: cover;
+    background-position: center;
+    filter: blur(15px);
+    -webkit-filter: blur(5px);
+    opacity: 0.50;
   }
