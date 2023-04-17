@@ -48,7 +48,7 @@
                         <button class="input-group-text" id="basic-addon1">@</button>
                       </div>
                       <input type="text" class="form-control" placeholder="Username (username#id)" aria-label="Username" aria-describedby="basic-addon1" [(ngModel)]="this.searchValue">
-                      <a mat-raised-button (click)="searchContact()">Search</a>
+                      <a mat-raised-button (click)="searchContact()" color="primary">Search</a>
                     </div>
                   </div>
                 </nav>
@@ -103,15 +103,15 @@
                                   <th scope="col" class="ps-4" style="width: 50px;">
                                       <div class="form-check font-size-16"><input type="checkbox" class="form-check-input" id="contacusercheck" /><label class="form-check-label" for="contacusercheck"></label></div>
                                   </th>
-                                  <th scope="col">Username</th>
-                                  <th scope="col">ID</th>
+                                  <th scope="col" style="font-size: large;">Username</th>
+                                  <th scope="col" style="font-size: large;">ID</th>
                                   <!-- <th scope="col">Phone</th> -->
                                   <!-- <th scope="col">Projects</th> -->
-                                  <th scope="col" style="width: 190px;">Action</th>
+                                  <th scope="col" style="width: 190px; font-size: large;">Action</th>
                               </tr>
                           </thead>
                           <tbody>
-                            <tr *ngFor="let contact of contactList">
+                            <tr *ngFor="let contact of contactList;let odd=odd" [style.background-color]="odd?'#e6e6e6':'white'" style="font-size: medium ;padding:5px; ">
                               
                                 <th scope="row" class="ps-4">
                                     <!-- <div class="form-check font-size-16"><input type="checkbox" class="form-check-input" id="contacusercheck1" /><label class="form-check-label" for="contacusercheck1"></label></div>

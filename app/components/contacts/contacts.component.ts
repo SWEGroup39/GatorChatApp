@@ -19,6 +19,7 @@ export class ContactsComponent {
   currentID:string=''
   localID:string=''
   currentUserUsername:string=''
+  odd:boolean = true;
   ngOnInit(){
     // for(let i = 0; i < this.contactList.length; i++){
     //   console.log(this.contactList.at(i))
@@ -30,16 +31,17 @@ export class ContactsComponent {
     this.currentUserUsername = sessionStorage.getItem('currentUserU'+this.localID)??''
     this.contactList = JSON.parse(localStorage.getItem("contact"+this.currentID)??'[]')
     console.log(this.contactList.length)
+    this.contactListArray()
   }
 
   contactListArray(){
-    if(this.contactList.length == 0){
-      this.size = 0;
+    if(this.contactList.length % 2 == 0){
+      this.odd = false
     }
     else{
-      this.size = this.contactList.length;
+      this.odd = true
     }
-    return this.size
+    return this.odd
   }
 
   searchContact():void{
@@ -57,6 +59,8 @@ export class ContactsComponent {
       },
       (error)=>{
         console.log(error)
+        alert(this.searchValue+' not found!')
+        window.location.reload()
       },
       ()=>{
         // this.contactList = JSON.parse(localStorage.getItem("contact"+this.currentID)??' ')
@@ -82,6 +86,7 @@ export class ContactsComponent {
       },
       (error)=>{
         console.log(error)
+        
       }
       
     );
@@ -97,6 +102,7 @@ export class ContactsComponent {
       }
     );
   }
+
 
 
 
