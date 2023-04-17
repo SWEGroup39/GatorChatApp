@@ -29,3 +29,6 @@
 - Added some routing/ easy access headings to the dashboard page
 - Fixed the issue of local storage overriding the contents when another tab is opened.
   -Changed from local to session storage
+- Contact page has add and delete functionality
+- Footer company named added
+- styled contact page where odd numbered contact has a grey background color
