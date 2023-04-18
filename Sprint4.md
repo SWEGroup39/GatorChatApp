@@ -16,14 +16,14 @@
   - Modified the sign up page create user function where it integrates the back end user ID function
    - The back end userID function creates the correct unique id for each user created.
   - Modified the query params so that the url does not display sensitive user credentials
-   -Session storage was used to fix or update this approach 
+   - Session storage was used to fix or update this approach 
   - Added the phone and full name fields to the sign up page
-   -These fields were added for the profile page  
+   - These fields were added for the profile page  
   - Dashboard now has welcome back username message displayed
   - Profile page is implemented to where the profile picture is the capitalized initials of their full name in an orange background with blue font
    - The profile page consists of the Username, Email, Phone number, and Full Name fields
    - It also has a secondary navigation bar which shows the route the user took to get to the page as well as routes back to the dashboard page if clicked
-  -Created the settings page with a form field and a  sub navigation bar where users can effectively navigate back to the dashboard. 
+  - Created the settings page with a form field and a  sub navigation bar where users can effectively navigate back to the dashboard. 
    - Has a delete account option that successfully deletes the user account and redirects users back to the login page.
   - Finished the editing functionalities of the settings page.
      - This includes:
