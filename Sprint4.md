@@ -85,19 +85,25 @@
   - Unit tests were conducted for the following functionalities:
      - Creating a message.
      - Retrieving all messages between two users (get a conversation).
+     - Searching for a message across all conversations
      - Searching for a specific message.
      - Editing a message.
      - Deleting a specific message.
      - Deleteing an entire conversation.
-     - Undoing a delete.
+     - Undoing a message delete.
+     - Removing an ID from a user's Current Conversations list
      - Creating a user account.
      - Editing a user's conversation list by adding a new ID.
      - Updating a user's username.
-     - Updating a user's password (WIP).
+     - Updating a user's password.
      - Retrieving a user (by passing in login credentials).
      - Retrieving a user (by passing in the user's unique ID).
      - Deleting a user.
      - Getting an available user ID.
+     - Getting a user's most recent conversation
+     - Editing a user's phone number
+     - Editing a user's full name
+     - Searching for a user
   - **The Go Test file can be found [here.](https://github.com/SWEGroup39/GatorChatApp/blob/main/App_Contents/BackEnd/API/GatorChat_Rest_API_test.go)**
    - _**Note:** This leads to the API folder in the "main" branch. To see the full commit history, visit the working [Back-End branch.](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch)_
 
