@@ -5,8 +5,48 @@
 ## Work Completed in Sprint 4:
 
  ### Frontend:
-  - 
-
+  - As long as the user does not click the sign out button or close the browser tab that user session will continue and the user will have access to his or her dashboard.
+   - Implemented the use of sessionStorage on the client side to store the user credentials
+   - Used information from session storage in the profile, contacts, settings, chat-list, messages, and dashboard components 
+  - Added footer a using bootstrap that contains:
+   -@2023 GatorChat Inc.
+   -Gator icon
+   -Home: If this is clicked, the user will be routed to the home page.
+   -About us: If this is clicked, the user will be routed to the about us page.
+  - Modified the sign up page create user function where it integrates the back end user ID function
+   - The back end userID function creates the correct unique id for each user created.
+  - Modified the query params so that the url does not display sensitive user credentials
+   -Session storage was used to fix or update this approach 
+  - Added the phone and full name fields to the sign up page
+   -These fields were added for the profile page  
+  - Dashboard now has welcome back username message displayed
+  - Profile page is implemented to where the profile picture is the capitalized initials of their full name in an orange background with blue font
+   - The profile page consists of the Username, Email, Phone number, and Full Name fields
+   - It also has a secondary navigation bar which shows the route the user took to get to the page as well as routes back to the dashboard page if clicked
+  -Created the settings page with a form field and a  sub navigation bar where users can effectively navigate back to the dashboard. 
+   - Has a delete account option that successfully deletes the user account and redirects users back to the login page.
+  - Finished the editing functionalities of the settings page.
+     - This includes:
+       -Edit Username: Has an edit and save button to individually call the functions 
+       -Edit Phone Number: Has an edit and save button to individually call the functions 
+       -Edit Full Name: Has an edit and save button to individually call the functions 
+       -Edit Password: User has to type in the old password and the new/intended password
+         -The save changes button underneath saves the password changes
+         -The cancel button refreshes the page to prevent the password change from occuring
+  -Added a contacts page that displays the username and id of a contact
+     -This information is based off of the current conversations array for the logged in or current user
+     -Local storage is used to store the contacts for each user
+     -A search bar was added for searching a username in the contact page in order to add a contact and its id to the current conversations array.
+     -Styled the contact page to where the odd numbered contact has a grey background color
+     -A trash can icon was included for the delete functionality
+      -If this icon is clicked, the contact is removed from the list and that contact's id is removed from the current conversations array
+- Added some routing/easy access headings to the dashboard page
+  -This includes:
+    - A group heading that when clicked routes to the most recent conversation
+    - A group heading that when clicked routes to the contacts page
+    - A group heading that when clicked routes to the settings page
+    - A group heading that when clicked routes to the profile page
+- Users can login with different number of browser tabs and still continue their session without affecting the other logged in user sessions.
 <hr>
 
  ### Backend:
