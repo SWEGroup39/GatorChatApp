@@ -1,6 +1,6 @@
 # Sprint 4
 
-### [Link to Sprint 4 Video](https://www.youtube.com/watch?v=uT1i3iMAUAQ)
+### [Link to Sprint 4 Video]()
 
 ## Work Completed in Sprint 4:
 
@@ -51,9 +51,21 @@
 <hr>
 
  ### Backend:
- - 
-
-- The API Documentation Was Also Updated for All of the Above Changes.
+ - Integrated the function that returns a valid ID to user into the **Create User** function to prevent the Frontend from having to call two separate functions.
+ - Added a new field for the "UserAccount" struct so a user can store their **Full Name**.
+    - Created a function that allows a user to edit their **Full Name**.
+ - Added a new field for the "UserAccount" struct so a user can store their **Phone Number**.
+    - Created a function that allows a user to edit their **Phone Number**.
+    - Internally checked to make sure that there are no duplicate phone numbers in the Users database (phone numbers must be unique).
+ - Fixed a bug where a user is not able to update a field (i.e. their username, full name, or phone number) with information that is the same as the currently stored information. For example, a user could not update their name from "Test" to "Test". This does not apply to passwords.
+ - Updated the **Edit Password** function so it takes in the original password and the new password.
+    - This is done since it is typical for site to ask a user for their original password as verification before allowing them to update to a new password.
+    - A new struct was created called "UserAccountConfirmPass" which contains the information from "UserAccount" along with a new field for passing in the original password.
+ - Added a search function designed for users who wish to look up and add a user to their contact list. It searches with the pattern ```[USERNAME]#[ID]```.
+ - Implemented an "Image" field to the "UserMessage" struct.
+    - Created a function for creating a message in the database that supports an image attachment (it uploads the image to a container on Microsoft Azure).
+    - Created a function that will take the BLOB URL in the "Image" field and convert it into an SAS URL that can be used by the Frontend to retrieve the image from the Azure container.
+- The API Documentation and Unit Tests Were Also Updated for All of the Above Additions.
 
 <hr>
 
@@ -64,7 +76,7 @@
 <hr>
 
  ### Entire Team:
-  - 
+  - Successfully implemented long polling into the **Get Conversation** function so messages will be updated in real-time without having to refresh.
 
 <hr>
 
