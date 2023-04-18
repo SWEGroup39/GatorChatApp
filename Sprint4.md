@@ -6,6 +6,7 @@
 
  ### Frontend:
   - As long as the user does not click the sign out button or close the browser tab that user session will continue and the user will have access to his or her dashboard.
+  - The signup, login, about us, and message window pages all have different images that represent UF set as the background
    - Implemented the use of sessionStorage on the client side to store the user credentials
    - Used information from session storage in the profile, contacts, settings, chat-list, messages, and dashboard components 
   - Added footer a using bootstrap that contains:
