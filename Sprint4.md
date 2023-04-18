@@ -65,6 +65,7 @@
  - Implemented an "Image" field to the "UserMessage" struct.
     - Created a function for creating a message in the database that supports an image attachment (it uploads the image to a container on Microsoft Azure).
     - Created a function that will take the BLOB URL in the "Image" field and convert it into an SAS URL that can be used by the Frontend to retrieve the image from the Azure container.
+ - Wrote a function that returns the person that a given user last talked to. This is used in the "Pick Up Where You Left Off" section on the Home page.
 - The API Documentation and Unit Tests Were Also Updated for All of the Above Additions.
 
 <hr>
