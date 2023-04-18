@@ -1,29 +1,79 @@
 $right-bubble-background: rgb(0, 122, 255);
 $left-bubble-background: rgb(209, 122, 41);
+$toggle-menu-background:rgb(186, 170, 170);
+$chat-background: white;
+$chat-background-image: url("https://i.etsystatic.com/24784860/r/il/69d3b7/2529483855/il_fullxfull.2529483855_jaq4.jpg");
 $background: white;
 $message-color: white;
 $message-font: 'San Francisco', sans-serif;
+//rgb(208, 208, 208);
 
+.background-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background-image: url("https://images.sidearmdev.com/crop?url=https%3a%2f%2fdxbhsrqyrr690.cloudfront.net%2fsidearm.nextgen.sites%2fgatorzone.com%2fimages%2f2018%2f9%2f24%2fFans_180915_2980_MattStamey.jpg&height=576&width=1024&type=jpeg&gravity=smart");
+  background-size: cover;
+  background-position: center;
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  opacity: 0.85;
+  //background-color: blue;
+}
 
-
-
-.container{
+.container
+{
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background:linear-gradient(90deg, rgb(137, 137, 238) 0%, rgba(153, 81, 38, 1) 100%);;
+    background: transparent;
+   // background:linear-gradient(90deg, rgb(137, 137, 238) 0%, rgba(153, 81, 38, 1) 100%);
+
+
+}
+#undo-button
+{
+  position: absolute;
+  bottom: calc(10%);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  height: 30px;
+  width: 30px;
+  border-radius: 30px;
+  background-color: $toggle-menu-background;
+
+  img
+   {
+      object-fit: cover;
+      height: 20px;
+      width: 20px;
+      left: 50%;
+      transform: translateX(-10%);
+   }
 
 }
 
+
 .card{
     background: $background;
-    height:  90vh;
+    height:  95vh;
     min-width: 100vh;
     margin: auto;
     display: flex;
     flex-direction: column;
     filter: drop-shadow(0px, 0px, 10px) black;
+    border-radius: 20px;
+}
+
+
+.message-container {
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-list {
@@ -32,12 +82,15 @@ $message-font: 'San Francisco', sans-serif;
     flex-direction: column;
     padding: 16px;
     overflow-y: scroll;
+    background: $chat-background;
+   //background-image: $chat-background-image;
 
    .chat-item{
     max-width: 80%;
     margin: 8px 0px;
     display: flex;
     flex-direction: row;
+    padding: 2%;
     
 
     #message-body{
@@ -49,7 +102,8 @@ $message-font: 'San Francisco', sans-serif;
         font-family: $message-font;
     }
 
-    .toggle-menu {
+    .toggle-menu 
+    {
       display: inline-block;
       position: relative;
       top: 0;
@@ -57,9 +111,31 @@ $message-font: 'San Francisco', sans-serif;
       padding: 5px;
       z-index: 1;
       border-radius: 15px;
-      background-color: grey;
+      background-color: rgb(195, 181, 181);
+      font-family: $message-font;
+      cursor: pointer;
+      color: rgb(65, 19, 3);
+      font-weight: bold;
+      height: 100px;
+      width: 100px;
+      
   }
 
+  #edit-text-area
+  {
+    background: $chat-background;
+    color: black;
+    font-family: $message-font;
+  }
+
+  #save-button
+  {
+    background:  rgb(195, 181, 181);
+    cursor: pointer;
+    border: none;
+    color: rgb(65, 19, 3);
+    font-weight: bold;  
+  }
 
     #avatar{
         height: 36px;
@@ -84,6 +160,8 @@ $message-font: 'San Francisco', sans-serif;
     margin-right: auto;
     margin-left: 8px;
     #message-body{
+        display: flex;
+        flex-direction: column;
         margin-left: -15px;
         margin-top: 10px;
         background: rgb(209, 122, 41);
@@ -96,10 +174,12 @@ $message-font: 'San Francisco', sans-serif;
     margin-left: auto;
     flex-direction: row-reverse;
     #message-body{
+        display: flex;
+        flex-direction: column;
         margin-right: -15px;
         margin-top: 10px;
         background: $right-bubble-background;
-
+       // padding-left: 700px;
     }    
 
     }
@@ -115,7 +195,11 @@ $message-font: 'San Francisco', sans-serif;
 {
     display: flex;
     flex-direction: row;
-    padding: 16px;
+    padding: 10px;
+    background-color: transparent;
+    background: $chat-background;
+    //background-image: $chat-background-image;
+   // opacity: .80;
 
 
   #chat-textarea
@@ -124,50 +208,76 @@ $message-font: 'San Francisco', sans-serif;
     background-color: $right-bubble-background;
     color: $message-color;
     font-family: $message-font;
-    margin: 0 6px;
+    margin: 0 5px;
     border: 1px solid white;
     border-radius: 5px;
     filter: drop-shadow(-5px 0px 8px grey);
+
 
   }
   #send-button
   {
     background: $right-bubble-background;
+    border-radius: 10px;
     img
+    {
+        object-fit: cover;
+        height: 35px;
+        width: 35px;
+    }
+
+  }
+
+  #image-button.image_uploaded
+  {
+    background-color: $left-bubble-background;
+  }
+
+ #image-button
+ {
+   margin: 0 6px;
+   background-color: $right-bubble-background;
+   border-radius: 10px;
+
+   img
     {
         object-fit: cover;
         height: 32px;
         width: 30px;
     }
-
-  }
+ }
 }
 .search-footer
 {
     display: flex;
     flex-direction: row;
     padding: 0px;
-
-
+    background: $chat-background;
+   // opacity: 0.85;
+   // background-image: $chat-background-image;
+  
   #chat-searcharea
   {
     flex: 1;
-    background-color:  $right-bubble-background;
+    background-color: $right-bubble-background;
     color: $message-color;
     font-family: $message-font;
+    border-radius: 15px;
+    height: 40px;
 
   }
   #search-button
   {
     background: $right-bubble-background;
     flex: 0;
+    border-radius: 25px;
+    cursor: pointer;
     img
     {
         object-fit: cover;
-        height: 32px;
-        width: 30px;
+        height:25px;
+        width:25px;
     }
 
   }
 }
-

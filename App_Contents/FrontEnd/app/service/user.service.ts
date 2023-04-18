@@ -7,7 +7,8 @@ import { User } from '../interface/user';
 })
 export class UserService {
   isLoggedIn: boolean = false;
-
+  emailAddress: string = ``;
+  loggedInUser:string=''
   constructor(private http: HttpClient) {
     
   }
@@ -24,14 +25,72 @@ export class UserService {
       email: username,
       password: password
     };
+    this.loggedInUser = username;
+    
     return this.http.post<any>('http://localhost:8080/api/users/User',requestBody);
   }
 
   getNextID():Observable<string>{
     return this.http.get<any>('http://localhost:8080/api/users/nextID');
   }
- 
+
+  deleteUser(userID:string):Observable<string>{
+    return this.http.delete<string>(`http://localhost:8080/api/users/${userID}`)
+  }
+
+  updateFN(userID: string, newFN:string):Observable<string>{
+    const requestBody:any = {
+      full_name: newFN
+    }
+    console.log(requestBody)
+    return this.http.put<string>(`http://localhost:8080/api/users/updateFN/${userID}`,requestBody)
+  }
+
+  updatePhoneNum(userID:string, newPN:string):Observable<string>{
+    const requestBody:any = {
+      phone_number:newPN
+    }
+    return this.http.put<string>(`http://localhost:8080/api/users/updatePN/${userID}`,requestBody)
+  }
+  updatePassword(userID:string, newPass:string,oldPass:string):Observable<string>{
+    const requestBody:any = {
+      password:newPass,
+      original_pass: oldPass
+    }
+    console.log(oldPass)
+    console.log(newPass)
+    return this.http.put<string>(`http://localhost:8080/api/users/updateP/${userID}`,requestBody)
+  }
+  
+  updateUsername(userID:string, newUsername:string):Observable<string>{
+    const requestBody:any = {
+      username: newUsername
+    }
+    return this.http.put<string>(`http://localhost:8080/api/users/updateN/${userID}`,requestBody)
+  }
+
+  searchContact(searchVal:string):Observable<any>{
+    const requestBody:any = {
+      username:searchVal
+    }
+    return this.http.post<any>(`http://localhost:8080/api/users/search`,requestBody)
+  }
+
+  addConversationID(sender_id:string, receiver_id:string):Observable<string>{
+    
+    return this.http.get<string>(`http://localhost:8080/api/users/${sender_id}/${receiver_id}`)
+  }
+
+  mostRecentConvo(userID:string):Observable<any>{
+    return this.http.get<any>(`http://localhost:8080/api/messages/getRecent/user/${userID}`)
+  }
+  deleteIDCovo(senderID:string, receiverID:string):Observable<string>{
+    return this.http.delete<string>(`http://localhost:8080/api/users/removeC/${senderID}/${receiverID}`)
+  }
 }
+
+
+
 
 
 // //   searchMessages(content: string): Observable<{ Messages: { messageId: number }[] }> {

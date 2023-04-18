@@ -12,7 +12,9 @@ export class AuthGuardGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): boolean {
-      if(this.userService.isLoggedIn === true){
+      const isAuthenticated = JSON.parse(sessionStorage.getItem('userLoggedIn')||'{}');
+      console.log(isAuthenticated)
+      if(isAuthenticated === true){
         return true;
       }
       else{

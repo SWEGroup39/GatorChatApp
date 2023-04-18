@@ -9,8 +9,8 @@
 
 </mat-toolbar> -->
 <!-- <router-outlet></router-outlet> -->
-
-
+ 
+<div class="background-image"></div>
 <div  fxLayoutAlign="center center" fxFlexFill class="outline">
   
   <div fxLayoutAlign="center center" fxFlexFill class="main-div">
@@ -23,7 +23,7 @@
         </mat-form-field>
   
         <mat-form-field>
-          <input  class="validate" matInput type="password" placeholder="Password" name = "password" [(ngModel)]="user.password" #Password="ngModel" required>
+          <input  class="validate" matInput type="password" placeholder="Password" name = "password" [(ngModel)]="user.password" #Password="ngModel" >
         </mat-form-field>
         <button mat-raised-button [disabled]="!myForm.valid" type="submit" color="primary" >Login</button>
         

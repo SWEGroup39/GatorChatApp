@@ -22,7 +22,6 @@ const appRoutes = [
   {path: 'signup', component: SignUpComponent},
   {path: 'about', component: AboutComponent},
   {path:'dashboard',component:DashboardComponent, canActivate:[AuthGuardGuard]},
-  {path:'dashboard/:username/:password',component:DashboardComponent, canActivate:[AuthGuardGuard]},
   {path: 'messages', component:MessagesComponent, canActivate:[AuthGuardGuard]},
   {path:'contacts', component: ContactsComponent, canActivate:[AuthGuardGuard]},
   {path:'profile', component: ProfileComponent, canActivate:[AuthGuardGuard]},

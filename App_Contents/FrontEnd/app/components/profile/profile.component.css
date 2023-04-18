@@ -31,3 +31,22 @@
 .profile-value {
   flex: 2;
 }
+.avatar {
+  display: flexbox;
+  justify-content: center;
+  margin: 0 auto;
+  height: 100px;
+  width: 100px;
+  border-radius: 100%;
+  color: rgb(55, 0, 255);
+  font-size: 50px;
+  background: #f17d39;
+  border : 2px solid #a09ff2;
+  text-align: center;
+  line-height: 100px;
+  
+}
+.avatar span{
+  line-height: 3rem; 
+  color:red;
+}

@@ -1,4 +1,5 @@
 
+<div class="background-image"></div>
  <div  fxLayoutAlign="center center" fxFlexFill class="outline">
    <div fxLayoutAlign="center center" fxFlexFill class="main-div">
      <mat-card fxFlex="25">
@@ -18,7 +19,13 @@
          <mat-form-field>
           <input matInput name="password" type="password" name="password" placeholder="Confirm your password" [(ngModel)]="user.password" #Password="ngModel" required>
         </mat-form-field>
+        <mat-form-field>
+          <input matInput name="fullname" type="fullname" name="fullname" placeholder="Full Name" [(ngModel)]="user.full_name" #Fullname="ngModel" required>
+        </mat-form-field>
         
+        <mat-form-field>
+          <input matInput name="phone" type="phone" name="phone" placeholder="Phone Number (###) ###-####" [(ngModel)]="user.phone_number" #Phone="ngModel" required>
+        </mat-form-field>
          <button mat-raised-button type="submit" [disabled]="!signUpForm.valid" color="primary">Sign Up</button>
         
        </form>

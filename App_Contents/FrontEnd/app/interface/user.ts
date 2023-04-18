@@ -3,5 +3,7 @@ export interface User {
   password: string
   email?: string
   user_id?: string
+  full_name?:string
+  phone_number?:string
   current_conversations?:any[]
 }

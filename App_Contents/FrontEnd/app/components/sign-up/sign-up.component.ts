@@ -14,6 +14,9 @@ export class SignUpComponent implements OnInit{
   @Input() username!: string;
   @Input() password!:string;
   @Input() email!:string;
+  @Input() fullname!:string;
+  @Input() phone!:string;
+
   
   userIDCount: number = 2;
   userIDFinal: string=``;
@@ -22,7 +25,8 @@ export class SignUpComponent implements OnInit{
     username :this.username,
     password: this.password,
     email:this.email,
-    user_id:`0004`,
+    full_name:this.fullname,
+    phone_number:this.phone,
     current_conversations:[]
   }
   constructor(private userService: UserService, private router:Router){
@@ -41,7 +45,9 @@ export class SignUpComponent implements OnInit{
       username: '',
       password: '',
       email: '',
-      user_id:''
+      user_id:'',
+      phone_number:'',
+      full_name: ''
 
     }
   }
@@ -52,12 +58,15 @@ export class SignUpComponent implements OnInit{
       
       (response) => {
         
+        
         alert(`User created successfully!`)
         
         this.router.navigateByUrl('/login')
         this.resetForm()
       },
-      (error: any) => console.log(error),
+      (error: any) => {console.log(error)
+      console.log(this.user)
+      },
       () => console.log('Done creating user')
     );
   }
