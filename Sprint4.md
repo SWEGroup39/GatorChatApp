@@ -27,25 +27,25 @@
    - Has a delete account option that successfully deletes the user account and redirects users back to the login page.
   - Finished the editing functionalities of the settings page.
      - This includes:
-       -Edit Username: Has an edit and save button to individually call the functions 
-       -Edit Phone Number: Has an edit and save button to individually call the functions 
-       -Edit Full Name: Has an edit and save button to individually call the functions 
-       -Edit Password: User has to type in the old password and the new/intended password
-         -The save changes button underneath saves the password changes
-         -The cancel button refreshes the page to prevent the password change from occuring
-  -Added a contacts page that displays the username and id of a contact
-     -This information is based off of the current conversations array for the logged in or current user
-     -Local storage is used to store the contacts for each user
-     -A search bar was added for searching a username in the contact page in order to add a contact and its id to the current conversations array.
-     -Styled the contact page to where the odd numbered contact has a grey background color
-     -A trash can icon was included for the delete functionality
-      -If this icon is clicked, the contact is removed from the list and that contact's id is removed from the current conversations array
+      - Edit Username: Has an edit and save button to individually call the functions 
+      - Edit Phone Number: Has an edit and save button to individually call the functions 
+      - Edit Full Name: Has an edit and save button to individually call the functions 
+      - Edit Password: User has to type in the old password and the new/intended password
+      - The save changes button underneath saves the password changes
+      - The cancel button refreshes the page to prevent the password change from occuring
+  - Added a contacts page that displays the username and id of a contact
+     - This information is based off of the current conversations array for the logged in or current user
+     - Local storage is used to store the contacts for each user
+     - A search bar was added for searching a username in the contact page in order to add a contact and its id to the current conversations array.
+     - Styled the contact page to where the odd numbered contact has a grey background color
+     - A trash can icon was included for the delete functionality
+      - If this icon is clicked, the contact is removed from the list and that contact's id is removed from the current conversations array
 - Added some routing/easy access headings to the dashboard page
-  -This includes:
-    - A group heading that when clicked routes to the most recent conversation
-    - A group heading that when clicked routes to the contacts page
-    - A group heading that when clicked routes to the settings page
-    - A group heading that when clicked routes to the profile page
+  - This includes:
+   - A group heading that when clicked routes to the most recent conversation
+   - A group heading that when clicked routes to the contacts page
+   - A group heading that when clicked routes to the settings page
+   - A group heading that when clicked routes to the profile page
 - Users can login with different number of browser tabs and still continue their session without affecting the other logged in user sessions.
 <hr>
 
