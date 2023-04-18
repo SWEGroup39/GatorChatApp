@@ -9,10 +9,10 @@
    - Implemented the use of sessionStorage on the client side to store the user credentials
    - Used information from session storage in the profile, contacts, settings, chat-list, messages, and dashboard components 
   - Added footer a using bootstrap that contains:
-     -@2023 GatorChat Inc.
-     -Gator icon
-     -Home: If this is clicked, the user will be routed to the home page.
-     -About us: If this is clicked, the user will be routed to the about us page.
+     - @2023 GatorChat Inc.
+     - Gator icon
+     - Home: If this is clicked, the user will be routed to the home page.
+     - About us: If this is clicked, the user will be routed to the about us page.
   - Modified the sign up page create user function where it integrates the back end user ID function
    - The back end userID function creates the correct unique id for each user created.
   - Modified the query params so that the url does not display sensitive user credentials
