@@ -1,6 +1,10 @@
+
+
 import { Component ,OnInit,Input} from '@angular/core';
 import { Location } from '@angular/common';
 import { UserService } from 'src/app/service/user.service';
+import { ConvoService } from 'src/app/service/convo.service';
+
 
 @Component({
   selector: 'app-contacts',
@@ -8,10 +12,17 @@ import { UserService } from 'src/app/service/user.service';
   styleUrls: ['./contacts.component.css']
 })
 export class ContactsComponent {
+  ConvoService: any;
 
-  constructor( private location: Location, private userService:UserService) {}
+  constructor( private location: Location, private userService:UserService,  private convoService:ConvoService) {}
   // currentConvo = localStorage.getItem('currentUserC');
-  contactList: any[] = [];
+ // contactList: any[] = [];
+
+  users: {
+    id: string,
+    username: string,
+  }[] =[];
+
   @Input() searchValue:string=``;
   size!: number;
   id:string=``
@@ -20,22 +31,30 @@ export class ContactsComponent {
   localID:string=''
   currentUserUsername:string=''
   odd:boolean = true;
+
   ngOnInit(){
-    // for(let i = 0; i < this.contactList.length; i++){
-    //   console.log(this.contactList.at(i))
-    // }
-    // this.contactList = JSON.parse(localStorage.getItem("this.username")??'')
 
     this.localID = sessionStorage.getItem('idLog')??''
     this.currentID = sessionStorage.getItem('currentUserI'+this.localID)??''
     this.currentUserUsername = sessionStorage.getItem('currentUserU'+this.localID)??''
-    this.contactList = JSON.parse(localStorage.getItem("contact"+this.currentID)??'[]')
-    console.log(this.contactList.length)
+    let currentConvString = sessionStorage.getItem('currentUserC'+this.localID);
+   
+    for (const friendId of JSON.parse(currentConvString?? '' )) {
+      this.convoService.getConvoUserName(friendId).subscribe(item => {
+        this.users.push({id: friendId, username: item.username})
+
+      console.log(friendId + '--> ' + item.username)
+      });
+    }
+
+    console.log(this.users);
+
+    console.log(this.users.length)
     this.contactListArray()
   }
 
   contactListArray(){
-    if(this.contactList.length % 2 == 0){
+    if(this.users.length % 2 == 0){
       this.odd = false
     }
     else{
@@ -44,18 +63,36 @@ export class ContactsComponent {
     return this.odd
   }
 
+  modifyContactsList(add:boolean, id:string)
+  {
+    let currentConvString = sessionStorage.getItem('currentUserC' + this.localID);
+    let currentConvArray = JSON.parse(currentConvString ?? '');
+
+    if(add)
+      currentConvArray.push(id);
+    else
+      currentConvArray = currentConvArray.filter((friendId: string) => friendId !== id);
+
+    sessionStorage.setItem('currentUserC' + this.localID, JSON.stringify(currentConvArray));
+    console.log( currentConvArray)
+
+  }
+  
+
   searchContact():void{
-    // this.username = this.searchValue.substring(0, this.searchValue.indexOf('#')).toString()
-    // this.id = this.searchValue.substring(this.searchValue.indexOf('#')+1).toString()
     this.userService.searchContact(this.searchValue).subscribe(
       (response)=>{
         console.log('User found!')
         this.username = this.searchValue.substring(0, this.searchValue.indexOf('#')).toString()
         this.id = this.searchValue.substring(this.searchValue.indexOf('#')+1).toString()
-        this.contactList.push({username: this.username, id:this.id})
-        localStorage.setItem("contact"+this.currentID,JSON.stringify(this.contactList))
+
+        this.users.push({username: this.username, id:this.id});
         console.log(sessionStorage)
+
+        this.modifyContactsList(true, this.id);
+
         this.addConversationID()
+
       },
       (error)=>{
         console.log(error)
@@ -63,7 +100,7 @@ export class ContactsComponent {
         window.location.reload()
       },
       ()=>{
-        // this.contactList = JSON.parse(localStorage.getItem("contact"+this.currentID)??' ')
+   
       }
       
     );
@@ -71,18 +108,21 @@ export class ContactsComponent {
 
   deleteContact(deleteID:string, deleteUsername:string):void{
     
-    let newContactList = this.contactList.filter(function(item){
-      return item.id != deleteID && item.username != deleteUsername
-    })
-    this.contactList = newContactList
-    localStorage.setItem("contact"+this.currentID,JSON.stringify(newContactList))
-    this.deleteContactsID(deleteID)
+    // Update users list 
+    this.deleteContactsID(deleteID);
+    let contactListN = this.users.filter(item =>  item.id != deleteID && item.username != deleteUsername);
+    console.log(contactListN);
+    this.users = contactListN;  
+
+    this.modifyContactsList(false, deleteID);
+    
   }
 
   addConversationID():void{
     this.userService.addConversationID(this.currentID,this.id).subscribe(
       (response)=>{
         console.log(response)
+
       },
       (error)=>{
         console.log(error)
@@ -102,8 +142,6 @@ export class ContactsComponent {
       }
     );
   }
-
-
 
 
   goBack() {
