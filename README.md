@@ -44,52 +44,57 @@
      - This should take the user to the home page initially.
        - From this point, you have successfully run Gator Chat
        
-## Instructions on How To Run API for Gator Chat (BACK END) 
+## Instructions on How To Run API for Gator Chat (BACK END)
 
-- Project Name: GatorChat
+### ➜ Setting Up Golang
 
-- Project Members: Rafael Sevilla, Kevin Cen, John Struckman, Ria Chacko
+#### Please refer to the instructions linked below to properly install Go.
 
-- Front-end Members: Ria Chacko, Rafael Sevilla
+- Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/main/go-setup.md).
+- It is important to place your Go projects in a valid directory, for example:
+    - ```C:\Users\[USER]\go\src\github.com\kevinc3n\API```
+        - This ensures that Golang can find all the packages and can properly run.
 
-- Back-end Members: Kevin Cen, John Struckman
+- **NOTE:** It is important to install the dependencies/packages required to use the GatorChat API.
 
-- Project Description:
+- These include:
+  - **GORM**
+      - GORM is needed for the "gorm.io/driver/mysql" and "gorm.io/gorm" packages.
+  - **Gorilla Mux**
+    - Gorilla Mux is needed for the "github.com/gorilla/mux" package.
+  - **CORS**
+    - CORS is needed for the ""github.com/rs/cors" package.
+  - **azblob**
+    - azblob is a package used for handling images by storing them in a container on the Microsoft Azure account. It is for the "github.com/Azure/azure-storage-blob-go/azblob" package.
 
-  - Create a full-stack application that operates as a general messaging platform for users.
+- **Quick Reference**: Use ```go get -u <package>``` in your command line to install a certain package.
 
-    - Below are a list of general/required features we would like to implement (should be able to implement within our time frame):
+---
 
-      - Login system with authentication. - Kevin
-      - Send text messages to other contacts on the application. - Kevin
-        - Messages have timestamps associated with them. - Rafael
-      - Can send images. - Kevin
-      - Able to edit/delete messages. - Kevin
-      - Ability to search past messages. - Rafael
-      - List of contacts with easy contact import and editing functionality. (Contact Syncing) - Ria
-      - Notifications, unread message counts, and/or message states (read/unread). -Ria
-      - User presence indication (available, away, offline, time last active). - Ria
-      - User Profile - Ria
+<a id="accessingAPI"></a>
 
-    - Below are additional features that we would implement if time permits:
+### ➜ Accessing the GatorChat API
 
-      - Have the messaging app be geared towards the computer science community or UF students in general. - Kevin
+- Once Golang is installed, the GatorChat API can now be opened and run.
 
-        - If we went down the CS community track, the features we would add would be:
+- In the [Back-End-Branch](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch) of the [Github repository](https://github.com/SWEGroup39/GatorChatApp), there is a file named ```GatorChat_Rest_API.go```.
+- This file contains the API file that must be run in order to make requests to the API.
+- **Pull** the Back-End-Branch into your repository folder (or manually download the file) to access the API.
+    - **To pull the branch into your folder through the command line, use the following commands:**
+        - _**This assumes that the project has already been forked into a folder on your computer.**_
+        - Open the command line/terminal and navigate to your repository folder using the ```cd``` command.
+            - For example: ```cd C:\Users\[USER]\Desktop\SWE\GatorChatApp```
+        - Next, run the following command to have all the branch's files be placed into your repository folder.
+            - ```git pull origin [BRANCH_NAME] ```
+            - In this case, it is ```git pull origin Back-End-Branch ```.
+        - The folder should now contain the API file.
 
-          - Prioritize the app to be able to share information such as code in a visually appealing way (make it look like an idea). - Kevin
-          - Syntax highlighting for code snippets that are shared within the messaging app. - Kevin
-          - A built-in code editor for writing/sharing code within the app. - Kevin
-          - An ability to create and share diagrams and flowcharts. - Kevin
-          - An ability to organize group chats with specific users. - John
-
-      - Other general additional features include:
-
-        - Ability to send voice notes. - Rafael
-        - Ability to reply to a message with emojis. - Kevin
-        - Message Disappearing - Ria
-        - Chatbots - Ria
-        - Dark/Light Mode - Ria
-        - Read Receipts - Ria
-        - Profile Customization - Ria
-        - Location tracking and sharing - Ria
+- To run the file, open the terminal in your respective IDE and run the following commands:
+    - ```go build```
+        - Once it has finished, run the command ```go run GatorChat_Rest_API.go```.
+        - If running the code in VSCode you can run the command ```./(put the name of the .exe file that was made by go build here)``` instead
+- The API should now be running. The localhost port should be active and able to receive requests.
+    - In the scenario where the program cannot connect to the database, an error message will appear in the terminal:
+        - If the ```user_messages``` database cannot be opened, then "Error: Failed to connect to messages database." will be displayed.
+        - If the ```user_accounts``` database cannot be opened, then "Error: Failed to connect to users database." will be displayed.
+- **NOTE:** By default, the API is hosted on **port 8080**. This can be changed if the port is already being used.
