@@ -113,15 +113,16 @@
 
  ### Cypress Tests
  - **_NOTE: These cypress tests include the past test cases as well. They are an updated verson plus test for additional features. The old cypress tests test the old functionality when the application was not integrated._**
+ - **Dashboard(Profile):**
 
- - **Test5Messages:** This test vists the log in page and manually logs in with the user credentials of test@ufl.edu and pass. This then redirects them to the dashboard where under the conversations tab you have access to the message window. This test then tests the functionality of the send message. Additionally, it tests the functionality of the POST API call of the send message function. 
+ - **conversations_messages:** This test vists the log in page and logs in with the user credentials of usernew@ufl.edu and newPass. This then redirects them to the dashboard where under the conversations tab you have access to the message window. This test then tests the functionality of the send message and image, search, edit, and delete message. Additionally, it tests the functionality of the POST API calls of the send message function and the sending an image function. It also test the routing functionality for the login, dashboard, conversation, and message window pages.
 
  - **Test6LoginPost:** This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard component. This test is mainly to test the API and whether a user is authenticated or not.<br>
   
- - **Test7Home:** This test visits the home page of the application and clicks on the about us button which routes the user to the about us page. This test is mainly to test routing.<br>
+ - **Settings:** This test tests the edit functionalities of the full name, username, phone number and password fields in the settings page. Additionally, this test also checks to see if the routing from the login page to the dashboard page and to the settings page works successfully. Additionally, it tests whether the API call is working correctly for each edit function. These functions include: edit password, username, full name, and phone number. Also, this test tests the login functionality and whether an authenticated user is logged in in order for that user to access the dashboard and settings page. It logs on with the credentials of usernew@ufl.edu and newPass.
+ 
+ - **Routing:** This test visits the home page and about us page. This test also tests the routing functionality. Additionally this test covers the previous Test7Home test.<br>
   
- - **Test8GetStarted:** This test visits the home page and clicks on the Get Started button which gets routed to the sign up page. This test also tests the routing functionality.<br>
-  
- - **Test9SignUpPost:** This test creates a user with an email, username, and password and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test routing and the POST Api call. <br>
+ - **Creat User:** This test creates a user with an email, username, password, full name and phone number and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test the routing to the sign up page and the POST Api call. The fields of full name and phone number were added to the test because these new fields were added during sprint 4. <br>
 
 <a href = "https://github.com/SWEGroup39/GatorChatApp/tree/Integrated-Front-End-Branch/Cypress%20Tests">Link to Cypress Tests <a>
