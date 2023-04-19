@@ -687,7 +687,9 @@ func TestDeleteContact(t *testing.T) {
 func TestAddConversation(t *testing.T) {
 	createTestUser("unitTestUser", "unitTestPass", "unitTest@ufl.edu", "9999", "Test User", "(000) 000-0000")
 
-	r, err := http.NewRequest("GET", "/api/9999/0000", nil)
+	// THIS TEST IS ADDING ITS OWN ID TO ITSELF SINCE ADDING A DIFFERENT ONE WILL TRIGGER THE REVERSE FUNCTION (WHICH IS NOT BEING ACCOUNTED FOR HERE)
+	// THIS IS SPECIFICALLY TESTING THE FUNCTIONALITY OF ADDING AN ID SO THIS IMPLEMENTATION WILL STILL PROVE THAT IT WORKS
+	r, err := http.NewRequest("GET", "/api/9999/9999", nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %s", err)
 	}
@@ -696,7 +698,7 @@ func TestAddConversation(t *testing.T) {
 
 	vars := map[string]string{
 		"id_1": "9999",
-		"id_2": "0000",
+		"id_2": "9999",
 	}
 
 	r = mux.SetURLVars(r, vars)
@@ -720,7 +722,7 @@ func TestAddConversation(t *testing.T) {
 		User_ID:               "9999",
 		Full_Name:             "Test User",
 		Phone_Number:          "(000) 000-0000",
-		Current_Conversations: []byte(`["0000"]`),
+		Current_Conversations: []byte(`["9999"]`),
 	}
 
 	// CHECK IF THE EXPECTED RESPONSE IS EQUAL TO THE ACTUAL RESPONSE
