@@ -102,8 +102,9 @@
             - For example: ```cd C:\Users\[USER]\Desktop\SWE\GatorChatApp```
         - Next, run the following command to have all the branch's files be placed into your repository folder.
             - ```git pull origin [BRANCH_NAME] ```
-            - In this case, it is ```git pull origin Back-End-Branch ```.
-        - The folder should now contain the API file.
+            - In this case, it is ```git pull origin main ```.
+        - The folder should now contain the main branche's files.
+        - The API file will be in the directory path: ```App_Contents/BackEnd/API```
 
 - To run the file, open the terminal in your respective IDE and run the following commands:
     - ```go build```
