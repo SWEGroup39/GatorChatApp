@@ -64,6 +64,7 @@
   - Button becomes orange once an image is uploaded 
   - Contians an image icon in it to signify to the user that it is intended for that 
 - Messages can now store images and if a message has an image it is displayed below the message bubble 
+ - Messages taht contain an image are able to be deleted/edited/recovered just as normal messages are 
 - The Message Window / Login Page / SignUp Page / About Us Page/ now contain image backgrounds -> make the app look more lively and in theme with UF
 - The Message Window now displays the name of the user the current user is talking too 
    - Parameters in the router are used to pass both the user ids and the username of the "friend" user
