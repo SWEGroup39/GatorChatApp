@@ -1,6 +1,6 @@
 # README File
 ## Instructions on How To Run Gator Chat Application (FRONT END)
-  - In order to run this application, you first have to download and install angular. <a href="Installing Angular">Click here</a>
+  - In order to run this application, you first have to download and install angular. [click here](https://github.com/SWEGroup39/GatorChatApp/blob/main/README.md#installing-angular)
   - If you already have angular installed <a href="Running the Gator Chat Application">click here to see how to run Gator Chat</a>
   ### Installing Angular
   - Steps include:
