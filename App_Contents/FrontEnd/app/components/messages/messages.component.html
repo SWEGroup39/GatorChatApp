@@ -34,7 +34,7 @@
             </p>
             <img *ngIf="item?.image" [src]="item?.image" style="max-width:400px; max-height: 400px;" >
           </div>
-          <div class="toggle-menu" *ngIf="item === currentMessage">
+          <div class="toggle-menu" *ngIf="item === currentMessage && currentMessage.userId != user1.id">
             <ul>
               <p *ngIf="!editMode" (click)="editMesssage()">Edit</p>
               <p (click)="delete(currentMessage.messageId);">Delete</p>
