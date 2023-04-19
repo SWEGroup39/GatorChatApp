@@ -50,7 +50,7 @@
 
 #### Please refer to the instructions linked below to properly install Go.
 - You can download and install Golang by following the link [here](https://go.dev/doc/install).
-  - Open a terminal and type the command ```go env GOPATH``` to find the installation directory for Go.
+  - Once Go has been downloaded and installed, open a terminal and type the command ```go env GOPATH``` to find the installation directory for Go.
   - Copy the output path from the command and use the cd command to change to that directory.
   - Within the Go directory, navigate to the src directory.
   - Next, go to the github.com directory within src.
