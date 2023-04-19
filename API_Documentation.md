@@ -509,6 +509,7 @@
                         {
                             "full_name": "Test User"
                         }
+                    ```
 
     - **Fourth Option: Edit Phone Number**:
         - This **PUT** function edits a user's phone number.
