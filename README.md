@@ -86,7 +86,7 @@
 ---
 ### ➜ Accessing the GatorChat API
 
-- Once Golang is installed, the GatorChat API can now be opened and run.
+- Once Golang has been setup and the necessary packages have been installed, the GatorChat API can now be opened and run.
 
 - In the [API](https://github.com/SWEGroup39/GatorChatApp/tree/main/App_Contents/BackEnd/API) folder located in the ```Backend``` folder of the [Main](https://github.com/SWEGroup39/GatorChatApp/tree/main) branch, there is a file named ```GatorChat_Rest_API.go```.
 - This file contains the API file that must be run in order to make requests to the API.
