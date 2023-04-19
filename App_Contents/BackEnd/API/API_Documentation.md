@@ -8,10 +8,6 @@
 
 ## Table of Contents
 
-- [Setting Up Golang](#settingUp)
-
-- [Accessing the GatorChat API](#accessingAPI)
-
 - [Overview of **REST** Functions for Messages](#REST_Messages)
 
     - [Overview of  **POST** Commands for Messages](#POST_Messages)
@@ -33,62 +29,6 @@
     - [Overview of **DELETE** Commands for Users](#DELETE_Users)
 
 ---
-<a id="settingUp"></a>
-
-### ➜ Setting Up Golang
-
-#### Please refer to the instructions linked below to properly install Go.
-
-- Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/main/go-setup.md).
-- It is important to place your Go projects in a valid directory, for example:
-    - ```C:\Users\[USER]\go\src\github.com\kevinc3n\API```
-        - This ensures that Golang can find all the packages and can properly run.
-
-- **NOTE:** It is important to install the dependencies/packages required to use the GatorChat API.
-
-- These include:
-  - **GORM**
-      - GORM is needed for the "gorm.io/driver/mysql" and "gorm.io/gorm" packages.
-  - **Gorilla Mux**
-    - Gorilla Mux is needed for the "github.com/gorilla/mux" package.
-  - **CORS**
-    - CORS is needed for the ""github.com/rs/cors" package.
-  - **azblob**
-    - azblob is a package used for handling images by storing them in a container on the Microsoft Azure account. It is for the "github.com/Azure/azure-storage-blob-go/azblob" package.
-
-- **Quick Reference**: Use ```go get -u <package>``` in your command line to install a certain package.
-
----
-
-<a id="accessingAPI"></a>
-
-### ➜ Accessing the GatorChat API
-
-- Once Golang is installed, the GatorChat API can now be opened and run.
-
-- In the [Back-End-Branch](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch) of the [Github repository](https://github.com/SWEGroup39/GatorChatApp), there is a file named ```GatorChat_Rest_API.go```.
-- This file contains the API file that must be run in order to make requests to the API.
-- **Pull** the Back-End-Branch into your repository folder (or manually download the file) to access the API.
-    - **To pull the branch into your folder through the command line, use the following commands:**
-        - _**This assumes that the project has already been forked into a folder on your computer.**_
-        - Open the command line/terminal and navigate to your repository folder using the ```cd``` command.
-            - For example: ```cd C:\Users\[USER]\Desktop\SWE\GatorChatApp```
-        - Next, run the following command to have all the branch's files be placed into your repository folder.
-            - ```git pull origin [BRANCH_NAME] ```
-            - In this case, it is ```git pull origin Back-End-Branch ```.
-        - The folder should now contain the API file.
-
-- To run the file, open the terminal in your respective IDE and run the following commands:
-    - ```go build```
-        - Once it has finished, run the command ```go run GatorChat_Rest_API.go```.
-        - If running the code in VSCode you can run the command ```./(put the name of the .exe file that was made by go build here)``` instead
-- The API should now be running. The localhost port should be active and able to receive requests.
-    - In the scenario where the program cannot connect to the database, an error message will appear in the terminal:
-        - If the ```user_messages``` database cannot be opened, then "Error: Failed to connect to messages database." will be displayed.
-        - If the ```user_accounts``` database cannot be opened, then "Error: Failed to connect to users database." will be displayed.
-- **NOTE:** By default, the API is hosted on **port 8080**. This can be changed if the port is already being used.
----
-
 <a id="REST_Messages"></a>
 
 ### ➜ Overview of REST Functions for Messages
