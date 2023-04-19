@@ -2,11 +2,10 @@ import { HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/com
 import { Component, ElementRef, ViewChild, OnInit, ChangeDetectorRef } from '@angular/core';
 import { EMPTY, Observable, of, throwError, interval, timer, BehaviorSubject } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-//import {interval} from "rxjs/internal/observable/interval";
 import { tap, catchError, delay, delayWhen} from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-
+import { ConvoService } from 'src/app/service/convo.service';
 
 
 
@@ -31,6 +30,7 @@ export class MessagesComponent implements OnInit{
   image: string = "";
   lastDeletedMessage: number = 0;
   longPollingInterval = 1000; 
+  idLog: string=''
 
 
   // Messages List
@@ -54,18 +54,19 @@ export class MessagesComponent implements OnInit{
     name: 'null',
     id: 'null',
   }
-  idLog:string=''
+
   @ViewChild('chatList', { static: true }) chatList!: ElementRef;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location, private cd: ChangeDetectorRef) { }
+  constructor(private http: HttpClient, private route: ActivatedRoute, private location: Location, private cd: ChangeDetectorRef,  private convoService:ConvoService) { }
 
   ngOnInit() {
-    this.idLog = sessionStorage.getItem('idLog')??''
-    this.route.queryParams.subscribe(params => {
-      // this.currentUser.id  = params['id1'] ?? '0000';
+      this.route.queryParams.subscribe(params => {
+      this.idLog = sessionStorage.getItem('idLog')??''
       this.user1.id = params['id2'] ?? '0000';
+      this.user1.name = params['friendName'] ?? 'NULL'
+
       this.currentUser.id = JSON.stringify(sessionStorage.getItem('currentUserI'+this.idLog)).replace(/['"]/g, '');
-      
+  
       const intervalSubject = new BehaviorSubject(this.longPollingInterval); // create BehaviorSubject with initial interval time
   
       intervalSubject.pipe(
@@ -95,12 +96,7 @@ export class MessagesComponent implements OnInit{
      this.image = event.target.files[0];
      this.isImageUploaded = true;
      console.log("Image uploaded: " + this.image);
-    // const reader = new FileReader();
-    // reader.readAsDataURL(file);
-    // reader.onload = () => {
-    //  this.image = reader.result?.toString().split(',')[1] ?? '';
-    
-    // };
+
   }
 
   public getMessagesLong(Id1: string, Id2: string): Observable<{ chatMessages: { userId: number, recieverId: number,messageId: number, message: string, created_at: number, updated_at: number, deleted_at: number, image: File}[] }> {
@@ -268,12 +264,8 @@ isSameDate(time1: number, time2: number) {
   
     this.sendMessage(newMessage).subscribe(
       (result) => {
-        // Check if post was successful
-        if (result.success) {
-          // If post was successful, push newMessage to the chatMessages list
-         //this.chatMessages.push(result);
+        if (result.success) { 
         } else {
-          // If post was not successful, log the error
           console.error(result.message);
         }
       },
@@ -285,7 +277,6 @@ isSameDate(time1: number, time2: number) {
   
     this.chatInputMessage = "";
   }
-
 
 search(message: string) {
 
@@ -304,10 +295,8 @@ search(message: string) {
         const messageElement = this.chatList.nativeElement.children[messageIndex];
         messageElement.scrollIntoView({ behavior: 'smooth' });
       }
-  
+
       this.searchInputMessage = "";
-
-
     });
   }
 
@@ -328,7 +317,6 @@ search(message: string) {
       );
   }
   
-
   sendMessage(Ids: any): Observable<any> {
     const url = 'http://localhost:8080/api/messages';
     console.log('Send Message');
@@ -350,7 +338,6 @@ search(message: string) {
     ); 
   }
 
-
   deleteMessage(id: number): Observable<any> {
     const url = `http://localhost:8080/api/messages/${id}`;
     console.log('Deleting Message: ' + id);
@@ -368,5 +355,3 @@ search(message: string) {
   }
 
 }
-
-
