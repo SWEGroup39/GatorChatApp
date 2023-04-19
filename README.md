@@ -47,7 +47,20 @@
         - Read Receipts - Ria
         - Profile Customization - Ria
         - Location tracking and sharing - Ria
-
+        
+        
+  ## Instructions On Running the Front-End Application
+    - In the main branch, go to the App contents folder, then the Front-End folder and inside that folder contains the app folder with all the application contents
+     - The link to the file is here <a href="https://github.com/SWEGroup39/GatorChatApp/tree/main/App_Contents/FrontEnd">Front-End Application file<a>
+    - Once Angular is up and running, copy and paste the file contents into Angular
+    - Run the API.go file first
+    - Open a new terminal and run the command: ng serve for the default 4200 port number
+      - If you want to run the application on a specific port number the command is: ng serve --port number
+    - Then click or copy the local host url in the terminal after compilation and run it on the desired browser
+      - Google Chrome is the recommended browser to use
+    - A CORS policy blocker is an extension that was downloaded to prevent the error from showing up on the console
+    - The local host url should direct the user to the home page
+    - From this point, you have successfully started the gator chat application
 
 
 
