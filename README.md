@@ -34,12 +34,16 @@
           - The preferred browser for this app is Google Chrome
         - Also adding the CORS policy blocker prevents any CORS errors from occuring 
           - This is a Google Chrome extension that can be downloaded
-          
+  ### Information About The API File
+   - The file path that I have for the API.go file when running it is C:\Users\Ria Chacko\go\src\github.com\RiaChacko2\API
+   - Inside this folder is the API.go file.
+   - When running it from the terminal, the command is **go run API.go**
   ### Running the Gator Chat Application
    - First create an angular project with the command: ng new project-name
    - In order to run our application, navigate to the main branch App contents folder, then to the Front-End folder. <a href="https://github.com/SWEGroup39/GatorChatApp/tree/main/App_Contents/FrontEnd">Click Here</a>
      - Copy all of the files and folders **excluding** the Cypress Tests folder and place them into the newly created angular project
      - NOTE: **Before** running the application make sure to run the API file [Click here to see the steps](https://github.com/SWEGroup39/GatorChatApp/blob/main/README.md#instructions-on-how-to-run-api-for-gator-chat-back-end)
+     - To see information on how to set up the backend API file [click here](https://github.com/SWEGroup39/GatorChatApp/blob/main/README.md#information-about-the-api-file)
      - Then go to the terminal and run the ng serve command to run the application
      - This should take the user to the home page initially.
        - From this point, you have successfully run Gator Chat
@@ -49,27 +53,13 @@
 ### ➜ Setting Up Golang
 
 #### Please refer to the instructions linked below to properly install Go.
-- You can download and install Golang by following the link [here](https://go.dev/doc/install).
-  - Once Go has been downloaded and installed, open a terminal and type the command ```go env GOPATH``` to find the installation directory for Go.
-  - Copy the output path from the command and use the cd command to change to that directory.
-  - Within the Go directory, navigate to the src directory.
-  - Next, go to the github.com directory within src.
-  - Create a folder with the name of your GitHub username.
-  - This will be the directory where your project will live. However, note that your code can exist anywhere as long as the GOPATH variable is set correctly.
-  - **NOTE:** If this folder structure is not found, you can manually create it.
-  <hr>
-  
-   - Next, open a terminal and call the ```cd``` command until you get to the directory that you want the project to be in (e.g. the folder with your GitHub username). 
-   - From here, run ```go mod init```. This will make a default go.mod file.
-    - In this terminal, you can then install packages into your Go projects.
 
-      - **NOTE:** Remember to place your Go projects in a valid directory, for example:
-          - ```C:\Users\[USER]\go\src\github.com\kevinc3n\API```
-              - This ensures that Golang can find all the packages and can properly run.
+- Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/main/go-setup.md).
+- It is important to place your Go projects in a valid directory, for example:
+    - ```C:\Users\[USER]\go\src\github.com\kevinc3n\API```
+        - This ensures that Golang can find all the packages and can properly run.
 
-- For more information, visit [this](https://github.com/rb-uf/swe-project/blob/main/docs/go-setup.md) setup guide.
-
-- **IMPORTANT:** It is important to install the dependencies/packages required to use the GatorChat API.
+- **NOTE:** It is important to install the dependencies/packages required to use the GatorChat API.
 
 - These include:
   - **GORM**
@@ -84,11 +74,14 @@
 - **Quick Reference**: Use ```go get -u <package>``` in your command line to install a certain package.
 
 ---
+
+<a id="accessingAPI"></a>
+
 ### ➜ Accessing the GatorChat API
 
-- Once Golang has been setup and the necessary packages have been installed, the GatorChat API can now be opened and run.
+- Once Golang is installed, the GatorChat API can now be opened and run.
 
-- In the [API](https://github.com/SWEGroup39/GatorChatApp/tree/main/App_Contents/BackEnd/API) folder located in the ```Backend``` folder of the [Main](https://github.com/SWEGroup39/GatorChatApp/tree/main) branch, there is a file named ```GatorChat_Rest_API.go```.
+- In the [Back-End-Branch](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch) of the [Github repository](https://github.com/SWEGroup39/GatorChatApp), there is a file named ```GatorChat_Rest_API.go```.
 - This file contains the API file that must be run in order to make requests to the API.
 - **Pull** the Back-End-Branch into your repository folder (or manually download the file) to access the API.
     - **To pull the branch into your folder through the command line, use the following commands:**
