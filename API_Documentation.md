@@ -39,10 +39,10 @@
 
 #### Please refer to the instructions linked below to properly install Go.
 
-- Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/main/docs/go-setup.md).
+- Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/main/go-setup.md).
 - It is important to place your Go projects in a valid directory, for example:
     - ```C:\Users\[USER]\go\src\github.com\kevinc3n\API```
-        - This ensures that Golang can find all of the packages and can properly run.
+        - This ensures that Golang can find all the packages and can properly run.
 
 - **NOTE:** It is important to install the dependencies/packages required to use the GatorChat API.
 
@@ -73,7 +73,7 @@
         - _**This assumes that the project has already been forked into a folder on your computer.**_
         - Open the command line/terminal and navigate to your repository folder using the ```cd``` command.
             - For example: ```cd C:\Users\[USER]\Desktop\SWE\GatorChatApp```
-        - Next, run the following command to have all of the branch's files be placed into your repository folder.
+        - Next, run the following command to have all the branch's files be placed into your repository folder.
             - ```git pull origin [BRANCH_NAME] ```
             - In this case, it is ```git pull origin Back-End-Branch ```.
         - The folder should now contain the API file.
@@ -104,7 +104,7 @@
 
 <a id="POST_Messages"></a>
 
-### ➜ Overview of  **POST** Command for Messages
+### ➜ Overview of **POST** Command for Messages
 
 - The first **POST** command takes in an input and creates a new message in the messages database. The second and third focus on message retrieval. _While the remaining two options seem more like a "GET", it is not possible to send a GET request with information in the body. Therefore, a POST is used._
 
@@ -201,7 +201,7 @@
 - If a message is posted with no actual text in the message the "Invalid Message: Messages cannot be empty." message will be returned.
 - For the **Create Message with Image** function, an appropriate error message will be returned if:
     - The image cannot be retrieved.
-    - The image file is too large (the image size should be 10 megabytes or less).
+    - The image file is too large (the image size should be 10 megabytes or fewer).
     - A shared key credential could not be made (used to connect to the Azure container).
     - The image could not be uploaded.
 - The **"Search for Message in ALL/ONE Conversation(s)"** functions must have a valid message that exists in the database, or else "No messages found." will be returned.
@@ -299,7 +299,7 @@
          - **Example Syntax:**
         ```http://localhost:8080/api/messages/getRecent/user/{id} ```
 
-        - This will take in the id in the url and search for the last message they sent. It will then return the user object of the receiver_id (i.e. the last person they talked to).
+        - This will take in the ID in the URL and search for the last message they sent. It will then return the user object of the receiver_id (i.e. the last person they talked to).
 
 ### Requirements and Error Messages
 - The **"Get Conversation"** function must have a valid conversation that exists in the database, or else "Conversation not found." will be returned.
@@ -376,7 +376,7 @@
 
 ### ➜ Overview of  **POST** Command for Users
 
-- The first **POST** command takes in an input and creates a new user in the users database. The second command is focused on a retrieving a specific user. _The second option appears to be more of a "GET", but a "GET" does not allow for a body request. Therefore a POST is used._
+- The first **POST** command takes in an input and creates a new user in the users database. The second command is focused on a retrieving a specific user. _The second option appears to be more of a "GET", but a "GET" does not allow for a body request. Therefore, a POST is used._
 
 ### Syntax
 
@@ -534,7 +534,7 @@
 
 <a id="GET_Users"></a>
 
-### ➜ Overview of  **GET** Command for Users
+### ➜ Overview of **GET** Command for Users
 
 - The **GET** command returns information about users that have been created with a **POST** request.
 
@@ -565,7 +565,7 @@
 
 ### Requirements and Error Messages
 - A StatusBadRequest error will be returned if the passed-in body cannot be decoded.
-- The **"Get All Users"** function must have users that exists in the database, or else "Users not found." will be returned.
+- The **"Get All Users"** function must have users that exist in the database, or else "Users not found." will be returned.
 - The **"Get User by ID"** function must have the requested user exist in the users dataabse, or else a StatusBadRequest error will be returned.
 - If all requirements are met, the user(s) will be returned along with a successful console log message.
 ---
@@ -573,7 +573,7 @@
 
 ### ➜ Overview of  **DELETE** Command for Users
 
-- The **DELETE** command takes in a user and deletes some aspect of thier information.
+- The **DELETE** command takes in a user and deletes some aspect of their information.
 
 ### Syntax
 - There are currently two DELETE functions available:
@@ -590,7 +590,7 @@
 
 ### Requirements and Error Messages
 - An **Internal Server Error** will be returned if there are errors regarding the database connection or the query itself.
-- If all requirements are met for deleteContact, the contact will be removed from the user's Current Conversation's list along with a "Contact removed successfully."     console log message. 
+- If all requirements are met for deleteContact, the contact will be removed from the user's Current Conversation's list along with a "Contact removed successfully." console log message. 
 - If all requirements are met for deleteUser, the user will be removed from the database along with a "User deleted successfully." console log message.
 ---
 
