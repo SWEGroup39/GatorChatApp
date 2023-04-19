@@ -39,7 +39,7 @@
 
 #### Please refer to the instructions linked below to properly install Go.
 
-- Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/main/go-setup.md).
+- Golang can be setup by following the instructions listed [here](https://github.com/rb-uf/swe-project/blob/main/docs/go-setup.md).
 - It is important to place your Go projects in a valid directory, for example:
     - ```C:\Users\[USER]\go\src\github.com\kevinc3n\API```
         - This ensures that Golang can find all of the packages and can properly run.
