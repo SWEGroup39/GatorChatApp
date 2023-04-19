@@ -542,11 +542,12 @@
 - There are currently three **GET** functions available:
 
     - **First Option: Edit Current Conversation**:
-        - This **PUT** function adds an ID to a user's current conversation list.
+        - This **GET** function adds an ID to a user's current conversation list.
          - **Example Syntax:**
         - ```http://localhost:8080/api/users/[FIRST ID]/[SECOND ID]```
 
-        - The required inputs are the user's ID (```FIRST ID```) and the ID that you want added to ```FIRST_ID```'s conversation list (```SECOND ID```).
+        - The required inputs are the user's ID (```FIRST ID```) and a second ID (```SECOND ID```).
+            - This function will add ```SECOND ID``` into ```FIRST ID```'s conversation list and ```FIRST ID``` into ```SECOND ID```'s conversation list. This is done so when a user starts a conversation with someone else, that other person will also be able to see the conversation.
         - If all requirements are met, the updated user object will be returned along with a "ID added successfully." console log message.
         - **NOTE:** This function is called as a **GET** rather than a **PUT** because it does not involve passing anything into the body. Frameworks such as Angular must have a body for a **PUT**.
 

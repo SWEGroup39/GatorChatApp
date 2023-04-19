@@ -1018,11 +1018,56 @@ func addConversation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//GET THE UPDATED USER STRUCT
+	// GET THE UPDATED USER STRUCT
 	userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", params["id_1"]).First(&user)
+
+	if params["id_1"] != params["id_2"] {
+		addConversationWithReverseID(params["id_2"], params["id_1"])
+	}
 
 	json.NewEncoder(w).Encode(user)
 	log.Println("ID added successfully.")
+}
+
+func addConversationWithReverseID(id1, id2 string) {
+	var user UserAccount
+
+	// FIND THE MATCHING USER STRUCT WITH THE MATCHING USER_ID
+	result := userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", id1).First(&user)
+
+	if result.Error != nil {
+		return
+	}
+
+	// CREATE A SLICE OF STRINGS
+	var conversationSlice []string
+	// CONVERT THE JSON INTO A STRING SLICE
+	err := json.Unmarshal([]byte(user.Current_Conversations), &conversationSlice)
+
+	if err != nil {
+		return
+	}
+
+	// CHECK IF CONVERSATION ALREADY EXISTS
+	for _, v := range conversationSlice {
+		if v == id2 {
+			return
+		}
+	}
+
+	// ADD THE NEW ID TO THE STRING SLICE
+	conversationSlice = append(conversationSlice, id2)
+
+	// CONVERT THE STRING SLICE BACK INTO A JSON AND UPDATE THE USER'S CONVERSATION JSON
+	conversationJSON, _ := json.Marshal(conversationSlice)
+
+	// REPLACE THE JSON WITH A NEW JSON THAT CONTAINS THE ADDED ID
+	result = userAccountsDb.Model(&UserAccount{}).Where("user_id = ?", id1).Update("Current_Conversations", string(conversationJSON))
+
+	if result.Error != nil {
+		return
+	}
+	log.Println("ID added to the other user successfully.")
 }
 
 func deleteUser(w http.ResponseWriter, r *http.Request) {
