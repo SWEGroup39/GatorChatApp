@@ -16,7 +16,7 @@ export class ContactsComponent {
 
   constructor( private location: Location, private userService:UserService,  private convoService:ConvoService) {}
   // currentConvo = localStorage.getItem('currentUserC');
-  contactList: any[] = [];
+ // contactList: any[] = [];
 
   users: {
     id: string,
@@ -49,12 +49,12 @@ export class ContactsComponent {
 
     console.log(this.users);
 
-    console.log(this.contactList.length)
+    console.log(this.users.length)
     this.contactListArray()
   }
 
   contactListArray(){
-    if(this.contactList.length % 2 == 0){
+    if(this.users.length % 2 == 0){
       this.odd = false
     }
     else{
@@ -85,9 +85,8 @@ export class ContactsComponent {
         console.log('User found!')
         this.username = this.searchValue.substring(0, this.searchValue.indexOf('#')).toString()
         this.id = this.searchValue.substring(this.searchValue.indexOf('#')+1).toString()
-        //this.contactList.push({username: this.username, id:this.id})
+
         this.users.push({username: this.username, id:this.id});
-        localStorage.setItem("contact"+this.currentID,JSON.stringify(this.contactList))
         console.log(sessionStorage)
 
         this.modifyContactsList(true, this.id);
@@ -101,7 +100,8 @@ export class ContactsComponent {
         window.location.reload()
       },
       ()=>{
-        // this.contactList = JSON.parse(localStorage.getItem("contact"+this.currentID)??' ')
+        
+          window.location.reload()
       }
       
     );
@@ -123,8 +123,7 @@ export class ContactsComponent {
     this.userService.addConversationID(this.currentID,this.id).subscribe(
       (response)=>{
         console.log(response)
-        // this.users.push({id: response.user_id, username: response.username});
-        // console.log(response)
+
       },
       (error)=>{
         console.log(error)
