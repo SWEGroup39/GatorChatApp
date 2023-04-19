@@ -88,7 +88,7 @@
 
 - Once Golang is installed, the GatorChat API can now be opened and run.
 
-- In the [Back-End-Branch](https://github.com/SWEGroup39/GatorChatApp/tree/Back-End-Branch) of the [Github repository](https://github.com/SWEGroup39/GatorChatApp), there is a file named ```GatorChat_Rest_API.go```.
+- In the [API](https://github.com/SWEGroup39/GatorChatApp/tree/main/App_Contents/BackEnd/API) folder located in the ```Backend``` folder of the [Main](https://github.com/SWEGroup39/GatorChatApp/tree/main) branch, there is a file named ```GatorChat_Rest_API.go```.
 - This file contains the API file that must be run in order to make requests to the API.
 - **Pull** the Back-End-Branch into your repository folder (or manually download the file) to access the API.
     - **To pull the branch into your folder through the command line, use the following commands:**
