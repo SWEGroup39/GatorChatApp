@@ -79,6 +79,8 @@
 
  ### Entire Team:
   - Successfully implemented long polling into the **Get Conversation** function so messages will be updated in real-time without having to refresh.
+  - Integrated the **Undo** functionality that will return a user's most recently deleted message.
+  - Added the ability to send images to other users.
 
 <hr>
 
