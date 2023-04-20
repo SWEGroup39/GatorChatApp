@@ -41,6 +41,8 @@
      - Styled the contact page to where the odd numbered contact has a grey background color
      - A trash can icon was included for the delete functionality
       - If this icon is clicked, the contact is removed from the list and that contact's id is removed from the current conversations array
+    - When user A adds user B to a contact list, user A is added to the contact list of User B
+     - Both users are added to the conversations list of each other where they can access their new convo
 - Added some routing/easy access headings to the dashboard page
   - This includes:
    - A group heading that when clicked routes to the most recent conversation
@@ -48,6 +50,23 @@
    - A group heading that when clicked routes to the settings page
    - A group heading that when clicked routes to the profile page
 - Users can login with different number of browser tabs and still continue their session without affecting the other logged in user sessions.
+- Added LongPolling for the GetMessages API call, two users can now communicate on real time without needing to refresh their pages
+- Fully integrated the toggle menu that includes:
+   -Delete: (previusly there) -> Delete a Message
+   -Edit: Can now edit a message, when edidt is clicked a text area on the menu is displayed to let the user edit the message
+   -Close: (previusly there) -> close the toggle menu 
+-Toggle menu can no longer be accessed from the other users messages (left/oranage bubbles), it is avilable to only current user to edit its own messages
+-Added an undo button that gives the user a chance to get back a deleted message
+   -Dipslays for 5 seconds -> after timer is up the message is not able to be recovered
+   -It is dispalyed just above the input text area of the chat 
+   -Contains an circular arrow to inicate the user its purpose
+-Added the Image button: Lets the user upload a png/jpeg/jpg image to be send as a message 
+   -Button becomes orange once an image is uploaded 
+   -Contians an image icon in it to signify to the user that it is intended for that 
+-Messages can now store images and if a message has an image it is displayed below the message bubble 
+-The Message Window / Login Page / SignUp Page / About Us Page/ now contain image backgrounds -> make the app look more lively and in theme with UF
+-The Message Window now displays the name of the user the current user is talking too 
+    -Parameters in the router are used to pass both the user ids and the username of the "friend" user
 <hr>
 
  ### Backend:
