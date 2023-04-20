@@ -1,6 +1,6 @@
 # Sprint 4
 
-### [Link to Sprint 4 Video]()
+### [Link to Sprint 4 Video](https://youtu.be/SLc8g9nW35A)
 
 ## Work Completed in Sprint 4:
 
