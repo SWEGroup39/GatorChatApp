@@ -51,11 +51,14 @@
    - A group heading that when clicked routes to the profile page
 - Users can login with different number of browser tabs and still continue their session without affecting the other logged in user sessions.
 - Added LongPolling for the GetMessages API call, two users can now communicate on real time without needing to refresh their pages
+- The conversations list now uses Session Storage to get the id of the convo list of current user
+  - Messages appear insteantly in the other user's screen once sent from another user
 - Fully integrated the toggle menu that includes:
    - Delete: (previusly there) -> Delete a Message
    - Edit: Can now edit a message, when edidt is clicked a text area on the menu is displayed to let the user edit the message
    - Close: (previusly there) -> close the toggle menu 
 - Toggle menu can no longer be accessed from the other users messages (left/oranage bubbles), it is avilable to only current user to edit its own messages
+  - When the toggle menus is visible the LongPolling is paused, once closed the LongPolling resumes 
 - Added an undo button that gives the user a chance to get back a deleted message
   - Dipslays for 5 seconds -> after timer is up the message is not able to be recovered
   - It is dispalyed just above the input text area of the chat 
