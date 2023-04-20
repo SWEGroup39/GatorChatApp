@@ -41,8 +41,6 @@
      - Styled the contact page to where the odd numbered contact has a grey background color
      - A trash can icon was included for the delete functionality
       - If this icon is clicked, the contact is removed from the list and that contact's id is removed from the current conversations array
-     - When user A adds user B to a contact list, user A is added to the contact list of User B
-     - Both users are added to the conversations list of each other where they can access their new convo
 - Added some routing/easy access headings to the dashboard page
   - This includes:
    - A group heading that when clicked routes to the most recent conversation
@@ -50,27 +48,6 @@
    - A group heading that when clicked routes to the settings page
    - A group heading that when clicked routes to the profile page
 - Users can login with different number of browser tabs and still continue their session without affecting the other logged in user sessions.
-- Added LongPolling for the GetMessages API call, two users can now communicate on real time without needing to refresh their pages
-- The conversations list now uses Session Storage to get the id of the convo list of current user
-  - Messages appear insteantly in the other user's screen once sent from another user
-- Fully integrated the toggle menu that includes:
-   - Delete: (previusly there) -> Delete a Message
-   - Edit: Can now edit a message, when edidt is clicked a text area on the menu is displayed to let the user edit the message
-   - Close: (previusly there) -> close the toggle menu 
-- Toggle menu can no longer be accessed from the other users messages (left/oranage bubbles), it is avilable to only current user to edit its own messages
-  - When the toggle menus is visible the LongPolling is paused, once closed the LongPolling resumes 
-- Added an undo button that gives the user a chance to get back a deleted message
-  - Dipslays for 5 seconds -> after timer is up the message is not able to be recovered
-  - It is dispalyed just above the input text area of the chat 
-  - Contains an circular arrow to inicate the user its purpose
-- Added the Image button: Lets the user upload a png/jpeg/jpg image to be send as a message 
-  - Button becomes orange once an image is uploaded 
-  - Contians an image icon in it to signify to the user that it is intended for that 
-- Messages can now store images and if a message has an image it is displayed below the message bubble 
- - Messages taht contain an image are able to be deleted/edited/recovered just as normal messages are 
-- The Message Window / Login Page / SignUp Page / About Us Page/ now contain image backgrounds -> make the app look more lively and in theme with UF
-- The Message Window now displays the name of the user the current user is talking too 
-   - Parameters in the router are used to pass both the user ids and the username of the "friend" user
 <hr>
 
  ### Backend:
@@ -92,7 +69,6 @@
  - Wrote a function that removes an ID from a user's Current Conversations list.
  - Updated the **Edit Conversation** function so, when a user (e.g. User 1) adds a different user to their conversation list (e.g. User 2), it will also add User 1 to User 2's conversation list.
 - The API Documentation and Unit Tests Were Also Updated for All of the Above Additions.
-
 
 <hr>
 
@@ -137,16 +113,21 @@
 
  ### Cypress Tests
  - **_NOTE: These cypress tests include the past test cases as well. They are an updated verson plus test for additional features. The old cypress tests test the old functionality when the application was not integrated._**
- - **Dashboard(Profile):**
+ 
+ - **Dashboard(Profile):** This test visits the login page and logs in with the credentials: user@ufl.edu and pass. It then routes to the profile page which displays the user information which includes the email, phone number, full name, and username. It also contains a profile picture with capatalized intials of the user. This test tests the routing functionality and the API function for logging a user in to their dashboard. Additionally, it tests whether an authenicated user is logged in and viewing the profile page. <br>
+ 
+ - **Contacts:** This test visits the login page and logs in with the credentials: user@ufl.edu and pass. Then it routes to the contacts page which displays the list of contacts based off of the current conversations array. It then adds a contact to the list named studentUF and adds its id of 0001 to the current conversation array. Then the contact is removed by clicking the trash can icon and this removes the contact as well as the id from the array. This test checks the routing functionality as well as the API calls to add and remove the id and the get contact/search function. <br>
 
- - **conversations_messages:** This test vists the log in page and logs in with the user credentials of usernew@ufl.edu and newPass. This then redirects them to the dashboard where under the conversations tab you have access to the message window. This test then tests the functionality of the send message and image, search, edit, and delete message. Additionally, it tests the functionality of the POST API calls of the send message function and the sending an image function. It also test the routing functionality for the login, dashboard, conversation, and message window pages.
+ - **conversations_messages:** This test vists the log in page and logs in with the user credentials of usernew@ufl.edu and newPass. This then redirects them to the dashboard where under the conversations tab you have access to the message window. This test then tests the functionality of the send message and image, search, edit, and delete message. Additionally, it tests the functionality of the POST API calls of the send message function and the sending an image function. It also test the routing functionality for the login, dashboard, conversation, and message window pages.<br>
 
  - **Test6LoginPost:** This test types in the user credentials of test@ufl.edu and password of pass and clicks the login button. The user gets redirected to the       dashboard component. This test is mainly to test the API and whether a user is authenticated or not.<br>
   
- - **Settings:** This test tests the edit functionalities of the full name, username, phone number and password fields in the settings page. Additionally, this test also checks to see if the routing from the login page to the dashboard page and to the settings page works successfully. Additionally, it tests whether the API call is working correctly for each edit function. These functions include: edit password, username, full name, and phone number. Also, this test tests the login functionality and whether an authenticated user is logged in in order for that user to access the dashboard and settings page. It logs on with the credentials of usernew@ufl.edu and newPass.
+ - **Settings:** This test tests the edit functionalities of the full name, username, phone number and password fields in the settings page. Additionally, this test also checks to see if the routing from the login page to the dashboard page and to the settings page works successfully. Additionally, it tests whether the API call is working correctly for each edit function. These functions include: edit password, username, full name, and phone number. Also, this test tests the login functionality and whether an authenticated user is logged in in order for that user to access the dashboard and settings page. It logs on with the credentials of usernew@ufl.edu and newPass.<br>
  
  - **Routing:** This test visits the home page and about us page. This test also tests the routing functionality. Additionally this test covers the previous Test7Home test.<br>
+ 
+ - **DashboardEasyAccess:** This test tests the headings in the dashboard page that is for easy access. For example, this test routes to the settings page and tests if the easy access heading works. Therefore, this test tests the routing functionality. Additionally, there is a login with the credentials of usernew@ufl.edu and newPass. Therefore, it also checks whether an authenticated user is logged in. <br>
   
- - **Creat User:** This test creates a user with an email, username, password, full name and phone number and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test the routing to the sign up page and the POST Api call. The fields of full name and phone number were added to the test because these new fields were added during sprint 4. <br>
+ - **Creat User:** This test creates a user with an email, username, password, full name and phone number and clicks the sign up button. Then the user gets created and the page gets redirected to the login page where the user can log in with the created credentials. This test is mainly to test the routing to the sign up page and the POST Api call. The fields of full name and phone number were added to the test because these new fields were added during sprint 4. The credentials used to create the user includes: test8@ufl.edu, bobby, pass, bobby gator, and (231) 234-3245 <br>
 
 <a href = "https://github.com/SWEGroup39/GatorChatApp/tree/Integrated-Front-End-Branch/Cypress%20Tests">Link to Cypress Tests <a>
